@@ -1,2 +1,2 @@
-# project1
+# Project
 CMPUT 301 project
