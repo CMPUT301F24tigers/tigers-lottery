@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "649214704816",
+    "project_id": "tigers-lottery",
+    "storage_bucket": "tigers-lottery.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:649214704816:android:a62b5c250f5911c3328f75",
+        "android_client_info": {
+          "package_name": "com.example.tigers_lottery"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyChqMqgpEUpQuVeeHvo8sdKhgReRBt9EJo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
