@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="title_create_profile" type="id">title_create_profile</item>
+    <item name="imageViewProfilePicture" type="id">imageViewProfilePicture</item>
+    <item name="editTextFirstName" type="id">editTextFirstName</item>
+    <item name="editTextLastName" type="id">editTextLastName</item>
+    <item name="editTextUsername" type="id">editTextUsername</item>
+    <item name="editTextEmail" type="id">editTextEmail</item>
+    <item name="editTextDOB" type="id">editTextDOB</item>
+    <item name="editTextMobile" type="id">editTextMobile</item>
+    <item name="editTextPassword" type="id">editTextPassword</item>
+    <item name="editTextRePassword" type="id">editTextRePassword</item>
+    <item name="buttonCreateAccount" type="id">buttonCreateAccount</item>
+</resources>
