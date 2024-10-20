@@ -37,6 +37,7 @@ android {
 
 dependencies {
 
+    implementation ("commons-validator:commons-validator:1.9.0")
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.constraintlayout)

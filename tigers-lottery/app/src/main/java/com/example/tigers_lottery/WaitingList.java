@@ -5,9 +5,11 @@ import java.util.List;
 
 public class WaitingList {
     private List<Entrant> waitingList;
+    private List<Entrant> cancelledList;
 
     public WaitingList(){
         this.waitingList=new ArrayList<>();
+        this.cancelledList=new ArrayList<>();
     }
 
     public void addEntrant(Entrant entrant){
@@ -16,6 +18,8 @@ public class WaitingList {
 
     public void removeEntrant(int i){
         if(i>=0 && i < waitingList.size()){
+            Entrant cancelledEntrant = waitingList.get(i);
+            cancelledList.add(cancelledEntrant);
             waitingList.remove(i);
         }
     }
@@ -23,6 +27,8 @@ public class WaitingList {
     public void removeEntrant(String userName){
         for(int i=0; i<waitingList.size(); i++){
             if(waitingList.get(i).getUserName().equals(userName)){
+                Entrant cancelledEntrant = waitingList.get(i);
+                cancelledList.add(cancelledEntrant);
                 waitingList.remove(i);
                 break;
             }
