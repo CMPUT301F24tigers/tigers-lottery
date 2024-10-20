@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <!-- "Create Profile" Title -->
+
         <TextView
             android:id="@+id/title_create_profile"
             android:layout_width="wrap_content"
@@ -24,11 +24,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- ImageView for Uploading Profile Picture -->
-
-        <!-- First Name Input -->
-
-        <!-- Last Name Input -->
 
         <ImageView
             android:id="@+id/imageViewProfilePicture"
@@ -70,7 +65,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/editTextFirstName" />
 
-        <!-- Username Input -->
+
         <EditText
             android:id="@+id/editTextUsername"
             android:layout_width="0dp"
@@ -85,7 +80,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/editTextLastName" />
 
-        <!-- Email Input -->
+
         <EditText
             android:id="@+id/editTextEmail"
             android:layout_width="0dp"
@@ -100,7 +95,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/editTextUsername" />
 
-        <!-- Date of Birth Input -->
         <EditText
             android:id="@+id/editTextDOB"
             android:layout_width="0dp"
@@ -115,7 +109,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/editTextEmail" />
 
-        <!-- Mobile Number Input -->
+
         <EditText
             android:id="@+id/editTextMobile"
             android:layout_width="0dp"
@@ -130,7 +124,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/editTextDOB" />
 
-        <!-- Password Input -->
+
         <EditText
             android:id="@+id/editTextPassword"
             android:layout_width="0dp"
@@ -146,7 +140,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/editTextMobile" />
 
-        <!-- Re-type Password Input -->
+
         <EditText
             android:id="@+id/editTextRePassword"
             android:layout_width="0dp"
@@ -162,7 +156,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/editTextPassword" />
 
-        <!-- Create Account Button -->
+
         <Button
             android:id="@+id/buttonCreateAccount"
             android:layout_width="322dp"
