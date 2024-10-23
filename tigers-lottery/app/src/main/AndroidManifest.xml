@@ -13,7 +13,11 @@
         android:theme="@style/Theme.Tigerslottery"
         tools:targetApi="31">
         <activity
-            android:name=".MainActivity"
+            android:name=".SignUpActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Tigerslottery" />
+        <activity
+            android:name=".LogInActivity"
             android:exported="true"
             android:theme="@style/Theme.Tigerslottery">
             <intent-filter>

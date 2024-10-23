@@ -1,5 +1,4 @@
 package com.example.tigers_lottery;
-import org.apache.commons.validator.routines.EmailValidator;
 
 public class User {
     private String email;
@@ -18,10 +17,7 @@ public class User {
     }
 
     public void setEmail(String email){
-        EmailValidator validator = EmailValidator.getInstance();
-        if(validator.isValid(email)){
-            this.email=email;
-        }
+
     }
 
     public void setPassword(String password){
