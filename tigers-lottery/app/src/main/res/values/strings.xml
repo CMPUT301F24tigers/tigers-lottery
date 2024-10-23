@@ -2,10 +2,18 @@
     <string name="app_name">tigers-lottery</string>
     <string name="action_settings">Settings</string>
     <!-- Strings used for fragments for navigation -->
-    <string name="first_fragment_label">First Fragment</string>
-    <string name="second_fragment_label">Second Fragment</string>
     <string name="next">Next</string>
     <string name="previous">Previous</string>
+    <string name="welcome_to_events_lottery_app">Welcome to Events Lottery App</string>
+    <string name="register_log_in">Register/Log In</string>
+    <string name="password">Password</string>
+    <string name="username">Username</string>
+    <string name="log_in">Log In</string>
+    <string name="button">Button</string>
+    <string name="sign_up_button_text">Sign Up</string>
+    <!-- Strings used for fragments for navigation -->
+    <string name="first_fragment_label">First Fragment</string>
+    <string name="second_fragment_label">Second Fragment</string>
 
     <string name="lorem_ipsum">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam in scelerisque sem. Mauris
