@@ -21,10 +21,7 @@ public class User {
     }
 
     public void setPassword(String password){
-        PasswordStrengthCheck passwordStrength = new PasswordStrengthCheck();
-        if(passwordStrength.passwordIsSafe(password)){
-            this.password=password;
-        };
+
     }
 
     public void setFirstName(String firstName){

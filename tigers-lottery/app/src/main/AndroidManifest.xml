@@ -13,11 +13,7 @@
         android:theme="@style/Theme.Tigerslottery"
         tools:targetApi="31">
         <activity
-            android:name=".SignUpActivity"
-            android:exported="false"
-            android:theme="@style/Theme.Tigerslottery" />
-        <activity
-            android:name=".LogInActivity"
+            android:name=".MainActivity"
             android:exported="true"
             android:theme="@style/Theme.Tigerslottery">
             <intent-filter>
@@ -26,6 +22,22 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".CreateEntrantProfileActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Tigerslottery" />
+        <activity
+            android:name=".EntrantActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Tigerslottery" />
+        <activity
+            android:name=".AdminActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Tigerslottery" />
+        <activity
+            android:name=".OrganizerActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Tigerslottery" />
     </application>
 
 </manifest>
