@@ -24,6 +24,7 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseFirestore db;
     private CollectionReference usersRef;
 
+    //test comment added
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
