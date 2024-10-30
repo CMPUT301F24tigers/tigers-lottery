@@ -8,9 +8,9 @@ public class User {
     private String userName;
     private String number;
 
-    public User (String email, String password, String firstName, String lastName, String userName){
+    public User (String email, String firstName, String lastName, String userName){
         setEmail(email);
-        setPassword(password);
+
         this.firstName=firstName;
         this.lastName=lastName;
         this.userName=userName;
@@ -20,9 +20,6 @@ public class User {
 
     }
 
-    public void setPassword(String password){
-
-    }
 
     public void setFirstName(String firstName){
         this.firstName=firstName;
@@ -55,9 +52,6 @@ public class User {
         return this.email;
     }
 
-    public String getPassword(){
-        return this.password;
-    }
 
     public String getNumber(){
         return this.number;
