@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
         usersRef = db.collection("users");
 
         @SuppressLint("HardwareIds") String deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
-        adminContinue = findViewById(R.id.adminSelectButton);
+        /*adminContinue = findViewById(R.id.adminSelectButton);
         entrantContinue = findViewById(R.id.entrantSelectButton);
         organizerContinue = findViewById(R.id.organizerSelectButton);
 
@@ -105,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
                             }
                         });
             }
-        });
+        });*/
     }
 
 }
