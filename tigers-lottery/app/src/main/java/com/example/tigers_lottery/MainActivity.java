@@ -33,9 +33,7 @@ public class MainActivity extends AppCompatActivity {
         usersRef = db.collection("users");
 
         @SuppressLint("HardwareIds") String deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
-        adminContinue = findViewById(R.id.adminSelectButton);
-        entrantContinue = findViewById(R.id.entrantSelectButton);
-        organizerContinue = findViewById(R.id.organizerSelectButton);
+
 
         db.collection("admins").document(deviceId)
                 .get()
@@ -66,8 +64,7 @@ public class MainActivity extends AppCompatActivity {
                                 if (task.isSuccessful()) {
                                     DocumentSnapshot document = task.getResult();
                                     if (document.exists()) {
-                                        Intent entrantActivityIntent = new Intent(getApplicationContext(), EntrantActivity.class);
-                                        startActivity(entrantActivityIntent);
+
                                     } else {
                                         Intent createEntrantProfileActivity = new Intent(getApplicationContext(), CreateEntrantProfileActivity.class);
                                         createEntrantProfileActivity.putExtra("Device ID", deviceId);
