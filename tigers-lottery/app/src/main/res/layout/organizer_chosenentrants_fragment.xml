@@ -6,20 +6,28 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+    <Button
+        android:id="@+id/cancelRemainingButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|end"
+        android:text="Cancel Remaining" />
+
     <TextView
-        android:id="@+id/organizerDashboardText"
+        android:id="@+id/chosenEntrantsText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Upcoming Events"
+        android:text="Chosen Entrants"
         android:textSize="24sp" />
 
     <SearchView
-        android:id="@+id/organizerDashboardSearch"
+        android:id="@+id/chosenEntrantsSearch"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
     <ListView
-        android:id="@+id/organizerListView"
+        android:id="@+id/chosenEntrantsList"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
+
 </LinearLayout>
