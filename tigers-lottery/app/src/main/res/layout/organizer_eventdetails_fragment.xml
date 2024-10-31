@@ -6,7 +6,7 @@
     android:layout_height="match_parent">
 
     <ImageView
-        android:id="@+id/imageView"
+        android:id="@+id/eventDetailsImage"
         android:layout_width="250dp"
         android:layout_height="131dp"
         tools:layout_editor_absoluteX="80dp"
@@ -14,44 +14,44 @@
         tools:srcCompat="@tools:sample/avatars" />
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/eventDetailsText"
         android:layout_width="108dp"
         android:layout_height="34dp"
         android:layout_marginBottom="24dp"
         android:text="TextView"
-        app:layout_constraintBottom_toTopOf="@+id/imageView"
+        app:layout_constraintBottom_toTopOf="@+id/eventDetailsImage"
         tools:layout_editor_absoluteX="16dp" />
 
     <TextView
-        android:id="@+id/textView3"
+        android:id="@+id/eventDetailsDetailsText"
         android:layout_width="147dp"
         android:layout_height="33dp"
         android:text="Event Details:"
         android:textSize="24sp"
-        app:layout_constraintBottom_toTopOf="@+id/textView4"
-        app:layout_constraintTop_toBottomOf="@+id/imageView"
+        app:layout_constraintBottom_toTopOf="@+id/eventDetailsDetailsDescription"
+        app:layout_constraintTop_toBottomOf="@+id/eventDetailsImage"
         tools:layout_editor_absoluteX="22dp" />
 
     <Button
-        android:id="@+id/button2"
+        android:id="@+id/eventDetailsEditEvent"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Edit Event"
-        app:layout_constraintBottom_toTopOf="@+id/listView"
+        app:layout_constraintBottom_toTopOf="@+id/eventDetailsListView"
         tools:layout_editor_absoluteX="284dp" />
 
     <ListView
-        android:id="@+id/listView"
+        android:id="@+id/eventDetailsListView"
         android:layout_width="403dp"
         android:layout_height="308dp"
         app:layout_constraintBottom_toBottomOf="parent"
         tools:layout_editor_absoluteX="-1dp" />
 
     <TextView
-        android:id="@+id/textView4"
+        android:id="@+id/eventDetailsDetailsDescription"
         android:layout_width="370dp"
         android:layout_height="99dp"
         android:text="TextView"
-        app:layout_constraintBottom_toTopOf="@+id/button2"
+        app:layout_constraintBottom_toTopOf="@+id/eventDetailsEditEvent"
         tools:layout_editor_absoluteX="22dp" />
 </androidx.constraintlayout.widget.ConstraintLayout>

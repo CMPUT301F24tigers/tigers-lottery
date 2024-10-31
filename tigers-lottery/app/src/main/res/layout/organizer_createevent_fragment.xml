@@ -6,7 +6,7 @@
     android:layout_height="match_parent">
 
     <EditText
-        android:id="@+id/editEventRegistrationDeadline"
+        android:id="@+id/createEventRegistrationDeadline"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:ems="10"
@@ -16,7 +16,7 @@
         tools:layout_editor_absoluteY="361dp" />
 
     <EditText
-        android:id="@+id/editEventNumberOfPeople"
+        android:id="@+id/createEventNumberOfPeople"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:ems="10"
@@ -26,7 +26,7 @@
         tools:layout_editor_absoluteY="451dp" />
 
     <EditText
-        android:id="@+id/editEventDescription"
+        android:id="@+id/createEventDescription"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:ems="10"
@@ -36,7 +36,7 @@
         tools:layout_editor_absoluteY="496dp" />
 
     <EditText
-        android:id="@+id/editEventEventName"
+        android:id="@+id/createEventName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:ems="10"
@@ -46,7 +46,7 @@
         tools:layout_editor_absoluteY="226dp" />
 
     <EditText
-        android:id="@+id/editEventLocation"
+        android:id="@+id/createEventLocation"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:ems="10"
@@ -56,7 +56,7 @@
         tools:layout_editor_absoluteY="271dp" />
 
     <EditText
-        android:id="@+id/editEventCapacity"
+        android:id="@+id/createEventCapacity"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:ems="10"
@@ -66,7 +66,7 @@
         tools:layout_editor_absoluteY="541dp" />
 
     <EditText
-        android:id="@+id/editEventTime"
+        android:id="@+id/createEventTime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:ems="10"
@@ -76,7 +76,7 @@
         tools:layout_editor_absoluteY="406dp" />
 
     <EditText
-        android:id="@+id/editEventRegistrationOpens"
+        android:id="@+id/createEventRegistrationOpens"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:ems="10"
@@ -86,7 +86,7 @@
         tools:layout_editor_absoluteY="316dp" />
 
     <ImageView
-        android:id="@+id/editEventImage"
+        android:id="@+id/createEventImage"
         android:layout_width="328dp"
         android:layout_height="153dp"
         tools:layout_editor_absoluteX="41dp"
@@ -94,15 +94,15 @@
         tools:srcCompat="@tools:sample/avatars" />
 
     <Button
-        android:id="@+id/editEventRegenerateQRCode"
+        android:id="@+id/createEventGenerateQRCode"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Regenerate QR Code"
+        android:text="Generate QR Code"
         tools:layout_editor_absoluteX="13dp"
         tools:layout_editor_absoluteY="674dp" />
 
     <CheckBox
-        android:id="@+id/editEventRecurring"
+        android:id="@+id/createEventRecurring"
         android:layout_width="133dp"
         android:layout_height="41dp"
         android:text="Recurring"

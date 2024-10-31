@@ -6,7 +6,7 @@
     android:layout_height="match_parent">
 
     <ImageView
-        android:id="@+id/imageView3"
+        android:id="@+id/qrCodeImage"
         android:layout_width="305dp"
         android:layout_height="228dp"
         tools:layout_editor_absoluteX="53dp"
@@ -14,7 +14,7 @@
         tools:srcCompat="@tools:sample/avatars" />
 
     <Button
-        android:id="@+id/button3"
+        android:id="@+id/qrCodeRegenerateButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Regenerate QR Code"
@@ -22,7 +22,7 @@
         tools:layout_editor_absoluteY="392dp" />
 
     <TextView
-        android:id="@+id/textView5"
+        android:id="@+id/qrCodeText"
         android:layout_width="95dp"
         android:layout_height="31dp"
         android:text="QR Code"
