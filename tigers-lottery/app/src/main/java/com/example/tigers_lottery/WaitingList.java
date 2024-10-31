@@ -1,5 +1,7 @@
 package com.example.tigers_lottery;
 
+import com.example.tigers_lottery.JoinedEvents.Entrant;
+
 import java.util.ArrayList;
 import java.util.List;
 
