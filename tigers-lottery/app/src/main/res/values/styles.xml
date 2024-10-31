@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <style name="BoldToolbarTitle" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
-        <item name="android:textStyle">bold</item>
-        <item name="android:textColor">@android:color/black</item>
-        <item name="android:textSize">20sp</item> <!-- Optional: Adjust size if needed -->
-    </style>
-</resources>

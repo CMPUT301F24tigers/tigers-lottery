@@ -11,13 +11,30 @@
         android:id="@+id/topAppBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/app_primary_light_purple"
-        android:titleTextColor="@android:color/black"
-        app:navigationIcon="?attr/homeAsUpIndicator"
-        app:title="Tigers Lottery"
-        app:titleCentered="true"
-        app:titleMarginBottom="2dp"
-        app:titleTextAppearance="@style/BoldToolbarTitle" />
+        android:background="@color/app_primary_light_purple">
+
+        <!-- Title TextView -->
+        <TextView
+            android:id="@+id/toolbarTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Tigers Lottery"
+            android:textColor="@android:color/black"
+            android:textSize="20sp"
+            android:textStyle="bold"  />
+
+        <!-- Profile Icon Button -->
+        <ImageButton
+            android:id="@+id/profileButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/baseline_account_circle_24"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Profile"
+            android:layout_gravity="end"
+            android:padding="10dp" />
+    </com.google.android.material.appbar.MaterialToolbar>
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/fragmentContainerView2"
