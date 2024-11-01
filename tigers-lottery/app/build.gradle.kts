@@ -47,6 +47,7 @@ dependencies {
     implementation(libs.firebase.firestore)
     implementation(libs.activity)
     testImplementation(libs.junit)
+    testImplementation(libs.core)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
 }

@@ -1,4 +1,6 @@
-package com.example.tigers_lottery;
+package com.example.tigers_lottery.Admin;
+
+import com.example.tigers_lottery.User;
 
 public class Administrator extends User {
 

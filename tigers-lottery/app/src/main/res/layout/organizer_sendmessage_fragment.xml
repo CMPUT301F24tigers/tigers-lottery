@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <CheckBox
+        android:id="@+id/sendMessageSelectedEntrants"
+        android:layout_width="314dp"
+        android:layout_height="51dp"
+        android:text="Selected Entrants"
+        tools:layout_editor_absoluteX="16dp"
+        tools:layout_editor_absoluteY="182dp" />
+
+    <CheckBox
+        android:id="@+id/sendMessageWaitingList"
+        android:layout_width="314dp"
+        android:layout_height="51dp"
+        android:text="Waiting List Entrants"
+        tools:layout_editor_absoluteX="16dp"
+        tools:layout_editor_absoluteY="285dp" />
+
+    <CheckBox
+        android:id="@+id/sendMessageCancelledEntrants"
+        android:layout_width="312dp"
+        android:layout_height="52dp"
+        android:text="Cancelled Entrants"
+        tools:layout_editor_absoluteX="16dp"
+        tools:layout_editor_absoluteY="233dp" />
+
+    <TextView
+        android:id="@+id/sendMessageText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TextView"
+        tools:layout_editor_absoluteX="16dp"
+        tools:layout_editor_absoluteY="18dp" />
+
+    <EditText
+        android:id="@+id/sendMessageEditText"
+        android:layout_width="381dp"
+        android:layout_height="165dp"
+        android:ems="10"
+        android:inputType="text"
+        android:text="EditText"
+        tools:layout_editor_absoluteX="12dp"
+        tools:layout_editor_absoluteY="505dp" />
+
+    <Button
+        android:id="@+id/sendMessageSendButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Send"
+        tools:layout_editor_absoluteX="12dp"
+        tools:layout_editor_absoluteY="670dp" />
+</androidx.constraintlayout.widget.ConstraintLayout>
