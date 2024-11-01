@@ -26,7 +26,7 @@ public class AdminListAdapter extends ArrayAdapter<AdminListItemModel> {
     /**
      * Provides a view for an AdapterView (ListView, GridView, etc.).
      * This method gets a view that displays the data at the specified position in the data set.
-     * If the view is not recycled, it initializes a new {@link AdminListItem}.
+     * If the view is not recycled, it initializes a new  {@link AdminListItem}.
      *
      * @param position    Position of the item within the adapter's data set.
      * @param convertView Existing view to reuse, if possible.
