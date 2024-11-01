@@ -1,4 +1,7 @@
 package com.example.tigers_lottery.HostedEvents;
 
-public class OrganizerEditEventFragment {
+import androidx.fragment.app.Fragment;
+
+public class OrganizerEditEventFragment extends Fragment {
+
 }
