@@ -26,7 +26,6 @@ public class AdminDashboardFragmentTest {
 
     @Rule
     public ActivityScenarioRule<MainActivity> activityScenarioRule = new ActivityScenarioRule<>(MainActivity.class);
-
     private FragmentManager fragmentManager;
 
     @Before
