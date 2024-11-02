@@ -53,7 +53,6 @@ public class DatabaseHelper {
                         List<Event> events = new ArrayList<>();
                         if (value != null) {
 
-
                             for (QueryDocumentSnapshot doc : value) {
                                 // Use Firestore's automatic mapping to convert document to Event object
                                 // If we update schema, change the relevant DTO class instead
@@ -125,9 +124,8 @@ public class DatabaseHelper {
      * Helper function to generate unique ID.
      */
     private String generateUniqueEventId() {
-        long timestamp = System.currentTimeMillis();
-        int randomSuffix = new Random().nextInt(1000); // Random number between 0-999
-        return String.valueOf(timestamp) + String.valueOf(randomSuffix);
+        int uniqueId = 10000 + new Random().nextInt(90000); // Generates a number between 10000 and 99999
+        return String.valueOf(uniqueId);
     }
 
     // Add other methods as needed (e.g., deleteEvent, updateEvent, etc.)
