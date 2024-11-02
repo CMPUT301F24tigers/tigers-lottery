@@ -5,11 +5,22 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <ListView
-        android:id="@+id/adminListView"
+    <Button
+        android:id="@+id/btnEntrantProfiles"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:divider="@android:color/darker_gray"
-        android:dividerHeight="1dp" />
+        android:text="Entrant Profiles" />
+
+    <Button
+        android:id="@+id/btnFacilityProfiles"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Facility Profiles" />
+
+    <Button
+        android:id="@+id/btnAllEvents"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="All Events" />
 
 </LinearLayout>
