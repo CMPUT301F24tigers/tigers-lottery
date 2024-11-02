@@ -37,57 +37,81 @@
                 android:textColor="#808080" />
         </FrameLayout>
 
-        <!-- Event Name Input -->
+        <!-- Event Name Label and Input -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Event Name" />
         <EditText
             android:id="@+id/inputEventName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Event Name"
+            android:hint="Enter event name"
             android:layout_marginBottom="12dp"
             android:inputType="text" />
 
-        <!-- Location Input -->
+        <!-- Location Label and Input -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Location" />
         <EditText
             android:id="@+id/inputEventLocation"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Location"
+            android:hint="Enter location"
             android:layout_marginBottom="12dp"
             android:inputType="text" />
 
-        <!-- Registration Opens Input -->
+        <!-- Registration Opens Label and Input -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Registration Opens (YYYY-MM-DD)" />
         <EditText
             android:id="@+id/inputRegistrationOpens"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Registration Opens (YYYY-MM-DD)"
+            android:hint="Select registration open date"
             android:layout_marginBottom="12dp"
             android:inputType="date" />
 
-        <!-- Registration Deadline Input -->
+        <!-- Registration Deadline Label and Input -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Registration Deadline (YYYY-MM-DD)" />
         <EditText
             android:id="@+id/inputRegistrationDeadline"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Registration Deadline (YYYY-MM-DD)"
+            android:hint="Select registration deadline"
             android:layout_marginBottom="12dp"
             android:inputType="date" />
 
-        <!-- Event Date Input -->
+        <!-- Event Date Label and Input -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Event Date (YYYY-MM-DD)" />
         <EditText
             android:id="@+id/inputEventDate"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Event Date (YYYY-MM-DD)"
+            android:hint="Select event date"
             android:layout_marginBottom="12dp"
             android:inputType="date" />
 
-        <!-- Description Input -->
+        <!-- Description Label and Input -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Description" />
         <EditText
             android:id="@+id/inputEventDescription"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Description"
+            android:hint="Enter description"
             android:inputType="textMultiLine"
             android:layout_marginBottom="12dp" />
 
@@ -112,12 +136,18 @@
                 android:textSize="16sp" />
         </LinearLayout>
 
-        <!-- Waitlist Limit Input (visible only when checkbox is checked) -->
+        <!-- Waitlist Limit Label and Input (visible only when checkbox is checked) -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Set Waitlist Limit"
+            android:visibility="gone"
+            android:id="@+id/labelWaitlistLimit" />
         <EditText
             android:id="@+id/inputWaitlistLimit"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Set Waitlist Limit"
+            android:hint="Enter limit"
             android:inputType="number"
             android:visibility="gone"
             android:layout_marginBottom="16dp" />
