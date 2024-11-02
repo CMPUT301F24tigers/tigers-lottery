@@ -31,38 +31,17 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
 
     @Override
     public void onBindViewHolder(@NonNull EventViewHolder holder, int position) {
-        // Get the current event object at the specified position in the list
         Event event = events.get(position);
 
         // Set the event name in the corresponding TextView
         holder.eventName.setText(event.getEventName());
 
-        // Format the event date
-        if (event.getEventDate() != null) {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyyy - hh:mm a", Locale.getDefault());
-            String formattedDate = dateFormat.format(event.getEventDate().toDate()); // Convert Timestamp to formatted date string
-            holder.eventDate.setText("Event Date: " + formattedDate);
-        } else {
-            holder.eventDate.setText("Date not available");
-        }
-
-        // Set eventId in the TextView for event ID, converting to a string
-        holder.eventId.setText("Event ID: " + String.valueOf(event.getEventId()));
-
-        // Set organizerId in a separate TextView, also converting to a string
-        holder.organizerId.setText("Organizer ID (for test purposes): " + String.valueOf(event.getOrganizerId()));
-
-        // Set waitlist limit in the TextView, converting to a string
-        holder.waitlistLimit.setText("Waitlist Limit: " + String.valueOf(event.getWaitlistLimit()));
-
-        // Display geolocation if available, showing both latitude and longitude
-        if (event.getGeolocation() != null) {
-            double latitude = event.getGeolocation().getLatitude();
-            double longitude = event.getGeolocation().getLongitude();
-            holder.eventGeolocation.setText("Location: " + latitude + "°, " + longitude + "°");
-        } else {
-            holder.eventGeolocation.setText("Location: N/A");  // Show N/A if geolocation is null
-        }
+        // Use the formatted date strings from the helper methods
+        holder.eventDate.setText("Event Date: " + event.getFormattedEventDate());
+        holder.eventId.setText("Event ID: " + event.getEventId());
+        holder.organizerId.setText("Organizer ID: " + event.getOrganizerId());
+        holder.waitlistLimit.setText("Waitlist Limit: " + event.getWaitlistLimit());
+        holder.eventGeolocation.setText("Location: " + event.getGeolocation());
     }
 
 

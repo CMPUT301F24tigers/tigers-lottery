@@ -13,6 +13,7 @@ import com.example.tigers_lottery.DatabaseHelper;
 import com.example.tigers_lottery.R;
 import com.example.tigers_lottery.models.Event;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -75,5 +76,6 @@ public class OrganizerDashboardFragment extends Fragment {
             }
         });
     }
+
 
 }

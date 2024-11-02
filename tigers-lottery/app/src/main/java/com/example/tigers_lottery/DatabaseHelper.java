@@ -38,6 +38,7 @@ public class DatabaseHelper {
      */
     public void organizerFetchEvents(final EventsCallback callback) {
         // Only fetch events where organizer_id is greater than 0
+        // NOTE: we will change this once we have UserID or device Id stored
         eventsRef.whereGreaterThan("organizer_id", 0)
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
@@ -50,19 +51,12 @@ public class DatabaseHelper {
 
                         List<Event> events = new ArrayList<>();
                         if (value != null) {
-                            for (QueryDocumentSnapshot doc : value) {
-                                int eventId = doc.getLong("event_id").intValue();
-                                String eventName = doc.getString("event_name");
-                                GeoPoint geolocation = doc.getGeoPoint("geolocation");
-                                int organizerId = doc.getLong("organizer_id").intValue();
-                                String posterUrl = doc.getString("poster_url");
-                                Timestamp eventDate = doc.getTimestamp("event_date");
-                                Timestamp waitlistOpenDate = doc.getTimestamp("waitlist_open_date");
-                                Timestamp waitlistDeadline = doc.getTimestamp("waitlist_deadline");
-                                int waitlistLimit = doc.getLong("waitlist_limit").intValue();
 
-                                Event event = new Event(eventId, eventName, geolocation, organizerId, posterUrl, eventDate,
-                                        waitlistOpenDate, waitlistDeadline, waitlistLimit);
+
+                            for (QueryDocumentSnapshot doc : value) {
+                                // Use Firestore's automatic mapping to convert document to Event object
+                                // If we update schema, change the relevant DTO class instead
+                                Event event = doc.toObject(Event.class);
                                 events.add(event);
                             }
                         }
@@ -70,6 +64,7 @@ public class DatabaseHelper {
                     }
                 });
     }
+
 
 
     /**
