@@ -1,4 +1,51 @@
 package com.example.tigers_lottery.HostedEvents;
 
-public class OrganizerWaitingListFragment {
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ListView;
+import android.widget.SearchView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+
+import com.example.tigers_lottery.R;
+
+public class OrganizerWaitingListFragment extends Fragment {
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState){
+        View view = inflater.inflate(R.layout.organizer_waitinglist_fragment, container, false);
+        Button chooseButton = view.findViewById(R.id.waitingListChooseParticipantsButton);
+        SearchView searchView = view.findViewById(R.id.waitingListSearch);
+        ListView listView = view.findViewById(R.id.waitingListListView);
+
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String s) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String s) {
+                handleSearch(s);
+                return true;
+            }
+        });
+
+
+
+        chooseButton.setOnClickListener(v->{
+
+        });
+        return view;
+    }
+    private void handleSearch(String s){
+
+    }
 }

@@ -1,64 +1,82 @@
 package com.example.tigers_lottery.Admin;
 
 import android.os.Bundle;
-import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+
+import com.example.tigers_lottery.Admin.DashboardFragments.AdminEntrantsProfilesFragment;
+import com.example.tigers_lottery.Admin.DashboardFragments.AdminFacilitiesFragment;
+import com.example.tigers_lottery.Admin.DashboardFragments.AdminEventsFragment;
+import com.example.tigers_lottery.DatabaseHelper;
 import com.example.tigers_lottery.R;
 
 /**
- * A simple {@link Fragment} subclass.
- * Use the {@link AdminDashboardFragment#newInstance} factory method to
- * create an instance of this fragment.
- *
+ * Fragment that displays the main dashboard for admin users.
+ * This fragment provides buttons for admin users to view entrant profiles,
+ * facility profiles, and all events. The number of users (entrant profiles)
+ * is dynamically fetched from the database and displayed on the button.
  */
 public class AdminDashboardFragment extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    /**
+     * Inflates the admin dashboard layout and sets up button listeners for
+     * navigating to various admin-specific screens. The number of users is
+     * dynamically fetched and displayed on the Entrant Profiles button.
+     *
+     * @param inflater           LayoutInflater to inflate the fragment layout.
+     * @param container          Parent view that this fragment's UI should attach to.
+     * @param savedInstanceState Bundle for restoring fragment state.
+     * @return The view for the fragment's UI.
+     */
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.admin_dashboard_fragment, container, false);
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+        Button btnEntrantProfiles = view.findViewById(R.id.btnEntrantProfiles);
+        Button btnFacilityProfiles = view.findViewById(R.id.btnFacilityProfiles);
+        Button btnAllEvents = view.findViewById(R.id.btnAllEvents);
+
+        btnEntrantProfiles.setText("Entrant Profiles (Loading...)");
+
+        DatabaseHelper dbHelper = new DatabaseHelper();
+        dbHelper.getUserCount(new DatabaseHelper.UserCountCallback() {
+            @Override
+            public void onUserCountFetched(int count) {
+                btnEntrantProfiles.setText("Entrant Profiles (" + count + ")");
+            }
+
+            @Override
+            public void onError(Exception e) {
+                Toast.makeText(getContext(), "Failed to retrieve user count", Toast.LENGTH_SHORT).show();
+                btnEntrantProfiles.setText("Entrant Profiles (Error)");
+            }
+        });
+
+        btnEntrantProfiles.setOnClickListener(v -> openFragment(new AdminEntrantsProfilesFragment()));
+        btnFacilityProfiles.setOnClickListener(v -> openFragment(new AdminFacilitiesFragment()));
+        btnAllEvents.setOnClickListener(v -> openFragment(new AdminEventsFragment()));
+
+        return view;
+    }
 
     /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
+     * Replaces the current fragment with the provided fragment and adds the transaction to the back stack.
      *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment AdminDashboardFragment.
+     * @param fragment The fragment to display in the fragment container.
      */
-    // TODO: Rename and change types and number of parameters
-    public static AdminDashboardFragment newInstance(String param1, String param2) {
-        AdminDashboardFragment fragment = new AdminDashboardFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
-    public AdminDashboardFragment() {
-        // Required empty public constructor
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.admin_dashboard_fragment, container, false);
+    private void openFragment(Fragment fragment) {
+        requireActivity().getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragmentContainerView2, fragment)
+                .addToBackStack(null)
+                .commit();
     }
 }
