@@ -57,7 +57,7 @@ public class AdminDashboardFragment extends Fragment {
                 case "Entrant Profiles":
                     selectedFragment = new AdminEntrantsProfilesFragment();
                     break;
-                case "Facility Profiles (for final checkpoint)":
+                case "Facility Profiles":
                     selectedFragment = new AdminFacilitiesFragment();
                     break;
                 case "All Events":

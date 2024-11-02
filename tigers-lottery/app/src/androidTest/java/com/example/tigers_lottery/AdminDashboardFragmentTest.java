@@ -12,6 +12,7 @@ import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
 import com.example.tigers_lottery.Admin.DashboardFragments.AdminEntrantsProfilesFragment;
 import com.example.tigers_lottery.Admin.DashboardFragments.AdminEventsFragment;
+import com.example.tigers_lottery.Admin.DashboardFragments.AdminFacilitiesFragment;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -42,12 +43,12 @@ public class AdminDashboardFragmentTest {
         assertTrue(fragment instanceof AdminEntrantsProfilesFragment);
     }
 
-    /*@Test
+    @Test
     public void testFacilityProfilesFragmentDisplayed() {
         onView(withText("Facility Profiles")).perform(click());
         Fragment fragment = fragmentManager.findFragmentById(R.id.fragmentContainerView2);
         assertTrue(fragment instanceof AdminFacilitiesFragment);
-    }*/
+    }
 
     @Test
     public void testAllEventsFragmentDisplayed() {
