@@ -20,10 +20,14 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
+      - name: Print working directory
+        run: pwd
+
+      - name: List files in working directory
+        run: ls -a
+        
       - name: Grant execute permission for gradlew
-        working-directory: ./tigers-lottery/tigers-lottery  # Set the correct directory here
-        run: chmod +x gradlew
+        run: chmod +x tigers-lottery/tigers-lottery/gradlew
 
       - name: Build with Gradle
-        working-directory: ./tigers-lottery/tigers-lottery  # Set the correct directory here
-        run: ./gradlew build
+        run: tigers-lottery/tigers-lottery/gradlew build
