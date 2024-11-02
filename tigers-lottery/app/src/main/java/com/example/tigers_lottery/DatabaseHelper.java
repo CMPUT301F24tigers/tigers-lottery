@@ -11,6 +11,7 @@ import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.Timestamp;
+import java.util.Random;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,15 +66,68 @@ public class DatabaseHelper {
                 });
     }
 
-
+    /**
+     * Fetch a single event by its eventId.
+     */
+    public void fetchEventById(int eventId, final EventsCallback callback) {
+        eventsRef.whereEqualTo("event_id", eventId)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        QuerySnapshot querySnapshot = task.getResult();
+                        if (querySnapshot != null && !querySnapshot.isEmpty()) {
+                            // Every event Id should be unique, so we can just take the first document found
+                            Event event = querySnapshot.getDocuments().get(0).toObject(Event.class);
+                            List<Event> events = new ArrayList<>();
+                            events.add(event);
+                            callback.onEventsFetched(events); // Pass the event as a single-item list
+                        } else {
+                            Log.w(TAG, "No event found with the specified eventId.");
+                            callback.onError(new Exception("Event not found"));
+                        }
+                    } else {
+                        Log.w(TAG, "Error fetching event by eventId", task.getException());
+                        callback.onError(task.getException()); // Pass error to callback
+                    }
+                });
+    }
 
     /**
-     * Add a new event to Firestore
+     * Create new event
      */
-    public void addEvent(Event event) {
-        eventsRef.add(event)
-                .addOnSuccessListener(documentReference -> Log.d(TAG, "Event added with ID: " + documentReference.getId()))
-                .addOnFailureListener(e -> Log.w(TAG, "Error adding event", e));
+    public void createEvent(Event event, EventsCallback callback) {
+        String uniqueEventId = generateUniqueEventId();
+
+        // Set the generated event_id in the Event DTO
+        event.setEventId(Integer.parseInt(uniqueEventId));
+
+        // Try adding the event with the event_id as the document ID
+        eventsRef.document(uniqueEventId)
+                .set(event)
+                .addOnSuccessListener(aVoid -> {
+                    Log.d(TAG, "Event created successfully with event_id: " + uniqueEventId);
+                    // Notify success by passing the created event
+                    callback.onEventsFetched(List.of(event));
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error creating event", e);
+                    // Retry if there's a duplicate ID collision (very unlikely)
+                    if (e.getMessage().contains("already exists")) {
+                        // Retry by regenerating event_id
+                        createEvent(event, callback);
+                    } else {
+                        callback.onError(e);
+                    }
+                });
+    }
+
+    /**
+     * Helper function to generate unique ID.
+     */
+    private String generateUniqueEventId() {
+        long timestamp = System.currentTimeMillis();
+        int randomSuffix = new Random().nextInt(1000); // Random number between 0-999
+        return String.valueOf(timestamp) + String.valueOf(randomSuffix);
     }
 
     // Add other methods as needed (e.g., deleteEvent, updateEvent, etc.)
