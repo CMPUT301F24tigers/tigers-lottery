@@ -9,8 +9,13 @@
         android:id="@+id/eventDetailsImage"
         android:layout_width="250dp"
         android:layout_height="131dp"
-        tools:layout_editor_absoluteX="80dp"
-        tools:layout_editor_absoluteY="87dp"
+        android:layout_marginTop="72dp"
+        app:layout_constraintBottom_toTopOf="@+id/eventDetailsDetailsDescription"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.496"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.191"
         tools:srcCompat="@tools:sample/avatars" />
 
     <TextView
@@ -20,7 +25,11 @@
         android:layout_marginBottom="24dp"
         android:text="TextView"
         app:layout_constraintBottom_toTopOf="@+id/eventDetailsImage"
-        tools:layout_editor_absoluteX="16dp" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.052"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.551" />
 
     <TextView
         android:id="@+id/eventDetailsDetailsText"
@@ -29,8 +38,11 @@
         android:text="Event Details:"
         android:textSize="24sp"
         app:layout_constraintBottom_toTopOf="@+id/eventDetailsDetailsDescription"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.083"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/eventDetailsImage"
-        tools:layout_editor_absoluteX="22dp" />
+        app:layout_constraintVertical_bias="0.56" />
 
     <Button
         android:id="@+id/eventDetailsEditEvent"
@@ -38,14 +50,22 @@
         android:layout_height="wrap_content"
         android:text="Edit Event"
         app:layout_constraintBottom_toTopOf="@+id/eventDetailsListView"
-        tools:layout_editor_absoluteX="284dp" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.93"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0" />
 
     <ListView
         android:id="@+id/eventDetailsListView"
         android:layout_width="403dp"
         android:layout_height="308dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        tools:layout_editor_absoluteX="-1dp" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0" />
 
     <TextView
         android:id="@+id/eventDetailsDetailsDescription"
@@ -53,5 +73,9 @@
         android:layout_height="99dp"
         android:text="TextView"
         app:layout_constraintBottom_toTopOf="@+id/eventDetailsEditEvent"
-        tools:layout_editor_absoluteX="22dp" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.487"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0" />
 </androidx.constraintlayout.widget.ConstraintLayout>

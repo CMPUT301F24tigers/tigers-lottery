@@ -9,11 +9,16 @@
         android:id="@+id/editEventRegistrationDeadline"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
         android:ems="10"
         android:inputType="text"
         android:text="Registration Deadline"
-        tools:layout_editor_absoluteX="12dp"
-        tools:layout_editor_absoluteY="361dp" />
+        app:layout_constraintBottom_toTopOf="@+id/editEventTime"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.079"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0" />
 
     <EditText
         android:id="@+id/editEventNumberOfPeople"
@@ -22,8 +27,12 @@
         android:ems="10"
         android:inputType="text"
         android:text="Number of People"
-        tools:layout_editor_absoluteX="12dp"
-        tools:layout_editor_absoluteY="451dp" />
+        app:layout_constraintBottom_toTopOf="@+id/editEventDescription"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.079"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0" />
 
     <EditText
         android:id="@+id/editEventDescription"
@@ -32,8 +41,12 @@
         android:ems="10"
         android:inputType="text"
         android:text="Description"
-        tools:layout_editor_absoluteX="12dp"
-        tools:layout_editor_absoluteY="496dp" />
+        app:layout_constraintBottom_toTopOf="@+id/editEventCapacity"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.079"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0" />
 
     <EditText
         android:id="@+id/editEventEventName"
@@ -42,8 +55,12 @@
         android:ems="10"
         android:inputType="text"
         android:text="Event Name"
-        tools:layout_editor_absoluteX="12dp"
-        tools:layout_editor_absoluteY="226dp" />
+        app:layout_constraintBottom_toTopOf="@+id/editEventLocation"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.079"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0" />
 
     <EditText
         android:id="@+id/editEventLocation"
@@ -52,45 +69,67 @@
         android:ems="10"
         android:inputType="text"
         android:text="Location"
-        tools:layout_editor_absoluteX="12dp"
-        tools:layout_editor_absoluteY="271dp" />
+        app:layout_constraintBottom_toTopOf="@+id/editEventRegistrationOpens"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.079"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0" />
 
     <EditText
         android:id="@+id/editEventCapacity"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="44dp"
         android:ems="10"
         android:inputType="text"
         android:text="Waiting List Capacity"
-        tools:layout_editor_absoluteX="12dp"
-        tools:layout_editor_absoluteY="541dp" />
+        app:layout_constraintBottom_toTopOf="@+id/editEventRegenerateQRCode"
+        app:layout_constraintEnd_toStartOf="@+id/editEventRecurring"
+        app:layout_constraintHorizontal_bias="0.888"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.98" />
 
     <EditText
         android:id="@+id/editEventTime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="472dp"
         android:ems="10"
         android:inputType="text"
         android:text="Time"
-        tools:layout_editor_absoluteX="12dp"
-        tools:layout_editor_absoluteY="406dp" />
+        app:layout_constraintBottom_toTopOf="@+id/editEventNumberOfPeople"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.079"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
         android:id="@+id/editEventRegistrationOpens"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
         android:ems="10"
         android:inputType="text"
         android:text="Registration Opens"
-        tools:layout_editor_absoluteX="12dp"
-        tools:layout_editor_absoluteY="316dp" />
+        app:layout_constraintBottom_toTopOf="@+id/editEventRegistrationDeadline"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.079"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0" />
 
     <ImageView
         android:id="@+id/editEventImage"
         android:layout_width="328dp"
         android:layout_height="153dp"
-        tools:layout_editor_absoluteX="41dp"
-        tools:layout_editor_absoluteY="51dp"
+        app:layout_constraintBottom_toTopOf="@+id/editEventEventName"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.493"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.661"
         tools:srcCompat="@tools:sample/avatars" />
 
     <Button
@@ -98,15 +137,22 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Regenerate QR Code"
-        tools:layout_editor_absoluteX="13dp"
-        tools:layout_editor_absoluteY="674dp" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.069"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.976" />
 
     <CheckBox
         android:id="@+id/editEventRecurring"
         android:layout_width="133dp"
         android:layout_height="41dp"
+        android:layout_marginStart="68dp"
         android:text="Recurring"
-        tools:layout_editor_absoluteX="262dp"
-        tools:layout_editor_absoluteY="545dp" />
+        app:layout_constraintBottom_toTopOf="@+id/editEventRegenerateQRCode"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/editEventRegenerateQRCode"
+        app:layout_constraintTop_toBottomOf="@+id/editEventDescription" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
