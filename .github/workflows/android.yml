@@ -20,11 +20,10 @@ jobs:
         distribution: 'temurin'
         cache: gradle
 
-    - name: Change directory to tigers-lottery
-      run: cd tigers-lottery
-
     - name: Grant execute permission for gradlew
-      run: chmod +x tigers-lottery/gradlew
+      working-directory: tigers-lottery/tigers-lottery
+      run: chmod +x gradlew
 
     - name: Build with Gradle
-      run: tigers-lottery/./gradlew build
+      working-directory: tigers-lottery/tigers-lottery
+      run: ./gradlew build
