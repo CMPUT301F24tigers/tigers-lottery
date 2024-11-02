@@ -4,6 +4,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +18,7 @@ import com.example.tigers_lottery.R;
 import com.example.tigers_lottery.models.Event;
 import com.google.firebase.Timestamp;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -73,11 +75,32 @@ public class OrganizerCreateEventFragment extends Fragment {
         boolean assignWaitlistLimit = checkboxWaitlistLimit.isChecked();
         int waitlistLimit = 0;
 
-        // Validation for required fields
-        if (TextUtils.isEmpty(eventName) || TextUtils.isEmpty(eventLocation) || TextUtils.isEmpty(registrationOpens) ||
-                TextUtils.isEmpty(registrationDeadline) || TextUtils.isEmpty(eventDate)) {
-            Toast.makeText(getContext(), "Please fill in all required fields", Toast.LENGTH_SHORT).show();
-            return;
+        boolean isValid = true;
+
+        // Input validation for each field
+        if (eventName.isEmpty()) {
+            inputEventName.setError("Event Name is required");
+            isValid = false;
+        }
+
+        if (eventLocation.isEmpty()) {
+            inputEventLocation.setError("Location is required");
+            isValid = false;
+        }
+
+        if (registrationOpens.isEmpty() || !isValidDateFormat(registrationOpens)) {
+            inputRegistrationOpens.setError("Enter a valid date (YYYY-MM-DD)");
+            isValid = false;
+        }
+
+        if (registrationDeadline.isEmpty() || !isValidDateFormat(registrationDeadline)) {
+            inputRegistrationDeadline.setError("Enter a valid date (YYYY-MM-DD)");
+            isValid = false;
+        }
+
+        if (eventDate.isEmpty() || !isValidDateFormat(eventDate)) {
+            inputEventDate.setError("Enter a valid date (YYYY-MM-DD)");
+            isValid = false;
         }
 
         // Parse waitlist limit if checkbox is selected
@@ -93,15 +116,41 @@ public class OrganizerCreateEventFragment extends Fragment {
             }
         }
 
-        // Convert dates to Timestamp objects
-        Timestamp registrationOpensTimestamp = parseDateToTimestamp(registrationOpens);
-        Timestamp registrationDeadlineTimestamp = parseDateToTimestamp(registrationDeadline);
-        Timestamp eventDateTimestamp = parseDateToTimestamp(eventDate);
-
-        if (registrationOpensTimestamp == null || registrationDeadlineTimestamp == null || eventDateTimestamp == null) {
-            Toast.makeText(getContext(), "Invalid date format. Please use YYYY-MM-DD", Toast.LENGTH_SHORT).show();
+        // If basic validation fails, stop event creation
+        if (!isValid) {
             return;
         }
+
+        // Convert date strings to Timestamp
+        Timestamp registrationOpensTimestamp = convertToTimestamp(registrationOpens);
+        Timestamp registrationDeadlineTimestamp = convertToTimestamp(registrationDeadline);
+        Timestamp eventDateTimestamp = convertToTimestamp(eventDate);
+        Timestamp currentTimestamp = Timestamp.now();
+
+        // Date-based validations
+        if (registrationOpensTimestamp.compareTo(currentTimestamp) <= 0) {
+            inputRegistrationOpens.setError("Registration Open Date must be in the future");
+            return;
+        }
+
+        if (registrationOpensTimestamp.compareTo(registrationDeadlineTimestamp) >= 0) {
+            inputRegistrationOpens.setError("Registration Open Date must be before Registration Deadline");
+            inputRegistrationDeadline.setError("Registration Deadline must be after Registration Open Date");
+            return;
+        }
+
+        if (registrationDeadlineTimestamp.compareTo(eventDateTimestamp) >= 0) {
+            inputRegistrationDeadline.setError("Registration Deadline must be before Event Date");
+            inputEventDate.setError("Event Date must be after Registration Deadline");
+            return;
+        }
+
+        if (registrationOpensTimestamp.compareTo(eventDateTimestamp) >= 0) {
+            inputRegistrationOpens.setError("Registration Open Date must be before Event Date");
+            inputEventDate.setError("Event Date must be after Waitlist Open Date");
+            return;
+        }
+
 
         // Create and populate the Event object
         Event event = new Event();
@@ -130,13 +179,29 @@ public class OrganizerCreateEventFragment extends Fragment {
         });
     }
 
-    // Helper method to convert date string to Timestamp
-    private Timestamp parseDateToTimestamp(String dateStr) {
+    private boolean isValidDateFormat(String date) {
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        format.setLenient(false);
         try {
-            Date date = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(dateStr);
-            return new Timestamp(date);
-        } catch (Exception e) {
-            return null; // Invalid date format
+            format.parse(date);
+            return true;  // Date format is valid
+        } catch (ParseException e) {
+            return false;  // Date format is invalid
         }
     }
+
+    private Timestamp convertToTimestamp(String date) {
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        try {
+            Date parsedDate = format.parse(date);
+            return new Timestamp(parsedDate);
+        } catch (ParseException e) {
+            Log.e("DateConversion", "Invalid date format, using current time as fallback", e);
+            return Timestamp.now();  // Default to current time if parsing fails
+        }
+    }
+
+
+
 }
+
