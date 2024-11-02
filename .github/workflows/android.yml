@@ -25,9 +25,17 @@ jobs:
 
       - name: List files in working directory
         run: ls -a
-        
+
+      - name: Change directory to Android project folder
+        working-directory: tigers-lottery/tigers-lottery
+        run: |
+          pwd
+          ls -a
+
       - name: Grant execute permission for gradlew
-        run: chmod +x tigers-lottery/tigers-lottery/gradlew
+        working-directory: tigers-lottery/tigers-lottery
+        run: chmod +x gradlew
 
       - name: Build with Gradle
-        run: tigers-lottery/tigers-lottery/gradlew build
+        working-directory: tigers-lottery/tigers-lottery
+        run: ./gradlew build
