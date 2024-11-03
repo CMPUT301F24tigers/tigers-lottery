@@ -3,17 +3,16 @@ package com.example.tigers_lottery;
 import android.content.Context;
 import android.util.Log;
 import androidx.annotation.Nullable;
-import android.provider.Settings;
+
 import com.example.tigers_lottery.models.*;
 import com.example.tigers_lottery.utils.DeviceIDHelper;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firebase.Timestamp;
+
 import java.util.Random;
 
 import java.util.ArrayList;
@@ -64,6 +63,11 @@ public class DatabaseHelper {
 
     public interface UserCountCallback {
         void onUserCountFetched(int count);
+        void onError(Exception e);
+    }
+
+    public interface EventDetailsCallback {
+        void onEventFetched(Event event);
         void onError(Exception e);
     }
 
@@ -136,18 +140,16 @@ public class DatabaseHelper {
                     if (task.isSuccessful()) {
                         QuerySnapshot querySnapshot = task.getResult();
                         if (querySnapshot != null && !querySnapshot.isEmpty()) {
-                            // Every event Id should be unique, so we can just take the first document found
+                            // Assuming event ID is unique, we take the first document found
                             Event event = querySnapshot.getDocuments().get(0).toObject(Event.class);
-                            List<Event> events = new ArrayList<>();
-                            events.add(event);
-                            callback.onEventsFetched(events); // Pass the event as a single-item list
+                            callback.onEventFetched(event);
                         } else {
                             Log.w(TAG, "No event found with the specified eventId.");
                             callback.onError(new Exception("Event not found"));
                         }
                     } else {
                         Log.w(TAG, "Error fetching event by eventId", task.getException());
-                        callback.onError(task.getException()); // Pass error to callback
+                        callback.onError(task.getException());
                     }
                 });
     }

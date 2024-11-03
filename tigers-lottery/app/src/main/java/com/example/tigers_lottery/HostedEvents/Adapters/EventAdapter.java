@@ -1,9 +1,8 @@
-package com.example.tigers_lottery.HostedEvents;
+package com.example.tigers_lottery.HostedEvents.Adapters;
 
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -17,21 +16,22 @@ import java.util.List;
 
 public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHolder> {
 
-    private List<Event> events;
-    private Context context;
-    private OnEventOptionSelectedListener optionSelectedListener;
+    private final List<Event> events;
+    private final Context context;
+    private final OnEventOptionSelectedListener optionSelectedListener;
+    private final OnEventClickListener eventClickListener;
 
-    // Constructor for the adapter
-    public EventAdapter(Context context, List<Event> events, OnEventOptionSelectedListener listener) {
+    // Constructor for the adapter, including both listeners
+    public EventAdapter(Context context, List<Event> events, OnEventOptionSelectedListener optionListener, OnEventClickListener eventClickListener) {
         this.context = context;
         this.events = events;
-        this.optionSelectedListener = listener;
+        this.optionSelectedListener = optionListener;
+        this.eventClickListener = eventClickListener;
     }
 
     @NonNull
     @Override
     public EventViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        // Inflate the layout for each item in the RecyclerView
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.event_item, parent, false);
         return new EventViewHolder(view);
     }
@@ -50,12 +50,10 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
 
         // Set up the options menu for each item
         holder.optionsMenu.setOnClickListener(view -> {
-            // Create a PopupMenu for the options
             PopupMenu popupMenu = new PopupMenu(context, holder.optionsMenu);
             MenuInflater inflater = popupMenu.getMenuInflater();
             inflater.inflate(R.menu.organizer_event_item_menu, popupMenu.getMenu());
 
-            // Handle menu item clicks
             popupMenu.setOnMenuItemClickListener(item -> {
                 if (item.getItemId() == R.id.action_edit) {
                     optionSelectedListener.onEditSelected(event);
@@ -67,9 +65,11 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
                 return false;
             });
 
-            // Show the popup menu
             popupMenu.show();
         });
+
+        // Set up click listener for the entire event item
+        holder.itemView.setOnClickListener(v -> eventClickListener.onEventClick(event));
     }
 
     @Override
@@ -98,5 +98,10 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
     public interface OnEventOptionSelectedListener {
         void onEditSelected(Event event);
         void onDeleteSelected(Event event);
+    }
+
+    // Interface for handling event item clicks
+    public interface OnEventClickListener {
+        void onEventClick(Event event);
     }
 }

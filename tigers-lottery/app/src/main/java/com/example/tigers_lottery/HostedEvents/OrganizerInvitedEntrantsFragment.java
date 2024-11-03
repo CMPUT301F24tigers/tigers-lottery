@@ -16,28 +16,28 @@ import com.example.tigers_lottery.R;
 import java.util.ArrayList;
 import java.util.List;
 
-public class OrganizerWaitingListFragment extends Fragment {
+public class OrganizerInvitedEntrantsFragment extends Fragment {
 
-    private RecyclerView waitingListRecyclerView;
+    private RecyclerView invitedEntrantsRecyclerView;
     private EntrantAdapter entrantAdapter;
-    private List<String> waitingListEntrants;
+    private List<String> invitedEntrants;
 
-    public OrganizerWaitingListFragment() {}
+    public OrganizerInvitedEntrantsFragment() {}
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.organizer_waitinglist_entrants, container, false);
+        View view = inflater.inflate(R.layout.organizer_invited_entrants, container, false);
 
         // Retrieve the entrants list from arguments
-        waitingListEntrants = getArguments() != null ? getArguments().getStringArrayList("entrants_list") : new ArrayList<>();
+        invitedEntrants = getArguments() != null ? getArguments().getStringArrayList("entrants_list") : new ArrayList<>();
 
-        waitingListRecyclerView = view.findViewById(R.id.waitlistedEntrantsRecyclerView);
-        waitingListRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        invitedEntrantsRecyclerView = view.findViewById(R.id.invitedEntrantsRecyclerView);
+        invitedEntrantsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         // Set up the adapter with the entrants list
-        entrantAdapter = new EntrantAdapter(waitingListEntrants);
-        waitingListRecyclerView.setAdapter(entrantAdapter);
+        entrantAdapter = new EntrantAdapter(invitedEntrants);
+        invitedEntrantsRecyclerView.setAdapter(entrantAdapter);
 
         return view;
     }
