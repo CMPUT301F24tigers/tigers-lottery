@@ -17,7 +17,7 @@ import com.example.tigers_lottery.R;
 
 import java.util.List;
 
-public class OrganizerWaitingListFragment extends Fragment {
+public class OrganizerInvitedEntrantsFragment extends Fragment {
     private RecyclerView recyclerView;
     private TextView noEntrantsMessage;
     private DatabaseHelper dbHelper;
@@ -26,20 +26,20 @@ public class OrganizerWaitingListFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.organizer_waitinglist_entrants, container, false);
-        recyclerView = view.findViewById(R.id.waitlistedEntrantsRecyclerView);
+        View view = inflater.inflate(R.layout.organizer_invited_entrants, container, false);
+        recyclerView = view.findViewById(R.id.invitedEntrantsRecyclerView);
         noEntrantsMessage = view.findViewById(R.id.noEntrantsMessage);
 
         eventId = getArguments() != null ? getArguments().getInt("event_id") : -1;
         dbHelper = new DatabaseHelper(requireContext());
 
-        fetchWaitlistedEntrants();
+        fetchInvitedEntrants();
 
         return view;
     }
 
-    private void fetchWaitlistedEntrants() {
-        dbHelper.fetchWaitlistedEntrants(eventId, new DatabaseHelper.EntrantsCallback() {
+    private void fetchInvitedEntrants() {
+        dbHelper.fetchInvitedEntrants(eventId, new DatabaseHelper.EntrantsCallback() {
             @Override
             public void onEntrantsFetched(List<String> entrants) {
                 if (entrants.isEmpty()) {

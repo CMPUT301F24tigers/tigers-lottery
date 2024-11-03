@@ -1,112 +1,162 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:padding="16dp">
 
-    <EditText
-        android:id="@+id/createEventRegistrationDeadline"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="text"
-        android:text="Registration Deadline"
-        tools:layout_editor_absoluteX="12dp"
-        tools:layout_editor_absoluteY="361dp" />
+        android:orientation="vertical">
 
-    <EditText
-        android:id="@+id/createEventNumberOfPeople"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="text"
-        android:text="Number of People"
-        tools:layout_editor_absoluteX="12dp"
-        tools:layout_editor_absoluteY="451dp" />
+        <!-- Title -->
+        <TextView
+            android:id="@+id/titleCreateEvent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Create an Event"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:layout_gravity="center"
+            android:paddingBottom="16dp" />
 
-    <EditText
-        android:id="@+id/createEventDescription"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="text"
-        android:text="Description"
-        tools:layout_editor_absoluteX="12dp"
-        tools:layout_editor_absoluteY="496dp" />
+        <!-- Placeholder for Photo/Poster -->
+        <FrameLayout
+            android:id="@+id/photoPlaceholder"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:background="#D3D3D3"
+            android:layout_marginBottom="16dp">
 
-    <EditText
-        android:id="@+id/createEventName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="text"
-        android:text="Event Name"
-        tools:layout_editor_absoluteX="12dp"
-        tools:layout_editor_absoluteY="226dp" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Poster Placeholder"
+                android:textSize="16sp"
+                android:layout_gravity="center"
+                android:textColor="#808080" />
+        </FrameLayout>
 
-    <EditText
-        android:id="@+id/createEventLocation"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="text"
-        android:text="Location"
-        tools:layout_editor_absoluteX="12dp"
-        tools:layout_editor_absoluteY="271dp" />
+        <!-- Event Name Label and Input -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Event Name" />
+        <EditText
+            android:id="@+id/inputEventName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter event name"
+            android:layout_marginBottom="12dp"
+            android:inputType="text" />
 
-    <EditText
-        android:id="@+id/createEventCapacity"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="text"
-        android:text="Waiting List Capacity"
-        tools:layout_editor_absoluteX="12dp"
-        tools:layout_editor_absoluteY="541dp" />
+        <!-- Location Label and Input -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Location" />
+        <EditText
+            android:id="@+id/inputEventLocation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter location"
+            android:layout_marginBottom="12dp"
+            android:inputType="text" />
 
-    <EditText
-        android:id="@+id/createEventTime"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="text"
-        android:text="Time"
-        tools:layout_editor_absoluteX="12dp"
-        tools:layout_editor_absoluteY="406dp" />
+        <!-- Registration Opens Label and Input -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Registration Opens (YYYY-MM-DD)" />
+        <EditText
+            android:id="@+id/inputRegistrationOpens"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Select registration open date"
+            android:layout_marginBottom="12dp"
+            android:inputType="date" />
 
-    <EditText
-        android:id="@+id/createEventRegistrationOpens"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="text"
-        android:text="Registration Opens"
-        tools:layout_editor_absoluteX="12dp"
-        tools:layout_editor_absoluteY="316dp" />
+        <!-- Registration Deadline Label and Input -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Registration Deadline (YYYY-MM-DD)" />
+        <EditText
+            android:id="@+id/inputRegistrationDeadline"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Select registration deadline"
+            android:layout_marginBottom="12dp"
+            android:inputType="date" />
 
-    <ImageView
-        android:id="@+id/createEventImage"
-        android:layout_width="328dp"
-        android:layout_height="153dp"
-        tools:layout_editor_absoluteX="41dp"
-        tools:layout_editor_absoluteY="51dp"
-        tools:srcCompat="@tools:sample/avatars" />
+        <!-- Event Date Label and Input -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Event Date (YYYY-MM-DD)" />
+        <EditText
+            android:id="@+id/inputEventDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Select event date"
+            android:layout_marginBottom="12dp"
+            android:inputType="date" />
 
-    <Button
-        android:id="@+id/createEventGenerateQRCode"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Generate QR Code"
-        tools:layout_editor_absoluteX="13dp"
-        tools:layout_editor_absoluteY="674dp" />
+        <!-- Description Label and Input -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Description" />
+        <EditText
+            android:id="@+id/inputEventDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter description"
+            android:inputType="textMultiLine"
+            android:layout_marginBottom="12dp" />
 
-    <CheckBox
-        android:id="@+id/createEventRecurring"
-        android:layout_width="133dp"
-        android:layout_height="41dp"
-        android:text="Recurring"
-        tools:layout_editor_absoluteX="262dp"
-        tools:layout_editor_absoluteY="545dp" />
+        <!-- Checkbox for Waitlist Limit -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="12dp"
+            android:gravity="center_vertical">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+            <CheckBox
+                android:id="@+id/checkboxWaitlistLimit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Assign Waitlist Limit?"
+                android:paddingStart="8dp"
+                android:textSize="16sp" />
+        </LinearLayout>
+
+        <!-- Waitlist Limit Label and Input (visible only when checkbox is checked) -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Set Waitlist Limit"
+            android:visibility="gone"
+            android:id="@+id/labelWaitlistLimit" />
+        <EditText
+            android:id="@+id/inputWaitlistLimit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter limit"
+            android:inputType="number"
+            android:visibility="gone"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Submit Button -->
+        <Button
+            android:id="@+id/btnCreateEvent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Create Event" />
+    </LinearLayout>
+</ScrollView>

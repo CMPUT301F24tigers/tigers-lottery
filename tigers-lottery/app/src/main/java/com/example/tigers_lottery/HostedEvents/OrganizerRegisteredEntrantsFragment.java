@@ -15,9 +15,10 @@ import com.example.tigers_lottery.DatabaseHelper;
 import com.example.tigers_lottery.HostedEvents.Adapters.EntrantAdapter;
 import com.example.tigers_lottery.R;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class OrganizerWaitingListFragment extends Fragment {
+public class OrganizerRegisteredEntrantsFragment extends Fragment {
     private RecyclerView recyclerView;
     private TextView noEntrantsMessage;
     private DatabaseHelper dbHelper;
@@ -26,20 +27,22 @@ public class OrganizerWaitingListFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.organizer_waitinglist_entrants, container, false);
-        recyclerView = view.findViewById(R.id.waitlistedEntrantsRecyclerView);
+        View view = inflater.inflate(R.layout.organizer_registered_entrants, container, false);
+        recyclerView = view.findViewById(R.id.registeredEntrantsRecyclerView);
         noEntrantsMessage = view.findViewById(R.id.noEntrantsMessage);
 
+        // Retrieve eventId from arguments
         eventId = getArguments() != null ? getArguments().getInt("event_id") : -1;
         dbHelper = new DatabaseHelper(requireContext());
 
-        fetchWaitlistedEntrants();
+        fetchRegisteredEntrants();
 
         return view;
     }
 
-    private void fetchWaitlistedEntrants() {
-        dbHelper.fetchWaitlistedEntrants(eventId, new DatabaseHelper.EntrantsCallback() {
+
+    private void fetchRegisteredEntrants() {
+        dbHelper.fetchRegisteredEntrants(eventId, new DatabaseHelper.EntrantsCallback() {
             @Override
             public void onEntrantsFetched(List<String> entrants) {
                 if (entrants.isEmpty()) {

@@ -51,4 +51,15 @@
         android:layout_height="wrap_content"
         android:textSize="14sp" />
 
+    <!-- Edit and Delete menu-button -->
+    <ImageView
+        android:id="@+id/optionsMenu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@android:drawable/ic_menu_more"
+        android:contentDescription="Options menu"
+        android:layout_gravity="end" />
+
+
+
 </LinearLayout>

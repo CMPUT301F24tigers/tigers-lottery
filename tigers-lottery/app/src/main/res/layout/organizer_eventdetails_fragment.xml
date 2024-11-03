@@ -1,57 +1,119 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:padding="16dp">
 
-    <ImageView
-        android:id="@+id/eventDetailsImage"
-        android:layout_width="250dp"
-        android:layout_height="131dp"
-        tools:layout_editor_absoluteX="80dp"
-        tools:layout_editor_absoluteY="87dp"
-        tools:srcCompat="@tools:sample/avatars" />
-
-    <TextView
-        android:id="@+id/eventDetailsText"
-        android:layout_width="108dp"
-        android:layout_height="34dp"
-        android:layout_marginBottom="24dp"
-        android:text="TextView"
-        app:layout_constraintBottom_toTopOf="@+id/eventDetailsImage"
-        tools:layout_editor_absoluteX="16dp" />
-
-    <TextView
-        android:id="@+id/eventDetailsDetailsText"
-        android:layout_width="147dp"
-        android:layout_height="33dp"
-        android:text="Event Details:"
-        android:textSize="24sp"
-        app:layout_constraintBottom_toTopOf="@+id/eventDetailsDetailsDescription"
-        app:layout_constraintTop_toBottomOf="@+id/eventDetailsImage"
-        tools:layout_editor_absoluteX="22dp" />
-
-    <Button
-        android:id="@+id/eventDetailsEditEvent"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Edit Event"
-        app:layout_constraintBottom_toTopOf="@+id/eventDetailsListView"
-        tools:layout_editor_absoluteX="284dp" />
+        android:orientation="vertical"
+        android:gravity="center_horizontal">
 
-    <ListView
-        android:id="@+id/eventDetailsListView"
-        android:layout_width="403dp"
-        android:layout_height="308dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        tools:layout_editor_absoluteX="-1dp" />
+        <!-- Event Name -->
+        <TextView
+            android:id="@+id/eventTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:paddingBottom="16dp" />
 
-    <TextView
-        android:id="@+id/eventDetailsDetailsDescription"
-        android:layout_width="370dp"
-        android:layout_height="99dp"
-        android:text="TextView"
-        app:layout_constraintBottom_toTopOf="@+id/eventDetailsEditEvent"
-        tools:layout_editor_absoluteX="22dp" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <!-- Placeholder for Photo/Poster -->
+        <FrameLayout
+            android:id="@+id/photoPlaceholder"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:background="#D3D3D3"
+            android:layout_marginBottom="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Poster Placeholder"
+                android:textSize="16sp"
+                android:layout_gravity="center"
+                android:textColor="#808080" />
+        </FrameLayout>
+
+        <!-- Event Description in a box -->
+        <TextView
+            android:id="@+id/eventDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="12dp"
+            android:background="#F0F0F0"
+            android:layout_marginBottom="16dp"
+            android:textSize="16sp" />
+
+        <!-- Event Location -->
+        <TextView
+            android:id="@+id/eventLocation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Waitlist Open Date -->
+        <TextView
+            android:id="@+id/waitlistOpenDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Waitlist Close Date -->
+        <TextView
+            android:id="@+id/waitlistCloseDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Event Date -->
+        <TextView
+            android:id="@+id/eventDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Waitlist Limit -->
+        <TextView
+            android:id="@+id/waitlistLimit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Buttons to View Entrant Lists -->
+        <Button
+            android:id="@+id/viewRegisteredEntrants"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="View Registered Entrants"
+            android:layout_marginBottom="8dp" />
+
+        <Button
+            android:id="@+id/viewWaitlistedEntrants"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="View Waitlisted Entrants"
+            android:layout_marginBottom="8dp" />
+
+        <Button
+            android:id="@+id/viewInvitedEntrants"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="View Invited Entrants"
+            android:layout_marginBottom="8dp" />
+
+        <Button
+            android:id="@+id/viewDeclinedEntrants"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="View Declined Entrants"
+            android:layout_marginBottom="8dp" />
+
+    </LinearLayout>
+</ScrollView>
