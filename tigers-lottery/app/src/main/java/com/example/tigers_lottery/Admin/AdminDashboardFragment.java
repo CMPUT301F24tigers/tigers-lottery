@@ -46,7 +46,7 @@ public class AdminDashboardFragment extends Fragment {
 
         btnEntrantProfiles.setText("Entrant Profiles (Loading...)");
 
-        DatabaseHelper dbHelper = new DatabaseHelper();
+        DatabaseHelper dbHelper = new DatabaseHelper(requireContext());
         dbHelper.getUserCount(new DatabaseHelper.UserCountCallback() {
             @Override
             public void onUserCountFetched(int count) {

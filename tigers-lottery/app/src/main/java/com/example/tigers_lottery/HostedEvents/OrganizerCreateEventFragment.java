@@ -51,7 +51,7 @@ public class OrganizerCreateEventFragment extends Fragment {
         btnCreateEvent = view.findViewById(R.id.btnCreateEvent);
 
         // Initialize DatabaseHelper
-        dbHelper = new DatabaseHelper();
+        dbHelper = new DatabaseHelper(requireContext());
 
         // Show/hide waitlist limit input based on checkbox
         checkboxWaitlistLimit.setOnCheckedChangeListener((buttonView, isChecked) -> {

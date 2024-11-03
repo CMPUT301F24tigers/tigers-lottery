@@ -37,7 +37,7 @@ public class OrganizerDashboardFragment extends Fragment {
         View view = inflater.inflate(R.layout.organizer_dashboard_fragment, container, false);
 
         // Initialize DatabaseHelper
-        dbHelper = new DatabaseHelper();
+        dbHelper = new DatabaseHelper(requireContext());
 
         // Initialize RecyclerView and FloatingActionButton
         eventsRecyclerView = view.findViewById(R.id.eventsRecyclerView);
