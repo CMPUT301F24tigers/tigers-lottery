@@ -141,19 +141,26 @@ public class DatabaseHelper {
                     if (task.isSuccessful()) {
                         QuerySnapshot querySnapshot = task.getResult();
                         if (querySnapshot != null && !querySnapshot.isEmpty()) {
-                            // Assuming event ID is unique, we take the first document found
                             Event event = querySnapshot.getDocuments().get(0).toObject(Event.class);
+
+                            // Initialize entrant lists if they are null, this is to ensure fragments later do not encounter null pointer issues
+                            if (event != null) {
+                                event.setRegisteredEntrants(event.getRegisteredEntrants() != null ? event.getRegisteredEntrants() : new ArrayList<>());
+                                event.setWaitlistedEntrants(event.getWaitlistedEntrants() != null ? event.getWaitlistedEntrants() : new ArrayList<>());
+                                event.setInvitedEntrants(event.getInvitedEntrants() != null ? event.getInvitedEntrants() : new ArrayList<>());
+                                event.setDeclinedEntrants(event.getDeclinedEntrants() != null ? event.getDeclinedEntrants() : new ArrayList<>());
+                            }
+
                             callback.onEventFetched(event);
                         } else {
-                            Log.w(TAG, "No event found with the specified eventId.");
                             callback.onError(new Exception("Event not found"));
                         }
                     } else {
-                        Log.w(TAG, "Error fetching event by eventId", task.getException());
                         callback.onError(task.getException());
                     }
                 });
     }
+
 
     /**
      * Create new event
@@ -270,6 +277,92 @@ public class DatabaseHelper {
                     }
                 })
                 .addOnFailureListener(callback::onError);
+    }
+
+    /** Retrieves the registered entrants list for a particular event ID
+     *
+     * @param eventId
+     * @param callback
+     */
+    public void fetchRegisteredEntrants(int eventId, final EntrantsCallback callback) {
+        eventsRef.whereEqualTo("event_id", eventId)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                        Event event = task.getResult().getDocuments().get(0).toObject(Event.class);
+                        callback.onEntrantsFetched(event != null ? event.getRegisteredEntrants() : new ArrayList<>());
+                    } else {
+                        callback.onEntrantsFetched(new ArrayList<>()); // Return empty list if no data
+                    }
+                })
+                .addOnFailureListener(callback::onError);
+    }
+
+
+    /** Retrieves the waitlisted entrants list for a particular event ID
+     *
+     * @param eventId
+     * @param callback
+     */
+    public void fetchWaitlistedEntrants(int eventId, final EntrantsCallback callback) {
+        eventsRef.whereEqualTo("event_id", eventId)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                        Event event = task.getResult().getDocuments().get(0).toObject(Event.class);
+                        callback.onEntrantsFetched(event != null ? event.getWaitlistedEntrants() : new ArrayList<>());
+                    } else {
+                        callback.onEntrantsFetched(new ArrayList<>()); // Return empty list if no data
+                    }
+                })
+                .addOnFailureListener(callback::onError);
+    }
+
+
+    /** Retrieves the invited entrants list for a particular event id
+     *
+     * @param eventId
+     * @param callback
+     */
+    public void fetchInvitedEntrants(int eventId, final EntrantsCallback callback) {
+        eventsRef.whereEqualTo("event_id", eventId)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                        Event event = task.getResult().getDocuments().get(0).toObject(Event.class);
+                        callback.onEntrantsFetched(event != null ? event.getInvitedEntrants() : new ArrayList<>());
+                    } else {
+                        callback.onEntrantsFetched(new ArrayList<>()); // Return empty list if no data
+                    }
+                })
+                .addOnFailureListener(callback::onError);
+    }
+
+
+    /** Retrieves the declined entrants list for an event id
+     *
+     * @param eventId
+     * @param callback
+     */
+    public void fetchDeclinedEntrants(int eventId, final EntrantsCallback callback) {
+        eventsRef.whereEqualTo("event_id", eventId)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                        Event event = task.getResult().getDocuments().get(0).toObject(Event.class);
+                        callback.onEntrantsFetched(event != null ? event.getDeclinedEntrants() : new ArrayList<>());
+                    } else {
+                        callback.onEntrantsFetched(new ArrayList<>()); // Return empty list if no data
+                    }
+                })
+                .addOnFailureListener(callback::onError);
+    }
+
+
+    // Callback interface for fetching entrants
+    public interface EntrantsCallback {
+        void onEntrantsFetched(List<String> entrants);
+        void onError(Exception e);
     }
 
 

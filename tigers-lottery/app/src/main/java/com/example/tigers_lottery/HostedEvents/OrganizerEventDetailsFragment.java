@@ -114,18 +114,28 @@ public class OrganizerEventDetailsFragment extends Fragment {
         waitlistCloseDate.setText("Waitlist Close Date: " + event.getFormattedWaitlistDeadline());
         eventDate.setText("Event Date: " + event.getFormattedEventDate());
         waitlistLimit.setText("Waitlist Limit: " + (event.isWaitlistLimitFlag() ? event.getWaitlistLimit() : "N/A"));
+
+        // Initialize entrant lists if they are null to prevent NullPointerException
+        event.setRegisteredEntrants(event.getRegisteredEntrants() != null ? event.getRegisteredEntrants() : new ArrayList<>());
+        event.setWaitlistedEntrants(event.getWaitlistedEntrants() != null ? event.getWaitlistedEntrants() : new ArrayList<>());
+        event.setInvitedEntrants(event.getInvitedEntrants() != null ? event.getInvitedEntrants() : new ArrayList<>());
+        event.setDeclinedEntrants(event.getDeclinedEntrants() != null ? event.getDeclinedEntrants() : new ArrayList<>());
+
+        setupButtonListeners(); // Initialize the button listeners after setting the lists
     }
+
 
     private void setupButtonListeners() {
-        viewRegisteredEntrants.setOnClickListener(v -> openEntrantFragment(new OrganizerRegisteredEntrantsFragment(), event.getRegisteredEntrants()));
-        viewWaitlistedEntrants.setOnClickListener(v -> openEntrantFragment(new OrganizerWaitingListFragment(), event.getWaitlistedEntrants()));
-        viewInvitedEntrants.setOnClickListener(v -> openEntrantFragment(new OrganizerInvitedEntrantsFragment(), event.getInvitedEntrants()));
-        viewDeclinedEntrants.setOnClickListener(v -> openEntrantFragment(new OrganizerDeclinedEntrantsFragment(), event.getDeclinedEntrants()));
+        viewRegisteredEntrants.setOnClickListener(v -> openEntrantFragment(new OrganizerRegisteredEntrantsFragment()));
+        viewWaitlistedEntrants.setOnClickListener(v -> openEntrantFragment(new OrganizerWaitingListFragment()));
+        viewInvitedEntrants.setOnClickListener(v -> openEntrantFragment(new OrganizerInvitedEntrantsFragment()));
+        viewDeclinedEntrants.setOnClickListener(v -> openEntrantFragment(new OrganizerDeclinedEntrantsFragment()));
     }
 
-    private void openEntrantFragment(Fragment fragment, List<String> entrants) {
+
+    private void openEntrantFragment(Fragment fragment) {
         Bundle args = new Bundle();
-        args.putStringArrayList("entrants_list", new ArrayList<>(entrants));
+        args.putInt("event_id", eventId); // Pass only eventId
         fragment.setArguments(args);
 
         requireActivity().getSupportFragmentManager().beginTransaction()
@@ -133,4 +143,5 @@ public class OrganizerEventDetailsFragment extends Fragment {
                 .addToBackStack(null)
                 .commit();
     }
+
 }

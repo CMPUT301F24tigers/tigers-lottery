@@ -16,6 +16,17 @@
         android:textStyle="bold"
         android:paddingBottom="8dp" />
 
+    <!-- Message to show if there are no entrants -->
+    <TextView
+        android:id="@+id/noEntrantsMessage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="No entrants found."
+        android:visibility="gone"
+        android:layout_gravity="center"
+        android:textSize="16sp"
+        android:textColor="@android:color/darker_gray" />
+
     <!-- RecyclerView to display declined entrants -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/declinedEntrantsRecyclerView"
