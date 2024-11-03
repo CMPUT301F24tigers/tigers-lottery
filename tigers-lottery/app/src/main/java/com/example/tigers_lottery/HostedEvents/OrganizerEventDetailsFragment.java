@@ -4,6 +4,8 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -80,10 +82,10 @@ public class OrganizerEventDetailsFragment extends Fragment {
     private void loadEventDetails() {
         dbHelper.fetchEventById(eventId, new DatabaseHelper.EventsCallback() {
             @Override
-            public void onEventsFetched(List<Event> events) {
-                if (!events.isEmpty()) {
-                    event = events.get(0);
+            public void onEventFetched(Event event) {
+                if (event != null) {
                     displayEventDetails(event);
+                    Log.d("EventDetails", "Event data loaded successfully"); // Log for debugging
                 } else {
                     Toast.makeText(getContext(), "Event not found", Toast.LENGTH_SHORT).show();
                     requireActivity().getSupportFragmentManager().popBackStack();
@@ -91,11 +93,18 @@ public class OrganizerEventDetailsFragment extends Fragment {
             }
 
             @Override
+            public void onEventsFetched(List<Event> events) {
+                // Not used here
+            }
+
+            @Override
             public void onError(Exception e) {
                 Toast.makeText(getContext(), "Error fetching event details: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.e("EventDetails", "Error fetching event details", e); // Log error
             }
         });
     }
+
 
     private void displayEventDetails(Event event) {
         eventTitle.setText(event.getEventName());

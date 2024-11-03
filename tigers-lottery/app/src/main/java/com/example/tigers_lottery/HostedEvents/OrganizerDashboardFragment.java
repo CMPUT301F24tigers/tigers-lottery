@@ -27,9 +27,7 @@ public class OrganizerDashboardFragment extends Fragment implements EventAdapter
     private List<Event> eventList;
     private DatabaseHelper dbHelper;
 
-    public OrganizerDashboardFragment() {
-        // Required empty public constructor
-    }
+    public OrganizerDashboardFragment() {}
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -44,7 +42,7 @@ public class OrganizerDashboardFragment extends Fragment implements EventAdapter
 
         // Initialize event list and adapter with this fragment as the listener
         eventList = new ArrayList<>();
-        eventAdapter = new EventAdapter(requireContext(), eventList, this, this);
+        eventAdapter = new EventAdapter(requireContext(), eventList, this, this); // Register both option listener and click listener
         eventsRecyclerView.setAdapter(eventAdapter);
 
         loadEvents();
@@ -75,6 +73,11 @@ public class OrganizerDashboardFragment extends Fragment implements EventAdapter
             }
 
             @Override
+            public void onEventFetched(Event event) {
+                // Not needed in this context but must be overridden
+            }
+
+            @Override
             public void onError(Exception e) {
                 Log.e(TAG, "Error loading events", e);
             }
@@ -101,6 +104,11 @@ public class OrganizerDashboardFragment extends Fragment implements EventAdapter
             public void onEventsFetched(List<Event> events) {
                 Toast.makeText(getContext(), "Event deleted successfully", Toast.LENGTH_SHORT).show();
                 loadEvents();
+            }
+
+            @Override
+            public void onEventFetched(Event event) {
+                // Not needed in this context but must be overridden
             }
 
             @Override

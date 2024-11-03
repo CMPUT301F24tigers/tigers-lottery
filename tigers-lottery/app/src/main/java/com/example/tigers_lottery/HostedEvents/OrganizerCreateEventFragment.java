@@ -177,6 +177,11 @@ public class OrganizerCreateEventFragment extends Fragment {
             }
 
             @Override
+            public void onEventFetched(Event event) {
+                // Not used in this fragment, so leave empty or add a comment
+            }
+
+            @Override
             public void onError(Exception e) {
                 Toast.makeText(getContext(), "Error creating event: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             }

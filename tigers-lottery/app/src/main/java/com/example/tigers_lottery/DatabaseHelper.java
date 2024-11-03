@@ -53,6 +53,7 @@ public class DatabaseHelper {
     // Callback interfaces for asynchronous Firestore operations
     public interface EventsCallback {
         void onEventsFetched(List<Event> events);
+        void onEventFetched(Event event);
         void onError(Exception e);
     }
 

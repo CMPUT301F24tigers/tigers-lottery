@@ -179,19 +179,20 @@ public class OrganizerEditEventFragment extends Fragment {
         event.setWaitlistLimitFlag(assignWaitlistLimit);
         event.setWaitlistLimit(assignWaitlistLimit ? waitlistLimit : 0);
 
-        // Update the event in Firestore
         dbHelper.updateEvent(event, new DatabaseHelper.EventsCallback() {
             @Override
             public void onEventsFetched(List<Event> events) {
-                Toast.makeText(getContext(), "Event updated successfully!", Toast.LENGTH_SHORT).show();
-                requireActivity().getSupportFragmentManager().popBackStack(); // Go back to the dashboard
+            }
+
+            @Override
+            public void onEventFetched(Event event) {
             }
 
             @Override
             public void onError(Exception e) {
-                Toast.makeText(getContext(), "Failed to update event: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+
     }
 
     private String formatTimestamp(Timestamp timestamp) {
