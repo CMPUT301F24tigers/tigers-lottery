@@ -182,6 +182,11 @@ public class OrganizerEditEventFragment extends Fragment {
         dbHelper.updateEvent(event, new DatabaseHelper.EventsCallback() {
             @Override
             public void onEventsFetched(List<Event> events) {
+                // Display success message
+                Toast.makeText(getContext(), "Event updated successfully", Toast.LENGTH_SHORT).show();
+
+                // Navigate back to OrganizerDashboardFragment
+                requireActivity().getSupportFragmentManager().popBackStack();
             }
 
             @Override
