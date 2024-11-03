@@ -96,15 +96,13 @@ public class DatabaseHelper {
 
 
     /**
-     * Fetches events for the organizer dashboard, filtering by valid organizer ID.
+     * Fetches events for the organizer dashboard, showing only the current user's hosted events
      *
      * @param callback The callback to handle the list of events or error.
      */
     public void organizerFetchEvents(final EventsCallback callback) {
-
-        // Only fetch events where organizer_id is greater than 0
-        // NOTE: we will change this once we have UserID or device Id stored
-        eventsRef.whereGreaterThan("organizer_id", 0)
+        // Fetch events where organizer_id matches the current user's ID
+        eventsRef.whereEqualTo("organizer_id", currentUserId)
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException e) {
@@ -116,20 +114,18 @@ public class DatabaseHelper {
 
                         List<Event> events = new ArrayList<>();
                         if (value != null) {
-
                             for (QueryDocumentSnapshot doc : value) {
                                 // Use Firestore's automatic mapping to convert document to Event object
-                                // If we update schema, change the relevant DTO class instead
                                 Event event = doc.toObject(Event.class);
                                 events.add(event);
                             }
                         }
-                        callback.onEventsFetched(events);
+                        callback.onEventsFetched(events); // Pass fetched events to callback
                     }
                 });
     }
 
-  
+
     /**
      * Fetch a single event by its eventId.
      */
@@ -156,7 +152,6 @@ public class DatabaseHelper {
                 });
     }
 
-  
     /**
      * Create new event
      */
@@ -198,8 +193,7 @@ public class DatabaseHelper {
     
      /**
      * Fetch all events from the events collection without any conditions.
-     *
-     * @param event The Event object to be added.
+     * The @param line was throwing an error so I got rid of it for now --- FIX ALL THAT LATER
      */
     public void fetchAllEvents(final EventsCallback callback) {
             eventsRef.addSnapshotListener(new EventListener<QuerySnapshot>() {

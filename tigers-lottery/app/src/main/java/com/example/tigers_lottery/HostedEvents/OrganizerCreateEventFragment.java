@@ -163,6 +163,10 @@ public class OrganizerCreateEventFragment extends Fragment {
         event.setWaitlistLimitFlag(assignWaitlistLimit);
         event.setWaitlistLimit(assignWaitlistLimit ? waitlistLimit : 0);
 
+        // Set organizer ID from Device ID (current user ID)
+        String organizerId = dbHelper.getCurrentUserId(); // Retrieve Device ID
+        event.setOrganizerId(organizerId); // Set as organizer ID
+
         // Save the event using DatabaseHelper
         dbHelper.createEvent(event, new DatabaseHelper.EventsCallback() {
             @Override

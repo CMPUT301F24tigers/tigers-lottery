@@ -20,7 +20,7 @@ public class Event {
     private GeoPoint geolocation = new GeoPoint(0.0, 0.0);
 
     @PropertyName("organizer_id")
-    private int organizerId = 0;
+    private String organizerId = "";
 
     @PropertyName("poster_url")
     private String posterUrl = "https://example.com/default-poster.png";
@@ -81,10 +81,10 @@ public class Event {
     public void setGeolocation(GeoPoint geolocation) { this.geolocation = geolocation; }
 
     @PropertyName("organizer_id")
-    public int getOrganizerId() { return organizerId; }
+    public String getOrganizerId() { return organizerId; }
 
     @PropertyName("organizer_id")
-    public void setOrganizerId(int organizerId) { this.organizerId = organizerId; }
+    public void setOrganizerId(String organizerId) { this.organizerId = organizerId; }
 
     @PropertyName("poster_url")
     public String getPosterUrl() { return posterUrl; }
