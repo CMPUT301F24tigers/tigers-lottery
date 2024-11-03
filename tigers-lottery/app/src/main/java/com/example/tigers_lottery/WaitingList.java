@@ -1,5 +1,7 @@
 package com.example.tigers_lottery;
 
+import com.example.tigers_lottery.models.Entrant;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,7 +26,7 @@ public class WaitingList {
         }
     }
 
-    public void removeEntrant(String userName){
+    /*public void removeEntrant(String userName){
         for(int i=0; i<waitingList.size(); i++){
             if(waitingList.get(i).getUserName().equals(userName)){
                 Entrant cancelledEntrant = waitingList.get(i);
@@ -33,7 +35,7 @@ public class WaitingList {
                 break;
             }
         }
-    }
+    }*/
 
     public Entrant getEntrant(int i){
         if(i>=0 && i < waitingList.size()){
