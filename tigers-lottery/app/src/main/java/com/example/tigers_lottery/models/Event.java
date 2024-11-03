@@ -48,16 +48,16 @@ public class Event implements Serializable {
     private String description = "No description available";
 
     @PropertyName("registered_entrants")
-    private List<Integer> registeredEntrants = new ArrayList<>();
+    private List<String> registeredEntrants = new ArrayList<>();
 
     @PropertyName("waitlisted_entrants")
-    private List<Integer> waitlistedEntrants = new ArrayList<>();
+    private List<String> waitlistedEntrants = new ArrayList<>();
 
     @PropertyName("invited_entrants")
-    private List<Integer> invitedEntrants = new ArrayList<>();
+    private List<String> invitedEntrants = new ArrayList<>();
 
     @PropertyName("declined_entrants")
-    private List<Integer> declinedEntrants = new ArrayList<>();
+    private List<String> declinedEntrants = new ArrayList<>();
 
     // No-argument constructor
     public Event() {}
@@ -136,28 +136,28 @@ public class Event implements Serializable {
     public void setDescription(String description) { this.description = description; }
 
     @PropertyName("registered_entrants")
-    public List<Integer> getRegisteredEntrants() { return registeredEntrants; }
+    public List<String> getRegisteredEntrants() { return registeredEntrants; }
 
     @PropertyName("registered_entrants")
-    public void setRegisteredEntrants(List<Integer> registeredEntrants) { this.registeredEntrants = registeredEntrants; }
+    public void setRegisteredEntrants(List<String> registeredEntrants) { this.registeredEntrants = registeredEntrants; }
 
     @PropertyName("waitlisted_entrants")
-    public List<Integer> getWaitlistedEntrants() { return waitlistedEntrants; }
+    public List<String> getWaitlistedEntrants() { return waitlistedEntrants; }
 
     @PropertyName("waitlisted_entrants")
-    public void setWaitlistedEntrants(List<Integer> waitlistedEntrants) { this.waitlistedEntrants = waitlistedEntrants; }
+    public void setWaitlistedEntrants(List<String> waitlistedEntrants) { this.waitlistedEntrants = waitlistedEntrants; }
 
     @PropertyName("invited_entrants")
-    public List<Integer> getInvitedEntrants() { return invitedEntrants; }
+    public List<String> getInvitedEntrants() { return invitedEntrants; }
 
     @PropertyName("invited_entrants")
-    public void setInvitedEntrants(List<Integer> invitedEntrants) { this.invitedEntrants = invitedEntrants; }
+    public void setInvitedEntrants(List<String> invitedEntrants) { this.invitedEntrants = invitedEntrants; }
 
     @PropertyName("declined_entrants")
-    public List<Integer> getDeclinedEntrants() { return declinedEntrants; }
+    public List<String> getDeclinedEntrants() { return declinedEntrants; }
 
     @PropertyName("declined_entrants")
-    public void setDeclinedEntrants(List<Integer> declinedEntrants) { this.declinedEntrants = declinedEntrants; }
+    public void setDeclinedEntrants(List<String> declinedEntrants) { this.declinedEntrants = declinedEntrants; }
 
     // Helper methods to format Timestamps
     public String getFormattedEventDate() {
