@@ -196,28 +196,81 @@ public class DatabaseHelper {
      * The @param line was throwing an error so I got rid of it for now --- FIX ALL THAT LATER
      */
     public void fetchAllEvents(final EventsCallback callback) {
-            eventsRef.addSnapshotListener(new EventListener<QuerySnapshot>() {
-                @Override
-                public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException e) {
-                    if (e != null) {
-                        Log.w(TAG, "Error fetching events.", e);
-                        callback.onError(e); // Pass error to callback
-                        return;
-                    }
-
-                    List<Event> events = new ArrayList<>();
-                    if (value != null) {
-                        for (QueryDocumentSnapshot doc : value) {
-                            Event event = doc.toObject(Event.class); // Automatic mapping to Event object
-                            events.add(event);
-                        }
-                    }
-                    callback.onEventsFetched(events); // Pass fetched events to callback
+        eventsRef.addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException e) {
+                if (e != null) {
+                    Log.w(TAG, "Error fetching events.", e);
+                    callback.onError(e); // Pass error to callback
+                    return;
                 }
-            });
-        }
 
-  
+                List<Event> events = new ArrayList<>();
+                if (value != null) {
+                    for (QueryDocumentSnapshot doc : value) {
+                        Event event = doc.toObject(Event.class); // Automatic mapping to Event object
+                        events.add(event);
+                    }
+                }
+                callback.onEventsFetched(events); // Pass fetched events to callback
+            }
+        });
+    }
+
+    /**
+     * Deletes a particular event
+     *
+     */
+    public void deleteEvent(int eventId, final EventsCallback callback) {
+        eventsRef.whereEqualTo("event_id", eventId)
+            .get()
+            .addOnCompleteListener(task -> {
+                if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                    //  event IDs are unique, so we can delete the first document found
+                    String documentId = task.getResult().getDocuments().get(0).getId();
+                    eventsRef.document(documentId).delete()
+                            .addOnSuccessListener(aVoid -> {
+                                Log.d(TAG, "Event deleted successfully");
+                                callback.onEventsFetched(null); // Notify deletion success
+                            })
+                            .addOnFailureListener(e -> {
+                                Log.w(TAG, "Error deleting event", e);
+                                callback.onError(e);
+                            });
+                } else {
+                    callback.onError(new Exception("Event not found"));
+                }
+            })
+            .addOnFailureListener(callback::onError);
+    }
+
+
+    /** Update an event
+     *
+     * @param event
+     * @param callback
+     */
+    public void updateEvent(Event event, EventsCallback callback) {
+        eventsRef.whereEqualTo("event_id", event.getEventId())
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                        String documentId = task.getResult().getDocuments().get(0).getId();
+                        eventsRef.document(documentId).set(event)
+                                .addOnSuccessListener(aVoid -> {
+                                    Log.d(TAG, "Event updated successfully");
+                                    callback.onEventsFetched(null); // Notify success
+                                })
+                                .addOnFailureListener(callback::onError);
+                    } else {
+                        callback.onError(new Exception("Event not found"));
+                    }
+                })
+                .addOnFailureListener(callback::onError);
+    }
+
+
+
     /**
      * Fetches all users from the "users" collection.
      *
