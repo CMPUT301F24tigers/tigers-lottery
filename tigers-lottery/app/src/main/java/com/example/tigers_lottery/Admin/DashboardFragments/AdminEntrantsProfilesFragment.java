@@ -86,7 +86,7 @@ public class AdminEntrantsProfilesFragment extends Fragment {
      * On failure, an error message is displayed.
      */
     private void fetchUsers() {
-        DatabaseHelper dbHelper = new DatabaseHelper();
+        DatabaseHelper dbHelper = new DatabaseHelper(requireContext());
 
         dbHelper.fetchAllUsers(new DatabaseHelper.UsersCallback() {
             @Override

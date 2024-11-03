@@ -4,12 +4,13 @@ import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.PropertyName;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class Event {
+public class Event implements Serializable {
     @PropertyName("event_id")
     private int eventId = -1;
 
@@ -20,7 +21,7 @@ public class Event {
     private GeoPoint geolocation = new GeoPoint(0.0, 0.0);
 
     @PropertyName("organizer_id")
-    private int organizerId = 0;
+    private String organizerId = "";
 
     @PropertyName("poster_url")
     private String posterUrl = "https://example.com/default-poster.png";
@@ -81,10 +82,10 @@ public class Event {
     public void setGeolocation(GeoPoint geolocation) { this.geolocation = geolocation; }
 
     @PropertyName("organizer_id")
-    public int getOrganizerId() { return organizerId; }
+    public String getOrganizerId() { return organizerId; }
 
     @PropertyName("organizer_id")
-    public void setOrganizerId(int organizerId) { this.organizerId = organizerId; }
+    public void setOrganizerId(String organizerId) { this.organizerId = organizerId; }
 
     @PropertyName("poster_url")
     public String getPosterUrl() { return posterUrl; }

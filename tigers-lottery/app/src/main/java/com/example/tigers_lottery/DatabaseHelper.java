@@ -1,8 +1,11 @@
 package com.example.tigers_lottery;
 
+import android.content.Context;
 import android.util.Log;
 import androidx.annotation.Nullable;
+import android.provider.Settings;
 import com.example.tigers_lottery.models.*;
+import com.example.tigers_lottery.utils.DeviceIDHelper;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -17,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+
 /**
  * Helper class for interacting with Firebase Firestore database.
  * Manages database operations for the "events" and "users" collections.
@@ -28,15 +32,23 @@ public class DatabaseHelper {
     private FirebaseFirestore db;
     private CollectionReference eventsRef;
     private CollectionReference usersRef;
+    private String currentUserId;
+
 
     /**
      * Constructor for DatabaseHelper.
      * Initializes Firestore instance and sets up references to "events" and "users" collections.
      */
-    public DatabaseHelper() {
+    public DatabaseHelper(Context context) {
         db = FirebaseFirestore.getInstance();
         eventsRef = db.collection("events"); // Reference to "events" collection
         usersRef = db.collection("users");   // Reference to "users" collection
+
+        // Retrieve and store the Device ID as the currentUserId
+        currentUserId = DeviceIDHelper.getDeviceId(context);
+
+        // Check if the user already exists in Firestore
+        ensureUserExists();
     }
 
     // Callback interfaces for asynchronous Firestore operations
@@ -56,15 +68,41 @@ public class DatabaseHelper {
     }
 
     /**
-     * Fetches events for the organizer dashboard, filtering by valid organizer ID.
+     * Returns the current user's ID, which is the Device ID.
+     */
+    public String getCurrentUserId() {
+        return currentUserId;
+    }
+
+    /**
+     * Checks if the user exists in Firestore. If not, creates a new user document.
+     */
+    private void ensureUserExists() {
+        usersRef.document(currentUserId).get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                if (!task.getResult().exists()) {
+                    // If user does not exist, create a new one
+                    User newUser = new User();
+                    newUser.setUserId(currentUserId);
+                    addUser(newUser);
+                } else {
+                    Log.d(TAG, "User already exists in Firestore: " + currentUserId);
+                }
+            } else {
+                Log.e(TAG, "Error checking user existence", task.getException());
+            }
+        });
+    }
+
+
+    /**
+     * Fetches events for the organizer dashboard, showing only the current user's hosted events
      *
      * @param callback The callback to handle the list of events or error.
      */
     public void organizerFetchEvents(final EventsCallback callback) {
-
-        // Only fetch events where organizer_id is greater than 0
-        // NOTE: we will change this once we have UserID or device Id stored
-        eventsRef.whereGreaterThan("organizer_id", 0)
+        // Fetch events where organizer_id matches the current user's ID
+        eventsRef.whereEqualTo("organizer_id", currentUserId)
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException e) {
@@ -76,20 +114,18 @@ public class DatabaseHelper {
 
                         List<Event> events = new ArrayList<>();
                         if (value != null) {
-
                             for (QueryDocumentSnapshot doc : value) {
                                 // Use Firestore's automatic mapping to convert document to Event object
-                                // If we update schema, change the relevant DTO class instead
                                 Event event = doc.toObject(Event.class);
                                 events.add(event);
                             }
                         }
-                        callback.onEventsFetched(events);
+                        callback.onEventsFetched(events); // Pass fetched events to callback
                     }
                 });
     }
 
-  
+
     /**
      * Fetch a single event by its eventId.
      */
@@ -116,7 +152,6 @@ public class DatabaseHelper {
                 });
     }
 
-  
     /**
      * Create new event
      */
@@ -158,32 +193,84 @@ public class DatabaseHelper {
     
      /**
      * Fetch all events from the events collection without any conditions.
-     *
-     * @param event The Event object to be added.
+     * The @param line was throwing an error so I got rid of it for now --- FIX ALL THAT LATER
      */
     public void fetchAllEvents(final EventsCallback callback) {
-            eventsRef.addSnapshotListener(new EventListener<QuerySnapshot>() {
-                @Override
-                public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException e) {
-                    if (e != null) {
-                        Log.w(TAG, "Error fetching events.", e);
-                        callback.onError(e); // Pass error to callback
-                        return;
-                    }
-
-                    List<Event> events = new ArrayList<>();
-                    if (value != null) {
-                        for (QueryDocumentSnapshot doc : value) {
-                            Event event = doc.toObject(Event.class); // Automatic mapping to Event object
-                            events.add(event);
-                        }
-                    }
-                    callback.onEventsFetched(events); // Pass fetched events to callback
+        eventsRef.addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException e) {
+                if (e != null) {
+                    Log.w(TAG, "Error fetching events.", e);
+                    callback.onError(e); // Pass error to callback
+                    return;
                 }
-            });
-        }
 
-  
+                List<Event> events = new ArrayList<>();
+                if (value != null) {
+                    for (QueryDocumentSnapshot doc : value) {
+                        Event event = doc.toObject(Event.class); // Automatic mapping to Event object
+                        events.add(event);
+                    }
+                }
+                callback.onEventsFetched(events); // Pass fetched events to callback
+            }
+        });
+    }
+
+    /**
+     * Deletes a particular event
+     *
+     */
+    public void deleteEvent(int eventId, final EventsCallback callback) {
+        eventsRef.whereEqualTo("event_id", eventId)
+            .get()
+            .addOnCompleteListener(task -> {
+                if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                    //  event IDs are unique, so we can delete the first document found
+                    String documentId = task.getResult().getDocuments().get(0).getId();
+                    eventsRef.document(documentId).delete()
+                            .addOnSuccessListener(aVoid -> {
+                                Log.d(TAG, "Event deleted successfully");
+                                callback.onEventsFetched(null); // Notify deletion success
+                            })
+                            .addOnFailureListener(e -> {
+                                Log.w(TAG, "Error deleting event", e);
+                                callback.onError(e);
+                            });
+                } else {
+                    callback.onError(new Exception("Event not found"));
+                }
+            })
+            .addOnFailureListener(callback::onError);
+    }
+
+
+    /** Update an event
+     *
+     * @param event
+     * @param callback
+     */
+    public void updateEvent(Event event, EventsCallback callback) {
+        eventsRef.whereEqualTo("event_id", event.getEventId())
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                        String documentId = task.getResult().getDocuments().get(0).getId();
+                        eventsRef.document(documentId).set(event)
+                                .addOnSuccessListener(aVoid -> {
+                                    Log.d(TAG, "Event updated successfully");
+                                    callback.onEventsFetched(null); // Notify success
+                                })
+                                .addOnFailureListener(callback::onError);
+                    } else {
+                        callback.onError(new Exception("Event not found"));
+                    }
+                })
+                .addOnFailureListener(callback::onError);
+    }
+
+
+
     /**
      * Fetches all users from the "users" collection.
      *
@@ -248,6 +335,8 @@ public class DatabaseHelper {
                     }
                 });
     }
+
+
 
    
     // Add other methods as needed (e.g., deleteEvent, updateEvent, etc.)

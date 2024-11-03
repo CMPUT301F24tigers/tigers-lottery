@@ -29,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
     Button adminContinue, entrantContinue, organizerContinue;
     private FirebaseFirestore db;
     private CollectionReference usersRef;
+    private DatabaseHelper dbHelper;
 
     //test comment added
     @Override
@@ -38,6 +39,13 @@ public class MainActivity extends AppCompatActivity {
 
         db = FirebaseFirestore.getInstance();
         usersRef = db.collection("users");
+
+        // Initialize DatabaseHelper, which will ensure user existence in Firestore
+        dbHelper = new DatabaseHelper(this);
+
+        // Optional: Log or use the current user ID if needed for debugging
+        String userId = dbHelper.getCurrentUserId();
+        Log.d("MainActivity", "Current User ID (Device ID): " + userId);
 
         // Load the default fragment
         loadFragment(new EntrantDashboardFragment());
