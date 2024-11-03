@@ -13,6 +13,7 @@ import com.example.tigers_lottery.DatabaseHelper;
 import com.example.tigers_lottery.R;
 import com.example.tigers_lottery.models.Event;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,11 +54,22 @@ public class OrganizerDashboardFragment extends Fragment {
         // Load events from DatabaseHelper
         loadEvents();
 
-        // Handle Floating Action Button click to open the create event fragment (to be implemented)
+        // Set onClickListener for fabCreateEvent to open OrganizerCreateEventFragment
         fabCreateEvent.setOnClickListener(v -> {
+            // Navigate to OrganizerCreateEventFragment
+            requireActivity().getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragmentContainerView2, new OrganizerCreateEventFragment())
+                    .addToBackStack(null) // Allows back navigation
+                    .commit();
         });
 
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        loadEvents(); // Reload events to fetch the latest data when fragment is resumed
     }
 
     private void loadEvents() {

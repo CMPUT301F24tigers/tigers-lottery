@@ -11,6 +11,7 @@ import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.Timestamp;
+import java.util.Random;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,6 +61,9 @@ public class DatabaseHelper {
      * @param callback The callback to handle the list of events or error.
      */
     public void organizerFetchEvents(final EventsCallback callback) {
+
+        // Only fetch events where organizer_id is greater than 0
+        // NOTE: we will change this once we have UserID or device Id stored
         eventsRef.whereGreaterThan("organizer_id", 0)
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
@@ -72,20 +76,11 @@ public class DatabaseHelper {
 
                         List<Event> events = new ArrayList<>();
                         if (value != null) {
-                            // Parse documents into Event objects and add to events list
-                            for (QueryDocumentSnapshot doc : value) {
-                                int eventId = doc.getLong("event_id").intValue();
-                                String eventName = doc.getString("event_name");
-                                GeoPoint geolocation = doc.getGeoPoint("geolocation");
-                                int organizerId = doc.getLong("organizer_id").intValue();
-                                String posterUrl = doc.getString("poster_url");
-                                Timestamp eventDate = doc.getTimestamp("event_date");
-                                Timestamp waitlistOpenDate = doc.getTimestamp("waitlist_open_date");
-                                Timestamp waitlistDeadline = doc.getTimestamp("waitlist_deadline");
-                                int waitlistLimit = doc.getLong("waitlist_limit").intValue();
 
-                                Event event = new Event(eventId, eventName, geolocation, organizerId, posterUrl, eventDate,
-                                        waitlistOpenDate, waitlistDeadline, waitlistLimit);
+                            for (QueryDocumentSnapshot doc : value) {
+                                // Use Firestore's automatic mapping to convert document to Event object
+                                // If we update schema, change the relevant DTO class instead
+                                Event event = doc.toObject(Event.class);
                                 events.add(event);
                             }
                         }
@@ -94,17 +89,101 @@ public class DatabaseHelper {
                 });
     }
 
+  
     /**
-     * Adds a new event to Firestore.
+     * Fetch a single event by its eventId.
+     */
+    public void fetchEventById(int eventId, final EventsCallback callback) {
+        eventsRef.whereEqualTo("event_id", eventId)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        QuerySnapshot querySnapshot = task.getResult();
+                        if (querySnapshot != null && !querySnapshot.isEmpty()) {
+                            // Every event Id should be unique, so we can just take the first document found
+                            Event event = querySnapshot.getDocuments().get(0).toObject(Event.class);
+                            List<Event> events = new ArrayList<>();
+                            events.add(event);
+                            callback.onEventsFetched(events); // Pass the event as a single-item list
+                        } else {
+                            Log.w(TAG, "No event found with the specified eventId.");
+                            callback.onError(new Exception("Event not found"));
+                        }
+                    } else {
+                        Log.w(TAG, "Error fetching event by eventId", task.getException());
+                        callback.onError(task.getException()); // Pass error to callback
+                    }
+                });
+    }
+
+  
+    /**
+     * Create new event
+     */
+    public void createEvent(Event event, EventsCallback callback) {
+        String uniqueEventId = generateUniqueEventId();
+
+        // Set the generated event_id in the Event DTO
+        event.setEventId(Integer.parseInt(uniqueEventId));
+
+        // Try adding the event with the event_id as the document ID
+        eventsRef.document(uniqueEventId)
+                .set(event)
+                .addOnSuccessListener(aVoid -> {
+                    Log.d(TAG, "Event created successfully with event_id: " + uniqueEventId);
+                    // Notify success by passing the created event
+                    callback.onEventsFetched(List.of(event));
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error creating event", e);
+                    // Retry if there's a duplicate ID collision (very unlikely)
+                    if (e.getMessage().contains("already exists")) {
+                        // Retry by regenerating event_id
+                        createEvent(event, callback);
+                    } else {
+                        callback.onError(e);
+                    }
+                });
+    }
+
+  
+    /**
+     * Helper function to generate unique ID.
+     */
+    private String generateUniqueEventId() {
+        int uniqueId = 10000 + new Random().nextInt(90000); // Generates a number between 10000 and 99999
+        return String.valueOf(uniqueId);
+    }
+  
+    
+     /**
+     * Fetch all events from the events collection without any conditions.
      *
      * @param event The Event object to be added.
      */
-    public void addEvent(Event event) {
-        eventsRef.add(event)
-                .addOnSuccessListener(documentReference -> Log.d(TAG, "Event added with ID: " + documentReference.getId()))
-                .addOnFailureListener(e -> Log.w(TAG, "Error adding event", e));
-    }
+    public void fetchAllEvents(final EventsCallback callback) {
+            eventsRef.addSnapshotListener(new EventListener<QuerySnapshot>() {
+                @Override
+                public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException e) {
+                    if (e != null) {
+                        Log.w(TAG, "Error fetching events.", e);
+                        callback.onError(e); // Pass error to callback
+                        return;
+                    }
 
+                    List<Event> events = new ArrayList<>();
+                    if (value != null) {
+                        for (QueryDocumentSnapshot doc : value) {
+                            Event event = doc.toObject(Event.class); // Automatic mapping to Event object
+                            events.add(event);
+                        }
+                    }
+                    callback.onEventsFetched(events); // Pass fetched events to callback
+                }
+            });
+        }
+
+  
     /**
      * Fetches all users from the "users" collection.
      *
@@ -170,29 +249,6 @@ public class DatabaseHelper {
                 });
     }
 
-    //This will be added when Abhro merges the Event DTO
-
-    /*public void fetchAllEvents(final EventsCallback callback) {
-            eventsRef.addSnapshotListener(new EventListener<QuerySnapshot>() {
-                @Override
-                public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException e) {
-                    if (e != null) {
-                        Log.w(TAG, "Error fetching events.", e);
-                        callback.onError(e); // Pass error to callback
-                        return;
-                    }
-
-                    List<Event> events = new ArrayList<>();
-                    if (value != null) {
-                        for (QueryDocumentSnapshot doc : value) {
-                            Event event = doc.toObject(Event.class); // Automatic mapping to Event object
-                            events.add(event);
-                        }
-                    }
-                    callback.onEventsFetched(events); // Pass fetched events to callback
-                }
-            });
-        }*/
-
+   
     // Add other methods as needed (e.g., deleteEvent, updateEvent, etc.)
 }
