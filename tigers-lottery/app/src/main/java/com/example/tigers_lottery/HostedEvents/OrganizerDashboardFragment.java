@@ -74,7 +74,7 @@ public class OrganizerDashboardFragment extends Fragment implements EventAdapter
 
             @Override
             public void onEventFetched(Event event) {
-                // Not needed in this context but must be overridden
+                // Not needed in this context but still must be overridden
             }
 
             @Override

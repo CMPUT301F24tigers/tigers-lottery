@@ -178,7 +178,7 @@ public class OrganizerCreateEventFragment extends Fragment {
 
             @Override
             public void onEventFetched(Event event) {
-                // Not used in this fragment, so leave empty or add a comment
+                // Not used in this fragment
             }
 
             @Override

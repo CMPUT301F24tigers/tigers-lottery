@@ -366,7 +366,6 @@ public class DatabaseHelper {
     }
 
 
-
     /**
      * Fetches all users from the "users" collection.
      *
