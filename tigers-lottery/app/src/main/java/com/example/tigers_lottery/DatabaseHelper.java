@@ -1,23 +1,36 @@
 package com.example.tigers_lottery;
 
 import android.content.Context;
+import android.net.Uri;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.example.tigers_lottery.models.*;
 import com.example.tigers_lottery.utils.DeviceIDHelper;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
+import java.util.HashMap;
 import java.util.Random;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 
 /**
@@ -32,7 +45,7 @@ public class DatabaseHelper {
     private CollectionReference eventsRef;
     private CollectionReference usersRef;
     private String currentUserId;
-
+    private StorageReference storageReference;
 
     /**
      * Constructor for DatabaseHelper.
@@ -42,12 +55,13 @@ public class DatabaseHelper {
         db = FirebaseFirestore.getInstance();
         eventsRef = db.collection("events"); // Reference to "events" collection
         usersRef = db.collection("users");   // Reference to "users" collection
+        storageReference = storageReference = FirebaseStorage.getInstance().getReference("profile_images");
 
         // Retrieve and store the Device ID as the currentUserId
         currentUserId = DeviceIDHelper.getDeviceId(context);
 
         // Check if the user already exists in Firestore
-        ensureUserExists();
+//        ensureUserExists();
     }
 
     // Callback interfaces for asynchronous Firestore operations
@@ -72,6 +86,11 @@ public class DatabaseHelper {
         void onError(Exception e);
     }
 
+    public interface ProfileCallback {
+        void onProfileExists();
+        void onProfileNotExists();
+    }
+
     /**
      * Returns the current user's ID, which is the Device ID.
      */
@@ -79,25 +98,25 @@ public class DatabaseHelper {
         return currentUserId;
     }
 
-    /**
-     * Checks if the user exists in Firestore. If not, creates a new user document.
-     */
-    private void ensureUserExists() {
-        usersRef.document(currentUserId).get().addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                if (!task.getResult().exists()) {
-                    // If user does not exist, create a new one
-                    User newUser = new User();
-                    newUser.setUserId(currentUserId);
-                    addUser(newUser);
-                } else {
-                    Log.d(TAG, "User already exists in Firestore: " + currentUserId);
-                }
-            } else {
-                Log.e(TAG, "Error checking user existence", task.getException());
-            }
-        });
-    }
+//    /**
+//     * Checks if the user exists in Firestore. If not, creates a new user document.
+//     */
+//    private void ensureUserExists() {
+//        usersRef.document(currentUserId).get().addOnCompleteListener(task -> {
+//            if (task.isSuccessful()) {
+//                if (!task.getResult().exists()) {
+//                    // If user does not exist, create a new one
+//                    User newUser = new User();
+//                    newUser.setUserId(currentUserId);
+//                    addUser(newUser);
+//                } else {
+//                    Log.d(TAG, "User already exists in Firestore: " + currentUserId);
+//                }
+//            } else {
+//                Log.e(TAG, "Error checking user existence", task.getException());
+//            }
+//        });
+//    }
 
 
     /**
@@ -396,21 +415,63 @@ public class DatabaseHelper {
 
     /**
      * Adds a new user to Firestore.
-     *
-     * @param user The User object to be added.
-     *              Ensures user ID is set before attempting to add to Firestore.
      */
-    public void addUser(User user) {
-        if (user.getUserId() == null || user.getUserId().isEmpty() || Objects.equals(user.getUserId(), "NoUserId")) {
-            Log.e(TAG, "User ID is required to add a user. Use the Device ID of the user added");
-            return;
-        }
+//     * @param user The User object to be added.
+//     *              Ensures user ID is set before attempting to add to Firestore.
+//     */
+    public void addUser(HashMap<String, Object> userData, Uri imageUri) {
+//        if (user.getUserId() == null || user.getUserId().isEmpty() || Objects.equals(user.getUserId(), "NoUserId")) {
+//            Log.e(TAG, "User ID is required to add a user. Use the Device ID of the user added");
+//            return;
+//        }
 
-        usersRef.document(user.getUserId())
-                .set(user)
-                .addOnSuccessListener(aVoid -> Log.d(TAG, "User added with ID: " + user.getUserId()))
-                .addOnFailureListener(e -> Log.w(TAG, "Error adding user", e));
+//        usersRef.document(user.getUserId())
+//                .set(user)
+//                .addOnSuccessListener(aVoid -> Log.d(TAG, "User added with ID: " + user.getUserId()))
+//                .addOnFailureListener(e -> Log.w(TAG, "Error adding user", e));
+        User newUser = new User();
+        newUser.setUserId(currentUserId);
+        usersRef.document(currentUserId).set(newUser);
+
+        usersRef.document(currentUserId).update(userData)
+                .addOnSuccessListener(aVoid -> {
+                    Log.w(TAG, "Successfully added new user");
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Adding new user failed");
+                });
+
+        if(imageUri != null) {
+            uploadImageToFirebase(imageUri, "user_photo");
+        }
     }
+
+
+    /**
+     * Chekc if the user exists in the database
+     *
+     * @param
+     */
+    public void checkUserExists(ProfileCallback callback) {
+        usersRef.document(currentUserId)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if (task.isSuccessful()) {
+                            DocumentSnapshot document = task.getResult();
+                            if (document != null && document.exists()) {
+                                callback.onProfileExists(); // Document exists
+                            } else {
+                                callback.onProfileNotExists(); // Document does not exist
+                            }
+                        } else {
+                            Log.e(TAG, "Failed to fetch user data");
+                        }
+                    }
+                });
+    }
+
 
     /**
      * Fetches the number of users in the "users" collection.
@@ -431,8 +492,37 @@ public class DatabaseHelper {
                 });
     }
 
+    /**
+     * Uploads the URI image data to firebase storage and update the link in users document
+     * @param imageUri the URI data of the image
+     * @param field the name of the field to update the firebase storage image link
+     */
+    private void uploadImageToFirebase(Uri imageUri, String field) {
+        // Generate a unique name for the image using UUID
+        String fileName = UUID.randomUUID().toString() + ".jpg";
+        StorageReference fileRef = storageReference.child(fileName);
 
+        // Upload the image
+        fileRef.putFile(imageUri)
+                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        // Get the download URL for the uploaded image
+                        fileRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                            @Override
+                            public void onSuccess(Uri uri) {
+                                String downloadUrl = uri.toString();
+                                usersRef.document(currentUserId).update(field, downloadUrl);
+                            }
+                        });
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
 
-   
+                    }
+                });
+    }
     // Add other methods as needed (e.g., deleteEvent, updateEvent, etc.)
 }

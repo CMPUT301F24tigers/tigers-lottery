@@ -37,7 +37,7 @@ public class AdminEventsFragment extends Fragment {
         // Set click listener for back button
         backButton.setOnClickListener(v -> {
             getParentFragmentManager().beginTransaction()
-                    .replace(R.id.fragmentContainerView2, new AdminDashboardFragment())
+                    .replace(R.id.main_activity_fragment_container, new AdminDashboardFragment())
                     .commit();
             backButton.setVisibility(View.INVISIBLE);
         });

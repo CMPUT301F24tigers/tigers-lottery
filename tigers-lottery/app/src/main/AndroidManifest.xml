@@ -29,6 +29,10 @@
             android:name=".CreateEntrantProfileActivity"
             android:exported="false"
             android:theme="@style/Theme.Tigerslottery" />
+        <activity
+            android:name=".ProfileViewsEdit.ProfileDetailsActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Tigerslottery" />
 
     </application>
 
