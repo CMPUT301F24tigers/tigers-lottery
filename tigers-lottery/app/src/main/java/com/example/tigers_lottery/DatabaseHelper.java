@@ -384,6 +384,99 @@ public class DatabaseHelper {
         void onError(Exception e);
     }
 
+    /** Updates invited entrants list after lottery is ran by organizer
+     *
+     *
+     * @param eventId
+     * @param invitedEntrants
+     * @param callback
+     */
+    public void updateInvitedEntrantsAndSetLotteryRan(int eventId, List<String> invitedEntrants, final EventsCallback callback) {
+        eventsRef.whereEqualTo("event_id", eventId)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                        String documentId = task.getResult().getDocuments().get(0).getId();
+                        eventsRef.document(documentId)
+                                .update("invited_entrants", invitedEntrants, "is_lottery_ran", true)
+                                .addOnSuccessListener(aVoid -> {
+                                    Log.d(TAG, "Lottery ran successfully and invited entrants updated.");
+                                    callback.onEventsFetched(null); // Success callback
+                                })
+                                .addOnFailureListener(callback::onError);
+                    } else {
+                        callback.onError(new Exception("Event not found"));
+                    }
+                })
+                .addOnFailureListener(callback::onError);
+    }
+
+    // Helper function to select random entrants
+    public List<String> selectRandomEntrants(List<String> entrants, int count) {
+        List<String> selectedEntrants = new ArrayList<>();
+        Random random = new Random();
+        while (selectedEntrants.size() < count && !entrants.isEmpty()) {
+            int index = random.nextInt(entrants.size());
+            selectedEntrants.add(entrants.remove(index));
+        }
+        return selectedEntrants;
+    }
+
+
+    /** Listen for changes in the declined entrants list; If someone declines they're added here and we must repick randomly to fill their spot
+     *
+     * @param eventId
+     * @param callback
+     */
+    public void addDeclineListener(int eventId, DeclineCallback callback) {
+        eventsRef.whereEqualTo("event_id", eventId)
+                .addSnapshotListener((value, error) -> {
+                    if (error != null) {
+                        callback.onError(error);
+                        return;
+                    }
+                    if (value != null && !value.isEmpty()) {
+                        Event event = value.getDocuments().get(0).toObject(Event.class);
+                        callback.onDeclineDetected(event.getDeclinedEntrants());
+                    }
+                });
+    }
+
+    // Callback interface for handling declines
+    public interface DeclineCallback {
+        void onDeclineDetected(List<String> declinedEntrants);
+        void onError(Exception e);
+    }
+
+
+    /** Update both the waitlisted entrants list as well as the invited entrants list, after someone declines an invitation and someone else is picked to fill that spot
+     *
+     * @param eventId
+     * @param invitedEntrants
+     * @param waitlistedEntrants
+     * @param callback
+     */
+    public void updateEntrants(int eventId, List<String> invitedEntrants, List<String> waitlistedEntrants, final EventsCallback callback) {
+        eventsRef.whereEqualTo("event_id", eventId)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                        String documentId = task.getResult().getDocuments().get(0).getId();
+                        eventsRef.document(documentId)
+                                .update("invited_entrants", invitedEntrants, "waitlisted_entrants", waitlistedEntrants)
+                                .addOnSuccessListener(aVoid -> {
+                                    Log.d(TAG, "Entrants updated successfully.");
+                                    callback.onEventsFetched(null); // Notify success
+                                })
+                                .addOnFailureListener(callback::onError);
+                    } else {
+                        callback.onError(new Exception("Event not found"));
+                    }
+                })
+                .addOnFailureListener(callback::onError);
+    }
+
+
 
     /**
      * Fetches all users from the "users" collection.
@@ -524,5 +617,5 @@ public class DatabaseHelper {
                     }
                 });
     }
-    // Add other methods as needed (e.g., deleteEvent, updateEvent, etc.)
+
 }

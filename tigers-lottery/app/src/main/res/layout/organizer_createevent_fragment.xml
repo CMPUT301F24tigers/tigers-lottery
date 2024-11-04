@@ -119,7 +119,8 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Occupant Limit" />
+            android:text="Occupant Limit"
+            android:id="@+id/LabelOccupantLimit" />
         <EditText
             android:id="@+id/inputOccupantLimit"
             android:layout_width="match_parent"
@@ -144,6 +145,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:id="@+id/assignWaitlistLabel"
                 android:text="Assign Waitlist Limit?"
                 android:paddingStart="8dp"
                 android:textSize="16sp" />

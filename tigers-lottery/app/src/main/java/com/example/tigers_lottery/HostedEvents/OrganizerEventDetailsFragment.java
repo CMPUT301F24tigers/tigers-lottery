@@ -17,9 +17,11 @@ import android.widget.Toast;
 import com.example.tigers_lottery.DatabaseHelper;
 import com.example.tigers_lottery.R;
 import com.example.tigers_lottery.models.Event;
+import com.google.firebase.Timestamp;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class OrganizerEventDetailsFragment extends Fragment {
 
@@ -31,7 +33,7 @@ public class OrganizerEventDetailsFragment extends Fragment {
     // UI Components
     private TextView eventTitle, eventDescription, eventLocation, waitlistOpenDate, waitlistCloseDate, eventDate, waitlistLimit;
     private ImageView eventPoster;
-    private Button viewRegisteredEntrants, viewWaitlistedEntrants, viewInvitedEntrants, viewDeclinedEntrants;
+    private Button viewRegisteredEntrants, viewWaitlistedEntrants, viewInvitedEntrants, viewDeclinedEntrants, runLotteryButton;
 
     public OrganizerEventDetailsFragment() {}
 
@@ -69,6 +71,7 @@ public class OrganizerEventDetailsFragment extends Fragment {
         viewWaitlistedEntrants = view.findViewById(R.id.viewWaitlistedEntrants);
         viewInvitedEntrants = view.findViewById(R.id.viewInvitedEntrants);
         viewDeclinedEntrants = view.findViewById(R.id.viewDeclinedEntrants);
+        runLotteryButton = view.findViewById(R.id.runLotteryButton);
 
         // Fetch and display event details
         loadEventDetails();
@@ -82,9 +85,12 @@ public class OrganizerEventDetailsFragment extends Fragment {
     private void loadEventDetails() {
         dbHelper.fetchEventById(eventId, new DatabaseHelper.EventsCallback() {
             @Override
-            public void onEventFetched(Event event) {
-                if (event != null) {
+            public void onEventFetched(Event fetchedEvent) {
+                if (fetchedEvent != null) {
+                    event = fetchedEvent;
                     displayEventDetails(event);
+                    setupLotteryButton();
+                    setupDeclineListener();
                     Log.d("EventDetails", "Event data loaded successfully"); // Log for debugging
                 } else {
                     Toast.makeText(getContext(), "Event not found", Toast.LENGTH_SHORT).show();
@@ -130,6 +136,126 @@ public class OrganizerEventDetailsFragment extends Fragment {
         viewWaitlistedEntrants.setOnClickListener(v -> openEntrantFragment(new OrganizerWaitingListFragment()));
         viewInvitedEntrants.setOnClickListener(v -> openEntrantFragment(new OrganizerInvitedEntrantsFragment()));
         viewDeclinedEntrants.setOnClickListener(v -> openEntrantFragment(new OrganizerDeclinedEntrantsFragment()));
+    }
+
+
+    private void setupLotteryButton() {
+        // Check if the waitlist deadline has passed and lottery has not been run
+        Timestamp currentTimestamp = Timestamp.now();
+        if (event.getWaitlistDeadline().compareTo(currentTimestamp) <= 0 && !event.isLotteryRan()) {
+            runLotteryButton.setEnabled(true);
+        } else {
+            runLotteryButton.setEnabled(false);
+        }
+
+        runLotteryButton.setOnClickListener(v -> runLottery());
+    }
+
+    private void runLottery() {
+        dbHelper.fetchWaitlistedEntrants(event.getEventId(), new DatabaseHelper.EntrantsCallback() {
+            @Override
+            public void onEntrantsFetched(List<String> waitlistedEntrants) {
+                int occupantLimit = event.getOccupantLimit();
+                List<String> invitedEntrants = dbHelper.selectRandomEntrants(waitlistedEntrants, occupantLimit);
+
+                // Update Firestore with invited entrants and mark lottery as ran
+                dbHelper.updateInvitedEntrantsAndSetLotteryRan(event.getEventId(), invitedEntrants, new DatabaseHelper.EventsCallback() {
+                    @Override
+                    public void onEventsFetched(List<Event> events) {
+                        Toast.makeText(getContext(), "Lottery run successfully!", Toast.LENGTH_SHORT).show();
+                        runLotteryButton.setEnabled(false);
+                    }
+
+                    @Override
+                    public void onEventFetched(Event event) { }
+
+                    @Override
+                    public void onError(Exception e) {
+                        Toast.makeText(getContext(), "Error running lottery: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+
+            @Override
+            public void onError(Exception e) {
+                Toast.makeText(getContext(), "Error fetching waitlisted entrants", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+
+    private void setupDeclineListener() {
+        dbHelper.addDeclineListener(eventId, new DatabaseHelper.DeclineCallback() {
+            @Override
+            public void onDeclineDetected(List<String> declinedEntrants) {
+                fetchEventDetails(); // Fetch the latest event details to handle decline logic
+            }
+
+            @Override
+            public void onError(Exception e) {
+                Log.e("DeclineListener", "Error in handling declines: ", e);
+            }
+        });
+    }
+
+
+    // Helper function to fetch event details, this is so that we can handle the case of finding someone new to invite when an entrant declines an invitation
+    private void fetchEventDetails() {
+        dbHelper.fetchEventById(eventId, new DatabaseHelper.EventsCallback() {
+            @Override
+            public void onEventFetched(Event event) {
+                if (event != null) {
+                    handleDeclineLogic(event);
+                }
+            }
+
+            @Override
+            public void onEventsFetched(List<Event> events) {
+                // Not needed here
+            }
+
+            @Override
+            public void onError(Exception e) {
+                Log.e("EventDetails", "Error fetching updated event details", e);
+            }
+        });
+    }
+
+
+    private void handleDeclineLogic(Event event) {
+        if (event.getInvitedEntrants().size() < event.getOccupantLimit()) {
+            List<String> waitlistedEntrants = event.getWaitlistedEntrants();
+            if (!waitlistedEntrants.isEmpty()) {
+                String newInvitee = selectRandomEntrant(waitlistedEntrants);
+                event.getInvitedEntrants().add(newInvitee);
+                waitlistedEntrants.remove(newInvitee);
+
+                // Update Firestore with the modified lists
+                dbHelper.updateEntrants(eventId, event.getInvitedEntrants(), waitlistedEntrants, new DatabaseHelper.EventsCallback() {
+                    @Override
+                    public void onEventsFetched(List<Event> events) {
+                        Log.d("EventUpdate", "Entrants updated after handling decline.");
+                    }
+
+                    @Override
+                    public void onEventFetched(Event event) {
+                        // Not needed
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        Log.e("EventUpdate", "Failed to update entrants.", e);
+                    }
+                });
+            }
+        }
+    }
+
+
+    // Helper function to select a random entrant from waitlistedEntrants (similar to the method in db helper but this is simpler as its just for 1 entrant
+    private String selectRandomEntrant(List<String> waitlistedEntrants) {
+        int index = new Random().nextInt(waitlistedEntrants.size());
+        return waitlistedEntrants.get(index);
     }
 
 
