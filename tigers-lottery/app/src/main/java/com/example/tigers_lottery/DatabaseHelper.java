@@ -397,19 +397,35 @@ public class DatabaseHelper {
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful() && !task.getResult().isEmpty()) {
                         String documentId = task.getResult().getDocuments().get(0).getId();
-                        eventsRef.document(documentId)
-                                .update("invited_entrants", invitedEntrants, "is_lottery_ran", true)
-                                .addOnSuccessListener(aVoid -> {
-                                    Log.d(TAG, "Lottery ran successfully and invited entrants updated.");
-                                    callback.onEventsFetched(null); // Success callback
-                                })
-                                .addOnFailureListener(callback::onError);
+                        Event event = task.getResult().getDocuments().get(0).toObject(Event.class);
+
+                        // Check if event is null for safety
+                        if (event != null) {
+                            List<String> waitlistedEntrants = event.getWaitlistedEntrants();
+
+                            // Remove invitedEntrants from the waitlist
+                            waitlistedEntrants.removeAll(invitedEntrants);
+
+                            // Update both lists in Firestore
+                            eventsRef.document(documentId)
+                                    .update("invited_entrants", invitedEntrants,
+                                            "waitlisted_entrants", waitlistedEntrants,
+                                            "is_lottery_ran", true)
+                                    .addOnSuccessListener(aVoid -> {
+                                        Log.d(TAG, "Lottery ran successfully. Invited entrants updated and removed from waitlist.");
+                                        callback.onEventsFetched(null); // Success callback
+                                    })
+                                    .addOnFailureListener(callback::onError);
+                        } else {
+                            callback.onError(new Exception("Event not found"));
+                        }
                     } else {
                         callback.onError(new Exception("Event not found"));
                     }
                 })
                 .addOnFailureListener(callback::onError);
     }
+
 
     // Helper function to select random entrants
     public List<String> selectRandomEntrants(List<String> entrants, int count) {
@@ -456,7 +472,7 @@ public class DatabaseHelper {
      * @param waitlistedEntrants
      * @param callback
      */
-    public void updateEntrants(int eventId, List<String> invitedEntrants, List<String> waitlistedEntrants, final EventsCallback callback) {
+    public void updateEntrantsAfterDecline(int eventId, List<String> invitedEntrants, List<String> waitlistedEntrants, final EventsCallback callback) {
         eventsRef.whereEqualTo("event_id", eventId)
                 .get()
                 .addOnCompleteListener(task -> {

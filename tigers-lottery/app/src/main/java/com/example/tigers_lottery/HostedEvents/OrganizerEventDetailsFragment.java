@@ -29,6 +29,8 @@ public class OrganizerEventDetailsFragment extends Fragment {
     private int eventId;
     private DatabaseHelper dbHelper;
     private Event event;
+    private boolean isHandlingDecline = false;
+    private int lastKnownDeclinedEntrantsSize = 0;
 
     // UI Components
     private TextView eventTitle, eventDescription, eventLocation, waitlistOpenDate, waitlistCloseDate, eventDate, waitlistLimit;
@@ -121,14 +123,25 @@ public class OrganizerEventDetailsFragment extends Fragment {
         eventDate.setText("Event Date: " + event.getFormattedEventDate());
         waitlistLimit.setText("Waitlist Limit: " + (event.isWaitlistLimitFlag() ? event.getWaitlistLimit() : "N/A"));
 
-        // Initialize entrant lists if they are null to prevent NullPointerException
-        event.setRegisteredEntrants(event.getRegisteredEntrants() != null ? event.getRegisteredEntrants() : new ArrayList<>());
-        event.setWaitlistedEntrants(event.getWaitlistedEntrants() != null ? event.getWaitlistedEntrants() : new ArrayList<>());
-        event.setInvitedEntrants(event.getInvitedEntrants() != null ? event.getInvitedEntrants() : new ArrayList<>());
-        event.setDeclinedEntrants(event.getDeclinedEntrants() != null ? event.getDeclinedEntrants() : new ArrayList<>());
+        // Initialize entrant lists only if they are null and avoid altering the invitedEntrants if isLotteryRan is false
+        if (event.getRegisteredEntrants() == null) {
+            event.setRegisteredEntrants(new ArrayList<>());
+        }
+        if (event.getWaitlistedEntrants() == null) {
+            event.setWaitlistedEntrants(new ArrayList<>());
+        }
+        if (event.getDeclinedEntrants() == null) {
+            event.setDeclinedEntrants(new ArrayList<>());
+        }
 
-        setupButtonListeners(); // Initialize the button listeners after setting the lists
+        // If the lottery has already been run, ensure invitedEntrants is initialized; otherwise, leave it untouched
+        if (event.isLotteryRan()) {
+            if (event.getInvitedEntrants() == null) {
+                event.setInvitedEntrants(new ArrayList<>());
+            }
+        }
     }
+
 
 
     private void setupButtonListeners() {
@@ -140,30 +153,59 @@ public class OrganizerEventDetailsFragment extends Fragment {
 
 
     private void setupLotteryButton() {
-        // Check if the waitlist deadline has passed and lottery has not been run
         Timestamp currentTimestamp = Timestamp.now();
-        if (event.getWaitlistDeadline().compareTo(currentTimestamp) <= 0 && !event.isLotteryRan()) {
-            runLotteryButton.setEnabled(true);
-        } else {
-            runLotteryButton.setEnabled(false);
-        }
+        Timestamp oneDayBeforeEvent = new Timestamp(event.getEventDate().getSeconds() - 86400, 0); // Subtract 1 day (86400 seconds)
 
-        runLotteryButton.setOnClickListener(v -> runLottery());
+        // Log state for debugging purposes
+        Log.d("LotterySetup", "Current timestamp: " + currentTimestamp);
+        Log.d("LotterySetup", "Event date: " + event.getEventDate());
+        Log.d("LotterySetup", "One day before event: " + oneDayBeforeEvent);
+        Log.d("LotterySetup", "Is lottery already run? " + event.isLotteryRan());
+
+        // Run the lottery automatically if we're exactly 1 day before the event and lottery hasn't run
+        if (currentTimestamp.compareTo(oneDayBeforeEvent) >= 0 &&
+                currentTimestamp.compareTo(event.getEventDate()) < 0 &&
+                !event.isLotteryRan()) {
+
+            // Run the lottery automatically
+            runLottery();
+
+            // Alternatively, if manual triggering is also intended, keep button enabled
+            runLotteryButton.setEnabled(false);
+            runLotteryButton.setOnClickListener(null);
+
+        } else if (event.getWaitlistDeadline().compareTo(currentTimestamp) <= 0 && !event.isLotteryRan()) {
+            // Enable the button if it's past the waitlist deadline and before the event date
+            runLotteryButton.setEnabled(true);
+            runLotteryButton.setOnClickListener(v -> runLottery());
+        } else {
+            // Disable button and remove listener if conditions don't allow the lottery to be run
+            runLotteryButton.setEnabled(false);
+            runLotteryButton.setOnClickListener(null);
+        }
     }
 
+
+
     private void runLottery() {
+        if (event.isLotteryRan()) {
+            Toast.makeText(getContext(), "Lottery has already been run for this event.", Toast.LENGTH_SHORT).show();
+            return; // Exit if the lottery has already been run
+        }
+
         dbHelper.fetchWaitlistedEntrants(event.getEventId(), new DatabaseHelper.EntrantsCallback() {
             @Override
             public void onEntrantsFetched(List<String> waitlistedEntrants) {
                 int occupantLimit = event.getOccupantLimit();
                 List<String> invitedEntrants = dbHelper.selectRandomEntrants(waitlistedEntrants, occupantLimit);
 
-                // Update Firestore with invited entrants and mark lottery as ran
+                // Update Firestore with invited entrants and mark lottery as run
                 dbHelper.updateInvitedEntrantsAndSetLotteryRan(event.getEventId(), invitedEntrants, new DatabaseHelper.EventsCallback() {
                     @Override
                     public void onEventsFetched(List<Event> events) {
                         Toast.makeText(getContext(), "Lottery run successfully!", Toast.LENGTH_SHORT).show();
-                        runLotteryButton.setEnabled(false);
+                        runLotteryButton.setEnabled(false); // Disable button after running
+                        event.setLotteryRan(true); // Mark the event's lottery as run
                     }
 
                     @Override
@@ -188,7 +230,12 @@ public class OrganizerEventDetailsFragment extends Fragment {
         dbHelper.addDeclineListener(eventId, new DatabaseHelper.DeclineCallback() {
             @Override
             public void onDeclineDetected(List<String> declinedEntrants) {
-                fetchEventDetails(); // Fetch the latest event details to handle decline logic
+                // Only trigger decline handling if the declined entrants size has increased
+                if (!isHandlingDecline && declinedEntrants.size() > lastKnownDeclinedEntrantsSize) {
+                    isHandlingDecline = true;
+                    lastKnownDeclinedEntrantsSize = declinedEntrants.size(); // Update the known size
+                    fetchEventDetails(); // Proceed to handle the actual decline
+                }
             }
 
             @Override
@@ -225,16 +272,18 @@ public class OrganizerEventDetailsFragment extends Fragment {
     private void handleDeclineLogic(Event event) {
         if (event.getInvitedEntrants().size() < event.getOccupantLimit()) {
             List<String> waitlistedEntrants = event.getWaitlistedEntrants();
+
             if (!waitlistedEntrants.isEmpty()) {
                 String newInvitee = selectRandomEntrant(waitlistedEntrants);
                 event.getInvitedEntrants().add(newInvitee);
                 waitlistedEntrants.remove(newInvitee);
 
                 // Update Firestore with the modified lists
-                dbHelper.updateEntrants(eventId, event.getInvitedEntrants(), waitlistedEntrants, new DatabaseHelper.EventsCallback() {
+                dbHelper.updateEntrantsAfterDecline(eventId, event.getInvitedEntrants(), waitlistedEntrants, new DatabaseHelper.EventsCallback() {
                     @Override
                     public void onEventsFetched(List<Event> events) {
                         Log.d("EventUpdate", "Entrants updated after handling decline.");
+                        isHandlingDecline = false; // Reset the flag once the update is complete
                     }
 
                     @Override
@@ -245,9 +294,14 @@ public class OrganizerEventDetailsFragment extends Fragment {
                     @Override
                     public void onError(Exception e) {
                         Log.e("EventUpdate", "Failed to update entrants.", e);
+                        isHandlingDecline = false; // Ensure flag is reset even if an error occurs
                     }
                 });
+            } else {
+                isHandlingDecline = false; // No more waitlisted entrants to add, reset the flag
             }
+        } else {
+            isHandlingDecline = false; // Occupant limit is met, reset the flag
         }
     }
 
