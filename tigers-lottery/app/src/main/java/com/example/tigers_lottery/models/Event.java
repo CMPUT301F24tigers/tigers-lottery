@@ -59,6 +59,12 @@ public class Event implements Serializable {
     @PropertyName("declined_entrants")
     private List<String> declinedEntrants = new ArrayList<>();
 
+    @PropertyName("occupant_limit")
+    private int occupantLimit = 0;
+
+    @PropertyName("is_lottery_ran")
+    private boolean isLotteryRan = false;
+
     // No-argument constructor
     public Event() {}
 
@@ -158,6 +164,19 @@ public class Event implements Serializable {
 
     @PropertyName("declined_entrants")
     public void setDeclinedEntrants(List<String> declinedEntrants) { this.declinedEntrants = declinedEntrants; }
+
+    @PropertyName("occupant_limit")
+    public int getOccupantLimit() { return occupantLimit; }
+
+    @PropertyName("occupant_limit")
+    public void setOccupantLimit(int occupantLimit) { this.occupantLimit = occupantLimit; }
+
+    // Getter and Setter for is_lottery_ran
+    @PropertyName("is_lottery_ran")
+    public boolean isLotteryRan() { return isLotteryRan; }
+
+    @PropertyName("is_lottery_ran")
+    public void setLotteryRan(boolean lotteryRan) { isLotteryRan = lotteryRan; }
 
     // Helper methods to format Timestamps
     public String getFormattedEventDate() {

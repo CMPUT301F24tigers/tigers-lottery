@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.tigers_lottery.DatabaseHelper;
@@ -26,7 +27,7 @@ import java.util.Locale;
 
 public class OrganizerEditEventFragment extends Fragment {
 
-    private EditText inputEventName, inputEventLocation, inputRegistrationOpens, inputRegistrationDeadline, inputEventDate, inputEventDescription, inputWaitlistLimit;
+    private EditText inputEventName, inputEventLocation, inputRegistrationOpens, inputRegistrationDeadline, inputEventDate, inputEventDescription, inputWaitlistLimit, inputOccupantLimit;
     private CheckBox checkboxWaitlistLimit;
     private Button btnSaveEvent;
     private DatabaseHelper dbHelper;
@@ -50,6 +51,18 @@ public class OrganizerEditEventFragment extends Fragment {
         checkboxWaitlistLimit = view.findViewById(R.id.checkboxWaitlistLimit);
         inputWaitlistLimit = view.findViewById(R.id.inputWaitlistLimit);
         btnSaveEvent = view.findViewById(R.id.btnCreateEvent);
+        inputOccupantLimit = view.findViewById(R.id.inputOccupantLimit);
+
+        // Hide occupant limit whilst editing
+        TextView labelOccupantLimit = view.findViewById(R.id.LabelOccupantLimit);
+        labelOccupantLimit.setVisibility(View.GONE);
+        inputOccupantLimit.setVisibility(View.GONE);
+
+        // Ensure waitlist fields are hidden by default
+        TextView assignWaitlistLabel = view.findViewById(R.id.assignWaitlistLabel);
+        checkboxWaitlistLimit.setVisibility(View.GONE);
+        inputWaitlistLimit.setVisibility(View.GONE);
+        assignWaitlistLabel.setVisibility(View.GONE);
 
         // Set button text to "Save"
         btnSaveEvent.setText("Save");
@@ -77,9 +90,13 @@ public class OrganizerEditEventFragment extends Fragment {
         inputRegistrationDeadline.setText(formatTimestamp(event.getWaitlistDeadline()));
         inputEventDate.setText(formatTimestamp(event.getEventDate()));
         inputEventDescription.setText(event.getDescription());
-        checkboxWaitlistLimit.setChecked(event.isWaitlistLimitFlag());
-        inputWaitlistLimit.setText(String.valueOf(event.getWaitlistLimit()));
-        inputWaitlistLimit.setVisibility(event.isWaitlistLimitFlag() ? View.VISIBLE : View.GONE);
+
+        // Disable checkbox to ensure it doesn’t re-enable the waitlist limit field
+        checkboxWaitlistLimit.setChecked(false);
+        checkboxWaitlistLimit.setEnabled(false);
+
+        // Hide the waitlist limit input field regardless of any external listener
+        inputWaitlistLimit.setVisibility(View.GONE);
     }
 
     private void saveEvent() {

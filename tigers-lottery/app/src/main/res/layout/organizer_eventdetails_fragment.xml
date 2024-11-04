@@ -86,7 +86,14 @@
             android:textSize="16sp"
             android:layout_marginBottom="16dp" />
 
-        <!-- Buttons to View Entrant Lists -->
+        <!-- Buttons to View Entrant Lists as well as lottery button-->
+        <Button
+            android:id="@+id/runLotteryButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Run Lottery"
+            android:layout_marginBottom="16dp" />
+
         <Button
             android:id="@+id/viewRegisteredEntrants"
             android:layout_width="match_parent"
