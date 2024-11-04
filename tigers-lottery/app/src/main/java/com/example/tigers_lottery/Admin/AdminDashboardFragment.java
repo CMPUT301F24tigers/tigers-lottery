@@ -75,7 +75,7 @@ public class AdminDashboardFragment extends Fragment {
     private void openFragment(Fragment fragment) {
         requireActivity().getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.fragmentContainerView2, fragment)
+                .replace(R.id.main_activity_fragment_container, fragment)
                 .addToBackStack(null)
                 .commit();
     }

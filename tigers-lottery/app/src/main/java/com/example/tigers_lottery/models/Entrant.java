@@ -1,7 +1,5 @@
-package com.example.tigers_lottery.JoinedEvents;
+package com.example.tigers_lottery.models;
 
-
-import com.example.tigers_lottery.models.User;
 
 public class Entrant extends User {
 

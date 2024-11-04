@@ -59,7 +59,7 @@ public class User {
     @PropertyName("DOB")
     private Timestamp dateOfBirth = Timestamp.now();
 
-    @PropertyName("facility-location")
+    @PropertyName("facility_location")
     private String facilityLocation = "";
 
     @PropertyName("facility_name")

@@ -139,7 +139,7 @@ public class OrganizerEventDetailsFragment extends Fragment {
         fragment.setArguments(args);
 
         requireActivity().getSupportFragmentManager().beginTransaction()
-                .replace(R.id.fragmentContainerView2, fragment)
+                .replace(R.id.main_activity_fragment_container, fragment)
                 .addToBackStack(null)
                 .commit();
     }

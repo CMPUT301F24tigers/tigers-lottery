@@ -49,7 +49,7 @@
     </com.google.android.material.appbar.MaterialToolbar>
 
     <androidx.fragment.app.FragmentContainerView
-        android:id="@+id/fragmentContainerView2"
+        android:id="@+id/main_activity_fragment_container"
         android:name="com.example.tigers_lottery.Admin.AdminDashboardFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

@@ -37,6 +37,8 @@ android {
 
 dependencies {
 
+    implementation("com.github.bumptech.glide:glide:4.15.0")
+    annotationProcessor("com.github.bumptech.glide:compiler:4.15.0")
     implementation ("commons-validator:commons-validator:1.9.0")
     implementation(libs.appcompat)
     implementation(libs.material)
@@ -46,6 +48,8 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.firestore)
     implementation(libs.activity)
+    implementation("com.google.firebase:firebase-storage:20.1.1")
+    implementation("com.google.firebase:firebase-firestore:24.7.1")
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

@@ -49,7 +49,7 @@ public class OrganizerDashboardFragment extends Fragment implements EventAdapter
 
         fabCreateEvent.setOnClickListener(v -> {
             requireActivity().getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragmentContainerView2, new OrganizerCreateEventFragment())
+                    .replace(R.id.main_activity_fragment_container, new OrganizerCreateEventFragment())
                     .addToBackStack(null)
                     .commit();
         });
@@ -92,7 +92,7 @@ public class OrganizerDashboardFragment extends Fragment implements EventAdapter
         editFragment.setArguments(args);
 
         requireActivity().getSupportFragmentManager().beginTransaction()
-                .replace(R.id.fragmentContainerView2, editFragment)
+                .replace(R.id.main_activity_fragment_container, editFragment)
                 .addToBackStack(null)
                 .commit();
     }
@@ -123,7 +123,7 @@ public class OrganizerDashboardFragment extends Fragment implements EventAdapter
         OrganizerEventDetailsFragment detailsFragment = OrganizerEventDetailsFragment.newInstance(event.getEventId());
 
         requireActivity().getSupportFragmentManager().beginTransaction()
-                .replace(R.id.fragmentContainerView2, detailsFragment)
+                .replace(R.id.main_activity_fragment_container, detailsFragment)
                 .addToBackStack(null)
                 .commit();
     }

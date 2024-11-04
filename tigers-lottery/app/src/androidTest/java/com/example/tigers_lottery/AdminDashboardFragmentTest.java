@@ -38,21 +38,21 @@ public class AdminDashboardFragmentTest {
     @Test
     public void testEntrantProfilesFragmentDisplayed() {
         onView(withText("Entrant Profiles")).perform(click());
-        Fragment fragment = fragmentManager.findFragmentById(R.id.fragmentContainerView2);
+        Fragment fragment = fragmentManager.findFragmentById(R.id.main_activity_fragment_container);
         assertTrue(fragment instanceof AdminEntrantsProfilesFragment);
     }
 
     @Test
     public void testFacilityProfilesFragmentDisplayed() {
         onView(withText("Facility Profiles")).perform(click());
-        Fragment fragment = fragmentManager.findFragmentById(R.id.fragmentContainerView2);
+        Fragment fragment = fragmentManager.findFragmentById(R.id.main_activity_fragment_container);
         assertTrue(fragment instanceof AdminFacilitiesFragment);
     }
 
     @Test
     public void testAllEventsFragmentDisplayed() {
         onView(withText("All Events")).perform(click());
-        Fragment fragment = fragmentManager.findFragmentById(R.id.fragmentContainerView2);
+        Fragment fragment = fragmentManager.findFragmentById(R.id.main_activity_fragment_container);
         assertTrue(fragment instanceof AdminEventsFragment);
     }
 }
