@@ -49,7 +49,7 @@ public class OrganizerInvitedEntrantsFragmentTest {
                     .replace(R.id.main_activity_fragment_container, fragment)
                     .commitNow();
 
-            // Check if OrganizerInvitedEntrantsFragment is displayed
+            // Check if OrganizerInvitedEntrantsFragment is displayed c
             Fragment currentFragment = fragmentManager.findFragmentById(R.id.main_activity_fragment_container);
             assertTrue(currentFragment instanceof OrganizerInvitedEntrantsFragment);
         });

@@ -43,7 +43,7 @@ public class OrganizerQRCodeFragmentTest {
                     .replace(R.id.main_activity_fragment_container, fragment)
                     .commitNow();
 
-            // Check if OrganizerQRCodeFragment is displayed
+            // Check if OrganizerQRCodeFragment is displayed c
             Fragment currentFragment = fragmentManager.findFragmentById(R.id.main_activity_fragment_container);
             assertTrue(currentFragment instanceof OrganizerQRCodeFragment);
         });

@@ -42,7 +42,7 @@ public class OrganizerEventDetailsFragmentTest {
                     .replace(R.id.main_activity_fragment_container, fragment)
                     .commitNow();
 
-            // Check if OrganizerEventDetailsFragment is displayed
+            // Check if OrganizerEventDetailsFragment is displayed  c
             Fragment currentFragment = fragmentManager.findFragmentById(R.id.main_activity_fragment_container);
             assertTrue(currentFragment instanceof OrganizerEventDetailsFragment);
         });
