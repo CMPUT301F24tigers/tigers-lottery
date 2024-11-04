@@ -115,6 +115,19 @@
             android:inputType="textMultiLine"
             android:layout_marginBottom="12dp" />
 
+        <!-- Occupant Limit Label and Input -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Occupant Limit" />
+        <EditText
+            android:id="@+id/inputOccupantLimit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter occupant limit"
+            android:inputType="number"
+            android:layout_marginBottom="16dp" />
+
         <!-- Checkbox for Waitlist Limit -->
         <LinearLayout
             android:layout_width="wrap_content"

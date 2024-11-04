@@ -26,7 +26,7 @@ import java.util.Locale;
 
 public class OrganizerCreateEventFragment extends Fragment {
 
-    private EditText inputEventName, inputEventLocation, inputRegistrationOpens, inputRegistrationDeadline, inputEventDate, inputEventDescription, inputWaitlistLimit;
+    private EditText inputEventName, inputEventLocation, inputRegistrationOpens, inputRegistrationDeadline, inputEventDate, inputEventDescription, inputWaitlistLimit, inputOccupantLimit;
     private CheckBox checkboxWaitlistLimit;
     private Button btnCreateEvent;
     private DatabaseHelper dbHelper;
@@ -49,6 +49,7 @@ public class OrganizerCreateEventFragment extends Fragment {
         checkboxWaitlistLimit = view.findViewById(R.id.checkboxWaitlistLimit);
         inputWaitlistLimit = view.findViewById(R.id.inputWaitlistLimit);
         btnCreateEvent = view.findViewById(R.id.btnCreateEvent);
+        inputOccupantLimit = view.findViewById(R.id.inputOccupantLimit);
 
         // Initialize DatabaseHelper
         dbHelper = new DatabaseHelper(requireContext());
@@ -74,6 +75,8 @@ public class OrganizerCreateEventFragment extends Fragment {
         String eventDescription = inputEventDescription.getText().toString().trim();
         boolean assignWaitlistLimit = checkboxWaitlistLimit.isChecked();
         int waitlistLimit = 0;
+        String occupantLimitText = inputOccupantLimit.getText().toString().trim();
+        int occupantLimit = 100;
 
         boolean isValid = true;
 
@@ -113,6 +116,15 @@ public class OrganizerCreateEventFragment extends Fragment {
                     Toast.makeText(getContext(), "Invalid waitlist limit", Toast.LENGTH_SHORT).show();
                     return;
                 }
+            }
+        }
+
+        if (!TextUtils.isEmpty(occupantLimitText)) {
+            try {
+                occupantLimit = Integer.parseInt(occupantLimitText);
+            } catch (NumberFormatException e) {
+                Toast.makeText(getContext(), "Invalid occupant limit", Toast.LENGTH_SHORT).show();
+                return;
             }
         }
 
@@ -162,6 +174,7 @@ public class OrganizerCreateEventFragment extends Fragment {
         event.setDescription(eventDescription);
         event.setWaitlistLimitFlag(assignWaitlistLimit);
         event.setWaitlistLimit(assignWaitlistLimit ? waitlistLimit : 0);
+        event.setOccupantLimit(occupantLimit);
 
         // Set organizer ID from Device ID (current user ID)
         String organizerId = dbHelper.getCurrentUserId(); // Retrieve Device ID
