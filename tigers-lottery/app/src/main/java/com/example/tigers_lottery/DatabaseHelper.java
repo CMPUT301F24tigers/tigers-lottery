@@ -46,6 +46,8 @@ public class DatabaseHelper {
     private FirebaseFirestore db;
     private CollectionReference eventsRef;
     private CollectionReference usersRef;
+    private CollectionReference adminsRef;
+
     private String currentUserId;
     private StorageReference storageReference;
 
@@ -57,7 +59,8 @@ public class DatabaseHelper {
         db = FirebaseFirestore.getInstance();
         eventsRef = db.collection("events"); // Reference to "events" collection
         usersRef = db.collection("users");   // Reference to "users" collection
-        storageReference = storageReference = FirebaseStorage.getInstance().getReference("profile_images");
+        adminsRef = db.collection("admins"); //Reference to the "admin: collection
+        storageReference = FirebaseStorage.getInstance().getReference("profile_images");
 
         // Retrieve and store the Device ID as the currentUserId
         currentUserId = DeviceIDHelper.getDeviceId(context);
@@ -500,8 +503,72 @@ public class DatabaseHelper {
                 .addOnFailureListener(callback::onError);
     }
 
+    public void removeUserFromInvitedEntrants(Integer eventId, String userId) {
+        eventsRef.whereEqualTo("event_id", eventId).get().addOnSuccessListener(querySnapshot -> {
+            if (!querySnapshot.isEmpty()) {
+                querySnapshot.getDocuments().forEach(documentSnapshot -> {
+                    List<String> invitedEntrants = (List<String>) documentSnapshot.get("invited_entrants");
+                    if (invitedEntrants != null && invitedEntrants.contains(userId)) {
+                        invitedEntrants.remove(userId);
+                        documentSnapshot.getReference().update("invited_entrants", invitedEntrants)
+                                .addOnSuccessListener(aVoid -> Log.d("DatabaseHelper", "User " + userId + " removed from invited entrants for event " + eventId))
+                                .addOnFailureListener(e -> Log.e("DatabaseHelper", "Failed to remove user " + userId + " from invited entrants for event " + eventId, e));
+                    }
+                });
+            }
+        }).addOnFailureListener(e -> Log.e("DatabaseHelper", "Error fetching event document", e));
+    }
+
+    public void removeUserFromWaitlistedEntrants(Integer eventId, String userId) {
+        eventsRef.whereEqualTo("event_id", eventId).get().addOnSuccessListener(querySnapshot -> {
+            if (!querySnapshot.isEmpty()) {
+                querySnapshot.getDocuments().forEach(documentSnapshot -> {
+                    List<String> waitlistedEntrants = (List<String>) documentSnapshot.get("waitlisted_entrants");
+                    if (waitlistedEntrants != null && waitlistedEntrants.contains(userId)) {
+                        waitlistedEntrants.remove(userId);
+                        documentSnapshot.getReference().update("waitlisted_entrants", waitlistedEntrants)
+                                .addOnSuccessListener(aVoid -> Log.d("DatabaseHelper", "User " + userId + " removed from waitlisted entrants for event " + eventId))
+                                .addOnFailureListener(e -> Log.e("DatabaseHelper", "Failed to remove user " + userId + " from waitlisted entrants for event " + eventId, e));
+                    }
+                });
+            }
+        }).addOnFailureListener(e -> Log.e("DatabaseHelper", "Error fetching event document", e));
+    }
+
+    public void removeUserFromRegisteredEntrants(Integer eventId, String userId) {
+        eventsRef.whereEqualTo("event_id", eventId).get().addOnSuccessListener(querySnapshot -> {
+            if (!querySnapshot.isEmpty()) {
+                querySnapshot.getDocuments().forEach(documentSnapshot -> {
+                    List<String> registeredEntrants = (List<String>) documentSnapshot.get("registered_entrants");
+                    if (registeredEntrants != null && registeredEntrants.contains(userId)) {
+                        registeredEntrants.remove(userId);
+                        documentSnapshot.getReference().update("registered_entrants", registeredEntrants)
+                                .addOnSuccessListener(aVoid -> Log.d("DatabaseHelper", "User " + userId + " removed from registered entrants for event " + eventId))
+                                .addOnFailureListener(e -> Log.e("DatabaseHelper", "Failed to remove user " + userId + " from registered entrants for event " + eventId, e));
+                    }
+                });
+            }
+        }).addOnFailureListener(e -> Log.e("DatabaseHelper", "Error fetching event document", e));
+    }
+
+    public void removeUserFromDeclinedEntrants(Integer eventId, String userId) {
+        eventsRef.whereEqualTo("event_id", eventId).get().addOnSuccessListener(querySnapshot -> {
+            if (!querySnapshot.isEmpty()) {
+                querySnapshot.getDocuments().forEach(documentSnapshot -> {
+                    List<String> declinedEntrants = (List<String>) documentSnapshot.get("declined_entrants");
+                    if (declinedEntrants != null && declinedEntrants.contains(userId)) {
+                        declinedEntrants.remove(userId);
+                        documentSnapshot.getReference().update("declined_entrants", declinedEntrants)
+                                .addOnSuccessListener(aVoid -> Log.d("DatabaseHelper", "User " + userId + " removed from declined entrants for event " + eventId))
+                                .addOnFailureListener(e -> Log.e("DatabaseHelper", "Failed to remove user " + userId + " from declined entrants for event " + eventId, e));
+                    }
+                });
+            }
+        }).addOnFailureListener(e -> Log.e("DatabaseHelper", "Error fetching event document", e));
+    }
 
 
+    // User Calls
     /**
      * Fetches all users from the "users" collection.
      *
@@ -607,6 +674,85 @@ public class DatabaseHelper {
                         callback.onError(task.getException());
                     }
                 });
+    }
+
+    /**
+     * This method removed a user from the DB
+     *
+     * @param userId - The user ID (device ID) of the person to be removed
+     */
+    public void removeUser(String userId) {
+        // Removing the user if they are an admin
+        adminsRef.document(userId).get().addOnCompleteListener(task -> {
+            if (task.isSuccessful() && task.getResult() != null && task.getResult().exists()) {
+                adminsRef.document(userId).delete()
+                        .addOnSuccessListener(aVoid -> Log.d("DatabaseHelper", "User " + userId + " removed from admins collection"))
+                        .addOnFailureListener(e -> Log.e("DatabaseHelper", "Failed to remove user from admins collection", e));
+            } else {
+                Log.d("DatabaseHelper", "User " + userId + " does not exist in admins collection or task failed.");
+            }
+        });
+
+        // Removing a user from the users collection
+        usersRef.document(userId).get().addOnCompleteListener(task -> {
+            if (task.isSuccessful() && task.getResult().exists()) {
+                List<Integer> joinedEvents = null;
+                List<Integer> hostedEvents = null;
+
+                List<Long> joinedEventsLong = (List<Long>) task.getResult().get("joined_events");
+                if (joinedEventsLong != null) {
+                    joinedEvents = new ArrayList<>();
+                    for (Long eventId : joinedEventsLong) {
+                        joinedEvents.add(eventId.intValue()); // Convert Long to Integer
+                    }
+                }
+
+                List<Long> hostedEventsLong = (List<Long>) task.getResult().get("hosted_events");
+                if (hostedEventsLong != null) {
+                    hostedEvents = new ArrayList<>();
+                    for (Long eventId : hostedEventsLong) {
+                        hostedEvents.add(eventId.intValue()); // Convert Long to Integer
+                    }
+                }
+
+                // Removing user from joined events
+                if (joinedEvents != null) {
+                    for (Integer eventId : joinedEvents) {
+                        removeUserFromWaitlistedEntrants(eventId, userId);
+                        removeUserFromInvitedEntrants(eventId, userId);
+                        removeUserFromRegisteredEntrants(eventId, userId);
+                        removeUserFromDeclinedEntrants(eventId, userId);
+                    }
+                }
+
+                // Removing hosted events
+                if (hostedEvents != null) {
+                    for (Integer eventId : hostedEvents) {
+                        deleteEvent(eventId, new EventsCallback() {
+                            @Override
+                            public void onEventsFetched(List<Event> events) {
+                                Log.d("DatabaseHelper", "Event " + eventId + " deleted as part of user removal.");
+                            }
+
+                            @Override
+                            public void onEventFetched(Event event) {
+                                // No action needed here
+                            }
+
+                            @Override
+                            public void onError(Exception e) {
+                                Log.e("DatabaseHelper", "Failed to delete event " + eventId, e);
+                            }
+                        });
+                    }
+                }
+
+                // Finally, delete user from users collection
+                usersRef.document(userId).delete()
+                        .addOnSuccessListener(aVoid -> Log.d("DatabaseHelper", "User " + userId + " removed from users collection"))
+                        .addOnFailureListener(e -> Log.e("DatabaseHelper", "Failed to remove user from users collection", e));
+            }
+        });
     }
 
     /**

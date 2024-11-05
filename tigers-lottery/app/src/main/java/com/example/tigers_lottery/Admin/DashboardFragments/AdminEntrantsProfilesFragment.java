@@ -14,41 +14,27 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.tigers_lottery.Admin.AdminDashboardFragment;
 import com.example.tigers_lottery.Admin.AdminRecyclerViewAdapter;
+import com.example.tigers_lottery.Admin.DashboardFragments.ListItems.AdminListItemModel;
+import com.example.tigers_lottery.Admin.DashboardFragments.ListItems.OnActionListener;
 import com.example.tigers_lottery.DatabaseHelper;
 import com.example.tigers_lottery.R;
 import com.example.tigers_lottery.models.User;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
-/**
- * Fragment for displaying the entrant profiles within the admin dashboard.
- * This fragment provides a RecyclerView to show a list of user profiles.
- * It includes functionality to navigate back to the main AdminDashboardFragment.
- */
-public class AdminEntrantsProfilesFragment extends Fragment {
+public class AdminEntrantsProfilesFragment extends Fragment implements OnActionListener {
 
-    private RecyclerView recyclerView;
     private AdminRecyclerViewAdapter userAdapter;
-    private List<User> userList = new ArrayList<>();
+    private final List<AdminListItemModel> itemList = new ArrayList<>();
 
-    /**
-     * Inflates the layout for the entrant profiles screen, initializes the RecyclerView,
-     * and sets up the back button to return to the AdminDashboardFragment.
-     *
-     * @param inflater           LayoutInflater for inflating the fragment layout.
-     * @param container          The container this fragment belongs to.
-     * @param savedInstanceState Saved state for restoring fragment state.
-     * @return The View for the fragment's UI.
-     */
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.admin_entrants_profiles_fragment, container, false);
 
         ImageButton backButton = requireActivity().findViewById(R.id.globalBackButton);
         backButton.setVisibility(View.VISIBLE);
 
-        // Set click listener for back button
         backButton.setOnClickListener(v -> {
             getParentFragmentManager().beginTransaction()
                     .replace(R.id.main_activity_fragment_container, new AdminDashboardFragment())
@@ -56,22 +42,17 @@ public class AdminEntrantsProfilesFragment extends Fragment {
             backButton.setVisibility(View.INVISIBLE);
         });
 
-        // Set up RecyclerView for displaying user profiles
-        recyclerView = view.findViewById(R.id.recyclerViewEntrantProfiles);
+        RecyclerView recyclerView = view.findViewById(R.id.recyclerViewEntrantProfiles);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        userAdapter = new AdminRecyclerViewAdapter(userList);
+        userAdapter = new AdminRecyclerViewAdapter(itemList, this);
         recyclerView.setAdapter(userAdapter);
 
-        // Fetch users from the database
         fetchUsers();
 
         return view;
     }
 
-    /**
-     * Hides the back button when the fragment view is destroyed.
-     */
     @Override
     public void onDestroyView() {
         super.onDestroyView();
@@ -79,20 +60,24 @@ public class AdminEntrantsProfilesFragment extends Fragment {
         backButton.setVisibility(View.INVISIBLE);
     }
 
-    /**
-     * Fetches all users from the database and updates the RecyclerView.
-     * Utilizes DatabaseHelper's fetchAllUsers method with a callback to handle results.
-     * On success, the user list is updated and the adapter is notified.
-     * On failure, an error message is displayed.
-     */
     private void fetchUsers() {
         DatabaseHelper dbHelper = new DatabaseHelper(requireContext());
-
         dbHelper.fetchAllUsers(new DatabaseHelper.UsersCallback() {
             @Override
             public void onUsersFetched(List<User> users) {
-                userList.clear();
-                userList.addAll(users);
+                itemList.clear();
+                for (User user : users) {
+                    if (!Objects.equals(user.getUserId(), dbHelper.getCurrentUserId())) {
+                        itemList.add(new AdminListItemModel(
+                                user.getUserId(),
+                                user.getFirstName() + " " + user.getLastName(),
+                                user.getUserId(), //TODO Chathila: Change this to email later
+                                "Remove Profile Photo",
+                                "View User Profile",
+                                "Remove User"
+                        ));
+                    }
+                }
                 userAdapter.notifyDataSetChanged();
             }
 
@@ -102,5 +87,37 @@ public class AdminEntrantsProfilesFragment extends Fragment {
                 Log.e("DatabaseHelper", "Error retrieving users", e);
             }
         });
+    }
+
+    // Implement the action listener methods for handling button clicks
+    @Override
+    public void onOptionOneClick(String userId) {
+        // Handle "Remove Profile Photo" action for the specified user
+        // Example: Call a function to remove the user's profile photo from the database
+        DatabaseHelper dbHelper = new DatabaseHelper(requireContext());
+        Toast.makeText(getContext(), "Removing profile photo for user " + userId, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onOptionTwoClick(String userId) {
+        // Handle "View User Profile" action
+        // Example: Navigate to the user profile detail view
+        DatabaseHelper dbHelper = new DatabaseHelper(requireContext());
+        Toast.makeText(getContext(), "Viewing profile for user " + userId, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onOptionThreeClick(String userId) {
+        // Handle "Remove User" action
+        // Example: Call a function to delete the user from the database
+        DatabaseHelper dbHelper = new DatabaseHelper(requireContext());
+        dbHelper.removeUser(userId);
+        userAdapter.setExpandedPosition(-1);
+        userAdapter.notifyDataSetChanged();
+        Toast.makeText(getContext(), "Removing user " + userId, Toast.LENGTH_SHORT).show();
+    }
+
+    public static AdminEntrantsProfilesFragment newInstance() {
+        return new AdminEntrantsProfilesFragment();
     }
 }

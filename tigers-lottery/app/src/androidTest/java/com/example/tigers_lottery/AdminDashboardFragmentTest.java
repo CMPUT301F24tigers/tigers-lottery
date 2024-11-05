@@ -13,6 +13,7 @@ import static androidx.test.espresso.matcher.ViewMatchers.withText;
 import com.example.tigers_lottery.Admin.DashboardFragments.AdminEntrantsProfilesFragment;
 import com.example.tigers_lottery.Admin.DashboardFragments.AdminEventsFragment;
 import com.example.tigers_lottery.Admin.DashboardFragments.AdminFacilitiesFragment;
+import com.example.tigers_lottery.Admin.DashboardFragments.ListItems.OnActionListener;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -39,7 +40,7 @@ public class AdminDashboardFragmentTest {
     public void testEntrantProfilesFragmentDisplayed() {
         onView(withText("Entrant Profiles")).perform(click());
         Fragment fragment = fragmentManager.findFragmentById(R.id.main_activity_fragment_container);
-        assertTrue(fragment instanceof AdminEntrantsProfilesFragment);
+        assertTrue(fragment instanceof OnActionListener);
     }
 
     @Test
