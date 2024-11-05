@@ -206,6 +206,10 @@ public class DatabaseHelper {
                 .set(event)
                 .addOnSuccessListener(aVoid -> {
                     Log.d(TAG, "Event created successfully with event_id: " + uniqueEventId);
+
+                    // Update the organizer's hosted events after creating the event
+                    updateHostedEventsForOrganizer(event.getOrganizerId(), event.getEventId());
+
                     // Notify success by passing the created event
                     callback.onEventsFetched(List.of(event));
                 })
@@ -221,7 +225,7 @@ public class DatabaseHelper {
                 });
     }
 
-  
+
     /**
      * Helper function to generate unique ID.
      */
@@ -229,9 +233,41 @@ public class DatabaseHelper {
         int uniqueId = 10000 + new Random().nextInt(90000); // Generates a number between 10000 and 99999
         return String.valueOf(uniqueId);
     }
-  
-    
-     /**
+
+
+    /** Update the hosted events field for a user when they create an event and become the organizer of it
+     *
+     *
+     * @param organizerId
+     * @param eventId
+     */
+    private void updateHostedEventsForOrganizer(String organizerId, int eventId) {
+        usersRef.document(organizerId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        // Get the current list of hosted events
+                        List<Integer> hostedEvents = (List<Integer>) documentSnapshot.get("hosted_events");
+                        if (hostedEvents == null) {
+                            hostedEvents = new ArrayList<>();
+                        }
+                        // Add the new event ID to the list
+                        hostedEvents.add(eventId);
+
+                        // Update the user's document with the new list of hosted events
+                        usersRef.document(organizerId)
+                                .update("hosted_events", hostedEvents)
+                                .addOnSuccessListener(aVoid -> Log.d(TAG, "Successfully updated hosted events for organizer"))
+                                .addOnFailureListener(e -> Log.e(TAG, "Error updating hosted events", e));
+                    } else {
+                        Log.e(TAG, "Organizer document not found");
+                    }
+                })
+                .addOnFailureListener(e -> Log.e(TAG, "Failed to fetch organizer document", e));
+    }
+
+
+    /**
      * Fetch all events from the events collection without any conditions.
      * The @param line was throwing an error so I got rid of it for now --- FIX ALL THAT LATER
      */
@@ -263,25 +299,25 @@ public class DatabaseHelper {
      */
     public void deleteEvent(int eventId, final EventsCallback callback) {
         eventsRef.whereEqualTo("event_id", eventId)
-            .get()
-            .addOnCompleteListener(task -> {
-                if (task.isSuccessful() && !task.getResult().isEmpty()) {
-                    //  event IDs are unique, so we can delete the first document found
-                    String documentId = task.getResult().getDocuments().get(0).getId();
-                    eventsRef.document(documentId).delete()
-                            .addOnSuccessListener(aVoid -> {
-                                Log.d(TAG, "Event deleted successfully");
-                                callback.onEventsFetched(null); // Notify deletion success
-                            })
-                            .addOnFailureListener(e -> {
-                                Log.w(TAG, "Error deleting event", e);
-                                callback.onError(e);
-                            });
-                } else {
-                    callback.onError(new Exception("Event not found"));
-                }
-            })
-            .addOnFailureListener(callback::onError);
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                        //  event IDs are unique, so we can delete the first document found
+                        String documentId = task.getResult().getDocuments().get(0).getId();
+                        eventsRef.document(documentId).delete()
+                                .addOnSuccessListener(aVoid -> {
+                                    Log.d(TAG, "Event deleted successfully");
+                                    callback.onEventsFetched(null); // Notify deletion success
+                                })
+                                .addOnFailureListener(e -> {
+                                    Log.w(TAG, "Error deleting event", e);
+                                    callback.onError(e);
+                                });
+                    } else {
+                        callback.onError(new Exception("Event not found"));
+                    }
+                })
+                .addOnFailureListener(callback::onError);
     }
 
 
