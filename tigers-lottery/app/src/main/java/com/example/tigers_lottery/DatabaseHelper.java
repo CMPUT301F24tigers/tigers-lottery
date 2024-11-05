@@ -3,13 +3,13 @@ package com.example.tigers_lottery;
 import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.example.tigers_lottery.models.*;
 import com.example.tigers_lottery.utils.DeviceIDHelper;
-import com.google.android.gms.common.api.internal.StatusCallback;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -28,6 +28,7 @@ import com.google.firebase.storage.UploadTask;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.Date;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -75,6 +76,11 @@ public class DatabaseHelper {
 
     public interface UsersCallback {
         void onUsersFetched(List<User> users);
+        void onError(Exception e);
+    }
+
+    public interface UserCallback {
+        void onUserFetched(User user);
         void onError(Exception e);
     }
 
@@ -564,6 +570,27 @@ public class DatabaseHelper {
     }
 
 
+    public void getUser(UserCallback callback) {
+        usersRef.document(currentUserId).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document.exists()) {
+                        User user = document.toObject(User.class);
+
+                        callback.onUserFetched(user);
+                    } else {
+                        Log.d("Firestore", "No such user exists");
+                    }
+                } else {
+                    Log.d("Firestore", "Error getting user", task.getException());
+                }
+            }
+        });
+    }
+
+
     /**
      * Chekc if the user exists in the database
      *
@@ -642,6 +669,7 @@ public class DatabaseHelper {
                 });
     }
 
+
     public void entrantFetchEvents(EventsCallback callback) {
         List<Event> entrantsEvents = new ArrayList<>();
 
@@ -700,6 +728,7 @@ public class DatabaseHelper {
                 });
     }
 
+
     public void entrantLeaveWaitingList(int eventId, StatusCallback callback) {
         eventsRef.document(Integer.toString(eventId)).get().addOnSuccessListener(documentSnapshot -> {
             if (documentSnapshot.exists()) {
@@ -735,6 +764,7 @@ public class DatabaseHelper {
             Log.e("Firestore", "Error retrieving document");
         });
     }
+
 
     public void entrantAcceptDeclineInvitation(int eventId, String action, StatusCallback callback) {
         eventsRef.document(Integer.toString(eventId)).get().addOnSuccessListener(documentSnapshot -> {
@@ -782,5 +812,15 @@ public class DatabaseHelper {
         }).addOnFailureListener(e -> {
             Log.e("Firestore", "Error retrieving document");
         });
+    }
+
+
+    public boolean validatingUserProfileInput(String firstName, String lastName, String email, Date date) {
+        return (Objects.equals(firstName, "") || Objects.equals(lastName, "") || Objects.equals(email, "") || date == null);
+    }
+
+
+    public boolean validatingFacilityProfileInput(Context context, String name, String email, String location, String mobile) {
+        return (!Objects.equals(name, "") && !Objects.equals(email, "") && !Objects.equals(location, "") && mobile != null);
     }
 }

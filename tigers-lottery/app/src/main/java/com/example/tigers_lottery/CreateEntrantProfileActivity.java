@@ -5,22 +5,18 @@ import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.firebase.Timestamp;
-import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -96,7 +92,7 @@ public class CreateEntrantProfileActivity extends AppCompatActivity {
                 if (selectedMonth != null && selectedDay != null && selectedYear != null) {
                     Calendar calendar = Calendar.getInstance();
                     calendar.set(Calendar.DAY_OF_MONTH, selectedDay);
-                    calendar.set(Calendar.MONTH, selectedMonth);
+                    calendar.set(Calendar.MONTH, selectedMonth-1);
                     calendar.set(Calendar.YEAR, selectedYear);
 
                     // Set time components to zero to represent only the date
@@ -105,6 +101,11 @@ public class CreateEntrantProfileActivity extends AppCompatActivity {
                     calendar.set(Calendar.SECOND, 0);
                     calendar.set(Calendar.MILLISECOND, 0);
                     date = calendar.getTime();
+                }
+
+                if(dbHelper.validatingUserProfileInput(firstnameEditText.getText().toString(), lastnameEditText.getText().toString(), emailEditText.getText().toString(), date)) {
+                    Toast.makeText(CreateEntrantProfileActivity.this, "Every field except for Phone Number must be filled!", Toast.LENGTH_LONG).show();
+                    return;
                 }
 
                 userData.put("first_name", firstnameEditText.getText().toString());

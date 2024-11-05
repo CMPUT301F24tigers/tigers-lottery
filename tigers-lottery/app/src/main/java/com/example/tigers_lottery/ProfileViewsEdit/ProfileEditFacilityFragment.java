@@ -21,12 +21,18 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.example.tigers_lottery.CreateEntrantProfileActivity;
+import com.example.tigers_lottery.DatabaseHelper;
 import com.example.tigers_lottery.R;
+import com.example.tigers_lottery.models.User;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
 import java.util.UUID;
 
 /**
@@ -44,7 +50,7 @@ public class ProfileEditFacilityFragment extends Fragment {
 
     // UI components for editing facility information
     EditText nameEditText, emailEditText, mobileEditText, locationEditText;
-    Button saveChangesButton;
+
     ImageButton editProfilePhotoButton;
 
     private Uri imageUri;
@@ -113,6 +119,7 @@ public class ProfileEditFacilityFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.profile_edit_facility_fragment, container, false);
+        DatabaseHelper dbHelper = new DatabaseHelper(getContext());
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         FirebaseStorage storage = FirebaseStorage.getInstance();
@@ -123,15 +130,37 @@ public class ProfileEditFacilityFragment extends Fragment {
         emailEditText = view.findViewById(R.id.editTextEmail);
         mobileEditText = view.findViewById(R.id.editTextMobile);
         locationEditText = view.findViewById(R.id.editTextLocation);
-        saveChangesButton = view.findViewById(R.id.saveChangesButton);
+        Button saveChangesButton = view.findViewById(R.id.saveChangesButton);
         editProfilePhotoButton = view.findViewById(R.id.editProfilePhoto);
 
         String deviceId = getArguments().getString("deviceId");
+
+        dbHelper.getUser(new DatabaseHelper.UserCallback() {
+            @Override
+            public void onUserFetched(User user) {
+                nameEditText.setText(user.getFacilityName());
+                emailEditText.setText(user.getFacilityEmail());
+                mobileEditText.setText(user.getFacilityPhone());
+                locationEditText.setText(user.getFacilityLocation());
+
+            }
+
+            @Override
+            public void onError(Exception e) {
+
+            }
+        });
 
         // Listener to save changes to Firestore and Firebase Storage
         saveChangesButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+                if(!dbHelper.validatingFacilityProfileInput(getContext(), nameEditText.getText().toString(), emailEditText.getText().toString(), locationEditText.getText().toString(), mobileEditText.getText().toString())) {
+                    Toast.makeText(getContext(), "Every field must be filled!", Toast.LENGTH_LONG).show();
+                    return;
+                }
+
                 // Update user information in Firestore
                 db.collection("users").document(deviceId)
                         .update(
