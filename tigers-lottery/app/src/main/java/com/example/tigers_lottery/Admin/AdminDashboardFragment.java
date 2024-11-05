@@ -11,9 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.example.tigers_lottery.Admin.DashboardFragments.AdminEntrantsProfilesFragment;
-import com.example.tigers_lottery.Admin.DashboardFragments.AdminFacilitiesFragment;
-import com.example.tigers_lottery.Admin.DashboardFragments.AdminEventsFragment;
+import com.example.tigers_lottery.Admin.DashboardFragments.*;
 import com.example.tigers_lottery.DatabaseHelper;
 import com.example.tigers_lottery.R;
 
@@ -23,18 +21,9 @@ import com.example.tigers_lottery.R;
  * facility profiles, and all events. The number of users (entrant profiles)
  * is dynamically fetched from the database and displayed on the button.
  */
+
 public class AdminDashboardFragment extends Fragment {
 
-    /**
-     * Inflates the admin dashboard layout and sets up button listeners for
-     * navigating to various admin-specific screens. The number of users is
-     * dynamically fetched and displayed on the Entrant Profiles button.
-     *
-     * @param inflater           LayoutInflater to inflate the fragment layout.
-     * @param container          Parent view that this fragment's UI should attach to.
-     * @param savedInstanceState Bundle for restoring fragment state.
-     * @return The view for the fragment's UI.
-     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -60,18 +49,14 @@ public class AdminDashboardFragment extends Fragment {
             }
         });
 
-        btnEntrantProfiles.setOnClickListener(v -> openFragment(new AdminEntrantsProfilesFragment()));
+        // Navigate to respective fragments when buttons are clicked
+        btnEntrantProfiles.setOnClickListener(v -> openFragment(AdminEntrantsProfilesFragment.newInstance()));
         btnFacilityProfiles.setOnClickListener(v -> openFragment(new AdminFacilitiesFragment()));
         btnAllEvents.setOnClickListener(v -> openFragment(new AdminEventsFragment()));
 
         return view;
     }
 
-    /**
-     * Replaces the current fragment with the provided fragment and adds the transaction to the back stack.
-     *
-     * @param fragment The fragment to display in the fragment container.
-     */
     private void openFragment(Fragment fragment) {
         requireActivity().getSupportFragmentManager()
                 .beginTransaction()

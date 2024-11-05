@@ -36,10 +36,10 @@ import java.util.List;
 public class User {
 
     @PropertyName("user_id")
-    private String userId = "NoUserId";
+    private String userId;
 
     @PropertyName("first_name")
-    private String firstName = "";
+    private String firstName = "Unknown User";
 
     @PropertyName("last_name")
     private String lastName = "";

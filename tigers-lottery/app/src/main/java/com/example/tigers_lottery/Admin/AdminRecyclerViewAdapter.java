@@ -3,37 +3,29 @@ package com.example.tigers_lottery.Admin;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.tigers_lottery.Admin.DashboardFragments.ListItems.AdminListItemModel;
+import com.example.tigers_lottery.Admin.DashboardFragments.ListItems.OnActionListener;
 import com.example.tigers_lottery.R;
-import com.example.tigers_lottery.models.User;
 import java.util.List;
 
-/**
- * Adapter for displaying a list of users in a RecyclerView within the admin section.
- * Binds user data (first name, last name, and email) to each item view for display.
- */
 public class AdminRecyclerViewAdapter extends RecyclerView.Adapter<AdminRecyclerViewAdapter.UserViewHolder> {
 
-    private List<User> userList;
+    private List<AdminListItemModel> itemList;
+    private OnActionListener actionListener;
+    private int expandedPosition = -1;
 
-    /**
-     * Constructor for AdminRecyclerViewAdapter.
-     *
-     * @param userList List of User objects to be displayed in the RecyclerView.
-     */
-    public AdminRecyclerViewAdapter(List<User> userList) {
-        this.userList = userList;
+    public AdminRecyclerViewAdapter(List<AdminListItemModel> itemList, OnActionListener actionListener) {
+        this.itemList = itemList;
+        this.actionListener = actionListener;
     }
 
-    /**
-     * Inflates the item layout and creates a ViewHolder for it.
-     *
-     * @param parent   The ViewGroup into which the new view will be added.
-     * @param viewType The view type of the new View.
-     * @return A new UserViewHolder that holds the view for each item.
-     */
     @NonNull
     @Override
     public UserViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -42,45 +34,61 @@ public class AdminRecyclerViewAdapter extends RecyclerView.Adapter<AdminRecycler
         return new UserViewHolder(view);
     }
 
-    /**
-     * Binds data to the view elements in each item based on the position.
-     *
-     * @param holder   The ViewHolder that holds the item view.
-     * @param position The position of the item within the adapter's data set.
-     */
     @Override
     public void onBindViewHolder(@NonNull UserViewHolder holder, int position) {
-        User user = userList.get(position);
-        holder.userName.setText(user.getFirstName() + " " + user.getLastName());
-        holder.userEmail.setText(user.getEmailAddress());
+        AdminListItemModel item = itemList.get(position);
+
+        holder.userName.setText(item.getDisplayName());
+        holder.userEmail.setText(item.getSecondaryText());
+        holder.expandableMenuTextView.setText("Actions for " + item.getDisplayName());
+        holder.expandableMenuOption1.setText(item.getOption1Text());
+        holder.expandableMenuOption2.setText(item.getOption2Text());
+        holder.expandableMenuOption3.setText(item.getOption3Text());
+
+        holder.expandableMenuLayout.setVisibility(holder.getAdapterPosition() == expandedPosition ? View.VISIBLE : View.GONE);
+
+        holder.optionsButton.setOnClickListener(v -> {
+            int adapterPosition = holder.getAdapterPosition();
+            if (expandedPosition == adapterPosition) {
+                expandedPosition = -1;
+            } else {
+                int previousExpandedPosition = expandedPosition;
+                expandedPosition = adapterPosition;
+                notifyItemChanged(previousExpandedPosition);
+            }
+            notifyItemChanged(adapterPosition);
+        });
+
+        holder.expandableMenuOption1.setOnClickListener(v -> actionListener.onOptionOneClick(item.getUniqueIdentifier()));
+        holder.expandableMenuOption2.setOnClickListener(v -> actionListener.onOptionTwoClick(item.getUniqueIdentifier()));
+        holder.expandableMenuOption3.setOnClickListener(v -> actionListener.onOptionThreeClick(item.getUniqueIdentifier()));
     }
 
-    /**
-     * Returns the total number of items in the data set held by the adapter.
-     *
-     * @return The number of items in the user list.
-     */
+    public void setExpandedPosition(int position) {
+        this.expandedPosition = position;
+    }
+
     @Override
     public int getItemCount() {
-        return userList.size();
+        return itemList.size();
     }
 
-    /**
-     * ViewHolder class for managing the user item views in the RecyclerView.
-     */
     public static class UserViewHolder extends RecyclerView.ViewHolder {
-        TextView userName, userEmail;
+        TextView userName, userEmail, expandableMenuTextView;
+        ImageButton optionsButton;
+        Button expandableMenuOption1, expandableMenuOption2, expandableMenuOption3;
+        ConstraintLayout expandableMenuLayout;
 
-        /**
-         * Constructor for UserViewHolder, initializing the text views for displaying
-         * user name and email.
-         *
-         * @param itemView The view representing a single user item.
-         */
         public UserViewHolder(@NonNull View itemView) {
             super(itemView);
             userName = itemView.findViewById(R.id.textViewUserName);
             userEmail = itemView.findViewById(R.id.textViewUserEmail);
+            optionsButton = itemView.findViewById(R.id.optionsButton);
+            expandableMenuLayout = itemView.findViewById(R.id.expandableMenuLayout);
+            expandableMenuTextView = itemView.findViewById(R.id.expandableMenuTextView);
+            expandableMenuOption1 = itemView.findViewById(R.id.expandableMenuOption1);
+            expandableMenuOption2 = itemView.findViewById(R.id.expandableMenuOption2);
+            expandableMenuOption3 = itemView.findViewById(R.id.expandableMenuOption3);
         }
     }
 }

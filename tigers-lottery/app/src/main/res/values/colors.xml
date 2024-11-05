@@ -5,4 +5,5 @@
     <color name="app_primary_light_purple">#FEF7FF</color>
     <color name="background_color">#EAD7EC</color>
     <color name="gray">#646262</color>
+    <color name="light_grey">#DBD5D5</color>
 </resources>
