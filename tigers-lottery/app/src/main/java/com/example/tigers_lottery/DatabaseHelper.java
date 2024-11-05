@@ -78,6 +78,7 @@ public class DatabaseHelper {
 
     public interface UsersCallback {
         void onUsersFetched(List<User> users);
+        void onUserFetched(User user);
         void onError(Exception e);
     }
 
@@ -630,6 +631,39 @@ public class DatabaseHelper {
         }
     }
 
+    /**
+     * Grabs a user from the users collection by the userID
+     * @param userId - Device of that linked user
+     * @param callback - callback interface for users
+     */
+    public void fetchUserById(String userId, final UsersCallback callback) {
+        usersRef.whereEqualTo("user_id", userId).get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        List<DocumentSnapshot> documents = task.getResult().getDocuments();
+
+                        if (documents != null && !documents.isEmpty()) {
+                            if (documents.size() == 1) {
+                                // If exactly one user is found, map it to the User class
+                                User user = documents.get(0).toObject(User.class);
+                                callback.onUserFetched(user);
+                            } else {
+                                // If multiple users are found for the same ID, return placeholder user
+                                User user = new User();
+                                user.setFirstName("No Organizer Found");
+                                callback.onUserFetched(user);
+                            }
+                        } else {
+                            // No documents found; return placeholder user
+                            User user = new User();
+                            user.setFirstName("No Organizer Found");
+                            callback.onUserFetched(user);
+                        }
+                    } else {
+                        callback.onError(task.getException());
+                    }
+                });
+    }
 
     /**
      * Chekc if the user exists in the database
