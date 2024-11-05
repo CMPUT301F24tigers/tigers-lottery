@@ -9,6 +9,7 @@ import androidx.annotation.Nullable;
 
 import com.example.tigers_lottery.models.*;
 import com.example.tigers_lottery.utils.DeviceIDHelper;
+import com.google.android.gms.common.api.internal.StatusCallback;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -25,6 +26,7 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 import java.util.ArrayList;
@@ -89,6 +91,12 @@ public class DatabaseHelper {
     public interface ProfileCallback {
         void onProfileExists();
         void onProfileNotExists();
+    }
+
+    public interface StatusCallback {
+        void onStatusUpdated();
+
+        void onError(Exception e);
     }
 
     /**
@@ -634,4 +642,145 @@ public class DatabaseHelper {
                 });
     }
 
+    public void entrantFetchEvents(EventsCallback callback) {
+        List<Event> entrantsEvents = new ArrayList<>();
+
+        db.collection("events")
+                .whereArrayContains("invited_entrants", currentUserId)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            Event event = document.toObject(Event.class);
+                            entrantsEvents.add(event);
+                        }
+                    }
+
+                    db.collection("events")
+                            .whereArrayContains("registered_entrants", currentUserId)
+                            .get()
+                            .addOnCompleteListener(secondTask -> {
+                                if (secondTask.isSuccessful()) {
+                                    for (QueryDocumentSnapshot document : secondTask.getResult()) {
+                                        Event event = document.toObject(Event.class);
+                                        if (!entrantsEvents.contains(event)) { // Avoid duplicates
+                                            entrantsEvents.add(event);
+                                        }
+                                    }
+                                }
+
+                                db.collection("events")
+                                        .whereArrayContains("declined_entrants", currentUserId)
+                                        .get()
+                                        .addOnCompleteListener(third -> {
+                                            if (third.isSuccessful()) {
+                                                for (QueryDocumentSnapshot document : third.getResult()) {
+                                                    Event event = document.toObject(Event.class);
+                                                    if (!entrantsEvents.contains(event)) { // Avoid duplicates
+                                                        entrantsEvents.add(event);
+                                                    }
+                                                }
+                                            }
+                                            db.collection("events")
+                                                    .whereArrayContains("waitlisted_entrants", currentUserId)
+                                                    .get()
+                                                    .addOnCompleteListener(fourth -> {
+                                                        if (fourth.isSuccessful()) {
+                                                            for (QueryDocumentSnapshot document : fourth.getResult()) {
+                                                                Event event = document.toObject(Event.class);
+                                                                if (!entrantsEvents.contains(event)) { // Avoid duplicates
+                                                                    entrantsEvents.add(event);
+                                                                }
+                                                            }
+                                                        }
+                                                        callback.onEventsFetched(entrantsEvents);
+                                                    });
+                                        });
+                            });
+                });
+    }
+
+    public void entrantLeaveWaitingList(int eventId, StatusCallback callback) {
+        eventsRef.document(Integer.toString(eventId)).get().addOnSuccessListener(documentSnapshot -> {
+            if (documentSnapshot.exists()) {
+                List<String> waitlisted = (List<String>) documentSnapshot.get("waitlisted_entrants");
+
+                // Step 2: Check if the value exists in the sourceList
+                if (waitlisted != null && waitlisted.contains(currentUserId)) {
+                    // Remove from sourceList and add to targetList
+                    waitlisted.remove(currentUserId);
+
+                    // Step 3: Update Firestore with the modified lists
+                    Map<String, Object> updates = new HashMap<>();
+                    updates.put("waitlisted_entrants", waitlisted);
+
+                    eventsRef.document(Integer.toString(eventId)).update(updates)
+                            .addOnSuccessListener(aVoid -> {
+                                // Successfully updated the lists
+                                Log.d("Firestore", "Value moved successfully.");
+                                callback.onStatusUpdated();
+                            })
+                            .addOnFailureListener(e -> {
+                                // Failed to update
+                                Log.e("Firestore", "Error updating document", e);
+                                callback.onError(e);
+                            });
+                } else {
+                    Log.d("Firestore", "Value not found in source list.");
+                }
+            } else {
+                Log.d("Firestore", "Document does not exist.");
+            }
+        }).addOnFailureListener(e -> {
+            Log.e("Firestore", "Error retrieving document");
+        });
+    }
+
+    public void entrantAcceptDeclineInvitation(int eventId, String action, StatusCallback callback) {
+        eventsRef.document(Integer.toString(eventId)).get().addOnSuccessListener(documentSnapshot -> {
+            if (documentSnapshot.exists()) {
+                List<String> invited = (List<String>) documentSnapshot.get("invited_entrants");
+                String targetField;
+                List<String> targetList = new ArrayList<>();
+
+                if(Objects.equals(action, "accept")) {
+                    targetField = "registered_entrants";
+                    targetList = (List<String>) documentSnapshot.get("registered_entrants");
+                }else {
+                    targetField = "declined_entrants";
+                    targetList = (List<String>) documentSnapshot.get("declined_entrants");
+                }
+
+                // Step 2: Check if the value exists in the sourceList
+                if (invited != null && invited.contains(currentUserId)) {
+                    // Remove from sourceList and add to targetList
+                    invited.remove(currentUserId);
+                    targetList.add(currentUserId);
+
+                    // Step 3: Update Firestore with the modified lists
+                    Map<String, Object> updates = new HashMap<>();
+                    updates.put("invited_entrants", invited);
+                    updates.put(targetField, targetList);
+
+                    eventsRef.document(Integer.toString(eventId)).update(updates)
+                            .addOnSuccessListener(aVoid -> {
+                                // Successfully updated the lists
+                                Log.d("Firestore", "Value moved successfully.");
+                                callback.onStatusUpdated();
+                            })
+                            .addOnFailureListener(e -> {
+                                // Failed to update
+                                Log.e("Firestore", "Error updating document", e);
+                                callback.onError(e);
+                            });
+                } else {
+                    Log.d("Firestore", "Value not found in source list.");
+                }
+            } else {
+                Log.d("Firestore", "Document does not exist.");
+            }
+        }).addOnFailureListener(e -> {
+            Log.e("Firestore", "Error retrieving document");
+        });
+    }
 }
