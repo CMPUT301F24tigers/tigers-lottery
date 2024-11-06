@@ -186,7 +186,8 @@ public class OrganizerEditEventFragment extends Fragment {
     public void loadImageIntoImageView(String imageUrl, ImageView imageView) {
         Glide.with(imageView.getContext())
                 .load(imageUrl)
-                .skipMemoryCache(true)         // Skip memory cache
+                .skipMemoryCache(true)
+                .placeholder(R.drawable.placeholder_image_background) // find a better background later
                 .into(imageView);
     }
 
