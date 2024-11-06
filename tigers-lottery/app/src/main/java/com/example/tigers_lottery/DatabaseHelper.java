@@ -874,6 +874,33 @@ public class DatabaseHelper {
                 });
     }
 
+    /** uploads image to firebase storage and passes url back to callback
+     *
+     * @param imageUri
+     * @param callback
+     */
+    public void uploadPosterImageToFirebase(Uri imageUri, UploadCallback callback) {
+        String fileName = "event_posters/" + UUID.randomUUID().toString() + ".jpg";
+        StorageReference fileRef = storageReference.child(fileName);
+
+        // Upload the image to Firebase Storage
+        fileRef.putFile(imageUri)
+                .addOnSuccessListener(taskSnapshot -> fileRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                    String downloadUrl = uri.toString();
+                    callback.onUploadSuccess(downloadUrl);  // Pass the URL back to the callback
+                }))
+                .addOnFailureListener(e -> {
+                    callback.onUploadFailure(e);  // Pass the error back to the callback
+                });
+    }
+
+    // callback for upload functionality
+    public interface UploadCallback {
+        void onUploadSuccess(String downloadUrl);
+        void onUploadFailure(Exception e);
+    }
+
+
     public void entrantFetchEvents(EventsCallback callback) {
         List<Event> entrantsEvents = new ArrayList<>();
 

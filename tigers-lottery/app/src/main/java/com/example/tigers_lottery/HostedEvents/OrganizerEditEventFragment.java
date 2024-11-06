@@ -1,6 +1,13 @@
 package com.example.tigers_lottery.HostedEvents;
 
+import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import com.bumptech.glide.Glide;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import android.text.TextUtils;
@@ -11,13 +18,16 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.tigers_lottery.DatabaseHelper;
 import com.example.tigers_lottery.R;
 import com.example.tigers_lottery.models.Event;
 import com.google.firebase.Timestamp;
+import com.google.firebase.storage.StorageReference;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -32,6 +42,13 @@ public class OrganizerEditEventFragment extends Fragment {
     private Button btnSaveEvent;
     private DatabaseHelper dbHelper;
     private Event event; // Store the event being edited
+
+    private ImageView imagePoster;
+    private TextView photoPlaceholderText;
+    private Uri imageUri;
+    private ActivityResultLauncher<Intent> activityResultLauncher;
+    private StorageReference storageReference;
+    private boolean isImageUpdated = false;
 
     public OrganizerEditEventFragment() {
         // Required empty public constructor
@@ -52,6 +69,8 @@ public class OrganizerEditEventFragment extends Fragment {
         inputWaitlistLimit = view.findViewById(R.id.inputWaitlistLimit);
         btnSaveEvent = view.findViewById(R.id.btnCreateEvent);
         inputOccupantLimit = view.findViewById(R.id.inputOccupantLimit);
+        imagePoster = view.findViewById(R.id.photoPlaceholder);
+        photoPlaceholderText = view.findViewById(R.id.photoPlaceholderText);
 
         // Hide occupant limit whilst editing
         TextView labelOccupantLimit = view.findViewById(R.id.LabelOccupantLimit);
@@ -70,17 +89,73 @@ public class OrganizerEditEventFragment extends Fragment {
         // Initialize DatabaseHelper
         dbHelper = new DatabaseHelper(requireContext());
 
-        // Retrieve event from arguments
-        if (getArguments() != null && getArguments().getSerializable("event") != null) {
-            event = (Event) getArguments().getSerializable("event");
-            loadEventData(event); // Populate fields with existing event data
+        // Retrieve event by ID passed in arguments
+        if (getArguments() != null && getArguments().containsKey("eventId")) {
+            int eventId = getArguments().getInt("eventId"); // Retrieve eventId as an integer
+            fetchEventById(eventId);
         }
+
+        // Set up image picker
+        setUpImagePicker();
 
         // Set click listener for Save button
         btnSaveEvent.setOnClickListener(v -> saveEvent());
 
         return view;
     }
+
+    private void fetchEventById(int eventId) {
+        dbHelper.fetchEventById(eventId, new DatabaseHelper.EventsCallback() {
+            @Override
+            public void onEventFetched(Event fetchedEvent) {
+                event = fetchedEvent; // Assign fetched event to the local variable
+                loadEventData(event); // Populate fields with existing event data
+            }
+
+            @Override
+            public void onEventsFetched(List<Event> events) {
+                // Not used in this fragment, but must be implemented
+            }
+
+            @Override
+            public void onError(Exception e) {
+                Toast.makeText(getContext(), "Failed to load event", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void setUpImagePicker() {
+        activityResultLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                        imageUri = result.getData().getData();
+                        if (imageUri != null) {
+                            Log.d("OrganizerEditEvent", "Image URI selected: " + imageUri.toString());
+
+                            // Load the selected image URI immediately into the ImageView
+                            Glide.with(requireContext())
+                                    .load(imageUri)
+                                    .skipMemoryCache(true)    // Ensures fresh load for immediate feedback
+                                    .into(imagePoster);
+
+                            photoPlaceholderText.setVisibility(View.GONE);
+                            isImageUpdated = true; // Track that the image was updated
+                        }
+                    }
+                }
+        );
+
+        imagePoster.setOnClickListener(v -> {
+            Intent intent = new Intent(Intent.ACTION_PICK);
+            intent.setType("image/*");
+            activityResultLauncher.launch(intent);
+        });
+    }
+
+
+
+
 
     private void loadEventData(Event event) {
         // Populate input fields with event data
@@ -97,6 +172,22 @@ public class OrganizerEditEventFragment extends Fragment {
 
         // Hide the waitlist limit input field regardless of any external listener
         inputWaitlistLimit.setVisibility(View.GONE);
+
+        // Display existing poster only if no new image was picked
+        if (event.getPosterUrl() != null && !event.getPosterUrl().isEmpty()) {
+            loadImageIntoImageView(event.getPosterUrl(), imagePoster);
+            photoPlaceholderText.setVisibility(View.GONE);
+        } else {
+            photoPlaceholderText.setVisibility(View.VISIBLE);
+        }
+
+    }
+
+    public void loadImageIntoImageView(String imageUrl, ImageView imageView) {
+        Glide.with(imageView.getContext())
+                .load(imageUrl)
+                .skipMemoryCache(true)         // Skip memory cache
+                .into(imageView);
     }
 
     private void saveEvent() {
@@ -196,13 +287,39 @@ public class OrganizerEditEventFragment extends Fragment {
         event.setWaitlistLimitFlag(assignWaitlistLimit);
         event.setWaitlistLimit(assignWaitlistLimit ? waitlistLimit : 0);
 
+        if (isImageUpdated && imageUri != null) {
+            dbHelper.uploadPosterImageToFirebase(imageUri, new DatabaseHelper.UploadCallback() {
+                @Override
+                public void onUploadSuccess(String downloadUrl) {
+                    event.setPosterUrl(downloadUrl); // Update Event with new poster URL
+
+                    // Load the new poster URL after upload
+                    Glide.with(requireContext())
+                            .load(downloadUrl)
+                            .skipMemoryCache(true)
+                            .into(imagePoster);
+
+                    updateEventInDatabase(); // Save event details with new poster URL
+                    isImageUpdated = false;
+                }
+
+                @Override
+                public void onUploadFailure(Exception e) {
+                    Toast.makeText(getContext(), "Failed to upload poster image", Toast.LENGTH_SHORT).show();
+                }
+            });
+        } else {
+            updateEventInDatabase(); // Save event without updating the poster
+        }
+
+
+    }
+
+    private void updateEventInDatabase() {
         dbHelper.updateEvent(event, new DatabaseHelper.EventsCallback() {
             @Override
             public void onEventsFetched(List<Event> events) {
-                // Display success message
                 Toast.makeText(getContext(), "Event updated successfully", Toast.LENGTH_SHORT).show();
-
-                // Navigate back to OrganizerDashboardFragment
                 requireActivity().getSupportFragmentManager().popBackStack();
             }
 
@@ -212,9 +329,9 @@ public class OrganizerEditEventFragment extends Fragment {
 
             @Override
             public void onError(Exception e) {
+                Toast.makeText(getContext(), "Failed to update event", Toast.LENGTH_SHORT).show();
             }
         });
-
     }
 
     private String formatTimestamp(Timestamp timestamp) {
