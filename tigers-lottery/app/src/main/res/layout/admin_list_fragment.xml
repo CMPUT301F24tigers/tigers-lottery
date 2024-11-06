@@ -3,12 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Admin.DashboardFragments.AdminEventsFragment">
+    tools:context=".Admin.DashboardFragments.AdminEntrantsProfilesFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/adminRecyclerView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="THESE ARE THE EVENTS" />
-
+        android:layout_height="match_parent" />
 </FrameLayout>
