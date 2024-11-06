@@ -22,30 +22,28 @@
 
     <ImageView
         android:id="@+id/facilityProfilePic"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.53"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.166"
-        app:srcCompat="@drawable/baseline_account_circle_24"
         android:layout_width="111dp"
         android:layout_height="107dp"
-        tools:layout_editor_absoluteX="150dp"
-        tools:layout_editor_absoluteY="34dp" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.168"
+        app:srcCompat="@drawable/baseline_account_circle_24" />
 
     <TextView
         android:id="@+id/facilityName"
-        android:layout_width="112dp"
-        android:layout_height="17dp"
+        android:layout_width="305dp"
+        android:layout_height="34dp"
         android:text="facility name"
         android:textAlignment="center"
+        android:textSize="25sp"
+        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.528"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.336" />
+        app:layout_constraintVertical_bias="0.338" />
 
     <LinearLayout
         android:layout_width="317dp"
@@ -63,12 +61,15 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="3sp"
             android:text="Email"
+            android:textSize="16sp"
+            android:textStyle="bold"
             android:textColor="@color/gray" />
 
         <TextView
             android:id="@+id/facilityEmail"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textSize="16sp"
             android:text="facility email" />
 
         <TextView
@@ -77,6 +78,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:layout_marginBottom="3sp"
+            android:textSize="16sp"
+            android:textStyle="bold"
             android:text="Mobile Number"
             android:textColor="@color/gray" />
 
@@ -84,6 +87,7 @@
             android:id="@+id/facilityMobile"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textSize="16sp"
             android:text="facility mobile" />
 
         <TextView
@@ -93,12 +97,15 @@
             android:layout_marginTop="10dp"
             android:layout_marginBottom="3sp"
             android:text="Location"
+            android:textSize="16sp"
+            android:textStyle="bold"
             android:textColor="@color/gray" />
 
         <TextView
             android:id="@+id/facilityLocation"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textSize="16sp"
             android:text="facility location" />
     </LinearLayout>
 
