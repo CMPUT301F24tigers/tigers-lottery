@@ -5,14 +5,12 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.tigers_lottery.Admin.AdminDashboardFragment;
 import com.example.tigers_lottery.Admin.AdminRecyclerViewAdapter;
 import com.example.tigers_lottery.Admin.DashboardFragments.ListItems.AdminListItemModel;
 import com.example.tigers_lottery.Admin.DashboardFragments.ListItems.OnActionListener;
@@ -30,34 +28,15 @@ public class AdminEntrantsProfilesFragment extends Fragment implements OnActionL
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.admin_entrants_profiles_fragment, container, false);
+        View view = inflater.inflate(R.layout.admin_list_fragment, container, false);
 
-        ImageButton backButton = requireActivity().findViewById(R.id.globalBackButton);
-        backButton.setVisibility(View.VISIBLE);
-
-        backButton.setOnClickListener(v -> {
-            getParentFragmentManager().beginTransaction()
-                    .replace(R.id.main_activity_fragment_container, new AdminDashboardFragment())
-                    .commit();
-            backButton.setVisibility(View.INVISIBLE);
-        });
-
-        RecyclerView recyclerView = view.findViewById(R.id.recyclerViewEntrantProfiles);
+        RecyclerView recyclerView = view.findViewById(R.id.adminRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         userAdapter = new AdminRecyclerViewAdapter(itemList, this);
         recyclerView.setAdapter(userAdapter);
-
         fetchUsers();
-
         return view;
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        ImageButton backButton = requireActivity().findViewById(R.id.globalBackButton);
-        backButton.setVisibility(View.INVISIBLE);
     }
 
     private void fetchUsers() {
@@ -79,6 +58,11 @@ public class AdminEntrantsProfilesFragment extends Fragment implements OnActionL
                     }
                 }
                 userAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onUserFetched( User user){
+                //Do nothing
             }
 
             @Override
