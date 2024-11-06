@@ -82,8 +82,8 @@ public class DatabaseHelper {
         void onError(Exception e);
     }
 
-    public interface UserCountCallback {
-        void onUserCountFetched(int count);
+    public interface CountCallback {
+        void onCountFetched(int count);
         void onError(Exception e);
     }
 
@@ -230,33 +230,38 @@ public class DatabaseHelper {
         int uniqueId = 10000 + new Random().nextInt(90000); // Generates a number between 10000 and 99999
         return String.valueOf(uniqueId);
     }
+
+    public void getEventCount(final CountCallback callback) {
+        eventsRef.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                int eventCount = task.getResult().size();
+                callback.onCountFetched(eventCount);
+            } else {
+                callback.onError(task.getException());
+            }
+        });
+    }
   
     
      /**
      * Fetch all events from the events collection without any conditions.
      * The @param line was throwing an error so I got rid of it for now --- FIX ALL THAT LATER
      */
-    public void fetchAllEvents(final EventsCallback callback) {
-        eventsRef.addSnapshotListener(new EventListener<QuerySnapshot>() {
-            @Override
-            public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException e) {
-                if (e != null) {
-                    Log.w(TAG, "Error fetching events.", e);
-                    callback.onError(e); // Pass error to callback
-                    return;
-                }
-
-                List<Event> events = new ArrayList<>();
-                if (value != null) {
-                    for (QueryDocumentSnapshot doc : value) {
-                        Event event = doc.toObject(Event.class); // Automatic mapping to Event object
-                        events.add(event);
-                    }
-                }
-                callback.onEventsFetched(events); // Pass fetched events to callback
-            }
-        });
-    }
+     public void fetchAllEvents(final EventsCallback callback) {
+         eventsRef.get()
+                 .addOnCompleteListener(task -> {
+                     if (task.isSuccessful()) {
+                         List<Event> events = new ArrayList<>();
+                         for (QueryDocumentSnapshot doc : task.getResult()) {
+                             Event event = doc.toObject(Event.class);
+                             events.add(event);
+                         }
+                         callback.onEventsFetched(events); // Pass the list of events to the callback
+                     } else {
+                         callback.onError(task.getException()); // Handle any errors
+                     }
+                 });
+     }
 
     /**
      * Deletes a particular event
@@ -696,13 +701,13 @@ public class DatabaseHelper {
      *
      * @param callback The callback to handle the user count or error.
      */
-    public void getUserCount(final UserCountCallback callback) {
+    public void getUserCount(final CountCallback callback) {
         usersRef.get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         QuerySnapshot snapshot = task.getResult();
                         int userCount = (snapshot != null) ? snapshot.size() : 0;
-                        callback.onUserCountFetched(userCount);
+                        callback.onCountFetched(userCount);
                     } else {
                         Log.e(TAG, "Error fetching user count", task.getException());
                         callback.onError(task.getException());

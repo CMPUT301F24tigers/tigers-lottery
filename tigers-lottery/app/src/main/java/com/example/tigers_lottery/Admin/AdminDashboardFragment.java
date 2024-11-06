@@ -16,14 +16,22 @@ import com.example.tigers_lottery.DatabaseHelper;
 import com.example.tigers_lottery.R;
 
 /**
- * Fragment that displays the main dashboard for admin users.
+ * The AdminDashboardFragment class displays the main dashboard for admin users.
  * This fragment provides buttons for admin users to view entrant profiles,
- * facility profiles, and all events. The number of users (entrant profiles)
- * is dynamically fetched from the database and displayed on the button.
+ * facility profiles, and all events. The button text for entrant profiles
+ * and all events dynamically updates with counts fetched from the database.
  */
-
 public class AdminDashboardFragment extends Fragment {
 
+    /**
+     * Inflates the layout for the admin dashboard and sets up button listeners.
+     * Fetches and displays counts for entrant profiles and events on respective buttons.
+     *
+     * @param inflater           LayoutInflater for inflating the fragment layout.
+     * @param container          The container that this fragment will be attached to.
+     * @param savedInstanceState Bundle for restoring fragment state.
+     * @return The View for the fragment's UI.
+     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -34,11 +42,14 @@ public class AdminDashboardFragment extends Fragment {
         Button btnAllEvents = view.findViewById(R.id.btnAllEvents);
 
         btnEntrantProfiles.setText("Entrant Profiles (Loading...)");
+        btnAllEvents.setText("All Events (Loading...)");
 
         DatabaseHelper dbHelper = new DatabaseHelper(requireContext());
-        dbHelper.getUserCount(new DatabaseHelper.UserCountCallback() {
+
+        // Fetch entrant profile count and update button
+        dbHelper.getUserCount(new DatabaseHelper.CountCallback() {
             @Override
-            public void onUserCountFetched(int count) {
+            public void onCountFetched(int count) {
                 int adjustedCount = count - 1;
                 btnEntrantProfiles.setText("Entrant Profiles (" + adjustedCount + ")");
             }
@@ -50,7 +61,21 @@ public class AdminDashboardFragment extends Fragment {
             }
         });
 
-        // Navigate to respective fragments when buttons are clicked
+        // Fetch event count and update button
+        dbHelper.getEventCount(new DatabaseHelper.CountCallback() {
+            @Override
+            public void onCountFetched(int count) {
+                btnAllEvents.setText("All Events (" + count + ")");
+            }
+
+            @Override
+            public void onError(Exception e) {
+                Toast.makeText(getContext(), "Failed to retrieve event count", Toast.LENGTH_SHORT).show();
+                btnAllEvents.setText("All Events (Error)");
+            }
+        });
+
+        // Set click listeners to navigate to the respective fragments
         btnEntrantProfiles.setOnClickListener(v -> openFragment(AdminEntrantsProfilesFragment.newInstance()));
         btnFacilityProfiles.setOnClickListener(v -> openFragment(new AdminFacilitiesFragment()));
         btnAllEvents.setOnClickListener(v -> openFragment(new AdminEventsFragment()));
@@ -58,6 +83,11 @@ public class AdminDashboardFragment extends Fragment {
         return view;
     }
 
+    /**
+     * Replaces the current fragment with the provided fragment and adds the transaction to the back stack.
+     *
+     * @param fragment The fragment to display in the fragment container.
+     */
     private void openFragment(Fragment fragment) {
         requireActivity().getSupportFragmentManager()
                 .beginTransaction()

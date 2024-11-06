@@ -27,7 +27,8 @@ import java.util.List;
 /**
  * Fragment for displaying event information within the admin dashboard.
  * <p>
- * Provides navigation to return to the AdminDashboardFragment when the back button is clicked.
+ * Provides options for viewing and managing events and dynamically retrieves
+ * organizer names for each event.
  */
 public class AdminEventsFragment extends Fragment implements OnActionListener {
 
@@ -35,7 +36,7 @@ public class AdminEventsFragment extends Fragment implements OnActionListener {
     private final List<AdminListItemModel> itemList = new ArrayList<>();
 
     /**
-     * Inflates the admin events layout and configures the back button for navigation.
+     * Inflates the admin events layout, initializes the RecyclerView adapter, and fetches events.
      *
      * @param inflater           LayoutInflater for inflating the fragment layout.
      * @param container          The container that this fragment will be attached to.
@@ -47,112 +48,126 @@ public class AdminEventsFragment extends Fragment implements OnActionListener {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.admin_list_fragment, container, false);
 
+        eventsAdapter = new AdminRecyclerViewAdapter(itemList, this);
+        eventsAdapter.setHideExpandableSection2(true); // Hide section 2 for events
+
         RecyclerView recyclerView = view.findViewById(R.id.adminRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.setAdapter(eventsAdapter);
 
-        fetchEvents();
+        fetchEvents(); // Fetch events and populate the list
 
         return view;
     }
 
+    /**
+     * Fetches all events from the database and dynamically retrieves organizer names for each event.
+     * Updates the RecyclerView adapter after each item is added.
+     */
     private void fetchEvents() {
         DatabaseHelper dbHelper = new DatabaseHelper(requireContext());
-        final String[] organizerName = new String[1];
         dbHelper.fetchAllEvents(new DatabaseHelper.EventsCallback() {
             @Override
             public void onEventsFetched(List<Event> events) {
-                itemList.clear();
+                itemList.clear(); // Clear the current list to refresh with new data
                 for (Event event : events) {
-                    /*dbHelper.fetchUserById(event.getOrganizerId(), new DatabaseHelper.UsersCallback() {
-                        @Override
-                        public void onUsersFetched(List<User> users) {
-                            //Do nothing
-                        }
-
+                    // Fetch each organizer’s name asynchronously based on the organizer ID
+                    dbHelper.fetchUserById(event.getOrganizerId(), new DatabaseHelper.UsersCallback() {
                         @Override
                         public void onUserFetched(User user) {
-                            organizerName[0] = "by " + user.getFirstName() + " " + user.getLastName();
+                            String organizerName = (user != null)
+                                    ? "by " + user.getFirstName() + " " + user.getLastName()
+                                    : "Organizer Not Found";
+
+                            // Add the event item to the list with organizer name
+                            itemList.add(new AdminListItemModel(
+                                    String.valueOf(event.getEventId()),
+                                    event.getEventName(),
+                                    organizerName,
+                                    "View Event Details",
+                                    "Delete Event",
+                                    ""
+                            ));
+                            eventsAdapter.notifyDataSetChanged();  // Notify adapter after each addition
                         }
 
                         @Override
                         public void onError(Exception e) {
-                            Toast.makeText(getContext(), "Failed to retrieve organizer for Event", Toast.LENGTH_SHORT).show();
-                            Log.e("DatabaseHelper", "Error retriveing organizer for event", e);
+                            Log.e("DatabaseHelper", "Error retrieving organizer for event", e);
+                            Toast.makeText(getContext(), "Failed to retrieve organizer", Toast.LENGTH_SHORT).show();
                         }
-                    });*/
-                    itemList.add(new AdminListItemModel(
-                            String.valueOf(event.getEventId()),
-                            event.getEventName(),
-                            "bob",//organizerName[0],  // Or other event-specific properties
-                            "View Event Details",
-                            "Delete Event",
-                            ""
-                    ));
-                }
-                eventsAdapter.notifyDataSetChanged();
-            }
 
-            @Override
-            public void onEventFetched(Event event) {
-                // Not needed for this implementation
+                        @Override
+                        public void onUsersFetched(List<User> users) {
+                            // Not used for this implementation
+                        }
+                    });
+                }
             }
 
             @Override
             public void onError(Exception e) {
-                Toast.makeText(getContext(), "Failed to retrieve all events", Toast.LENGTH_SHORT).show();
-                Log.e("DatabaseHelper", "Error retrieving events", e);
+                Log.e("DatabaseHelper", "Error fetching events", e);
+                Toast.makeText(getContext(), "Failed to retrieve events", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onEventFetched(Event event) {
+                // Not used for this implementation
             }
         });
-
-
     }
-    // Implement the action listener methods for handling button clicks
+
+    /**
+     * Handles the click action for the first option in the expandable menu.
+     *
+     * @param strEventId The event ID in String format.
+     */
     @Override
     public void onOptionOneClick(String strEventId) {
         int eventId = Integer.parseInt(strEventId);
-        DatabaseHelper dbHelper = new DatabaseHelper(requireContext());
         Toast.makeText(getContext(), "Viewing Event details for event " + eventId, Toast.LENGTH_SHORT).show();
     }
 
+    /**
+     * Handles the click action for the second option in the expandable menu.
+     * Deletes the selected event from the database.
+     *
+     * @param strEventId The event ID in String format.
+     */
     @Override
     public void onOptionTwoClick(String strEventId) {
         int eventId = Integer.parseInt(strEventId);
         DatabaseHelper dbHelper = new DatabaseHelper(requireContext());
         dbHelper.deleteEvent(eventId, new DatabaseHelper.EventsCallback() {
             @Override
-            public void onEventsFetched(List<Event> events) {
-                //do nothing
-            }
-
+            public void onEventsFetched(List<Event> events) { /* Do nothing */ }
             @Override
-            public void onEventFetched(Event event) {
-                //do nothing
-            }
-
+            public void onEventFetched(Event event) { /* Do nothing */ }
             @Override
-            public void onError(Exception e) {
-                //do nothing
-            }
+            public void onError(Exception e) { /* Handle error if needed */ }
         });
-        eventsAdapter.setExpandedPosition(-1);
-        eventsAdapter.notifyDataSetChanged();
+        eventsAdapter.setExpandedPosition(-1); // Collapse any expanded menus
+        eventsAdapter.notifyDataSetChanged(); // Refresh adapter
         Toast.makeText(getContext(), "Removing Event " + eventId, Toast.LENGTH_SHORT).show();
     }
 
+    /**
+     * Handles the click action for the third option in the expandable menu (unused).
+     *
+     * @param userId The user ID associated with the action.
+     */
     @Override
     public void onOptionThreeClick(String userId) {
-        // Handle "Remove User" action
-        // Example: Call a function to delete the user from the database
-        DatabaseHelper dbHelper = new DatabaseHelper(requireContext());
-        dbHelper.removeUser(userId);
-        eventsAdapter.setExpandedPosition(-1);
-        eventsAdapter.notifyDataSetChanged();
-        Toast.makeText(getContext(), "Removing user " + userId, Toast.LENGTH_SHORT).show();
+        // Unused in this fragment for events
     }
 
+    /**
+     * Creates a new instance of the AdminEntrantsProfilesFragment.
+     *
+     * @return A new AdminEntrantsProfilesFragment instance.
+     */
     public static AdminEntrantsProfilesFragment newInstance() {
         return new AdminEntrantsProfilesFragment();
     }
-
-
 }
