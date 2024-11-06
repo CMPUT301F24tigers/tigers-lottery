@@ -7,9 +7,9 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.example.tigers_lottery.models.*;
+import com.example.tigers_lottery.models.Event;
+import com.example.tigers_lottery.models.User;
 import com.example.tigers_lottery.utils.DeviceIDHelper;
-import com.google.android.gms.common.api.internal.StatusCallback;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -25,13 +25,12 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
-
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Random;
 import java.util.UUID;
 
 
@@ -966,6 +965,61 @@ public class DatabaseHelper {
             }
         }).addOnFailureListener(e -> {
             Log.e("Firestore", "Error retrieving document");
+        });
+    }
+
+    /**
+     * Method to add an entrant to a waitlist using the eventId of the event.
+     * User is added to waitlist if they are not already a part of it.
+     *
+     * @param eventId to be joined
+     * @param userId current user that wants to join the waitlist
+     * @param callback handles the results of the method
+     */
+
+    public void addEntrantWaitlist(int eventId, String userId, EventsCallback callback){
+        fetchEventById(eventId, new EventsCallback() {
+            /**
+             * Required, unused.
+             * @param events
+             */
+            @Override
+            public void onEventsFetched(List<Event> events) {
+
+            }
+
+            /**
+             * Adds the user to the waitlisted entrants list through the database if the user
+             * is not already a part of the event.
+             *
+             * @param event to be joined
+             */
+            @Override
+            public void onEventFetched(Event event) {
+            List<String> waitlistedEntrants = event.getWaitlistedEntrants();
+            if(!waitlistedEntrants.contains(userId)){
+                waitlistedEntrants.add(userId);
+
+                eventsRef.document(Integer.toString(eventId))
+                        .update("waitlisted_entrants", waitlistedEntrants)
+                        .addOnSuccessListener(aVoid ->{
+                            callback.onEventFetched(event);
+                        }).addOnFailureListener(callback::onError);
+            } else {
+                callback.onError(new Exception("Entrant alr in waitlist"));
+            }
+
+            }
+
+            /**
+             *
+             * @param e exception catcher.
+             */
+
+            @Override
+            public void onError(Exception e) {
+                callback.onError(e);
+            }
         });
     }
 }
