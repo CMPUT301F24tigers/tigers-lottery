@@ -7,9 +7,9 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.example.tigers_lottery.models.*;
+import com.example.tigers_lottery.models.Event;
+import com.example.tigers_lottery.models.User;
 import com.example.tigers_lottery.utils.DeviceIDHelper;
-import com.google.android.gms.common.api.internal.StatusCallback;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -25,13 +25,12 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
-
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Random;
 import java.util.UUID;
 
 
@@ -47,6 +46,7 @@ public class DatabaseHelper {
     private CollectionReference eventsRef;
     private CollectionReference usersRef;
     private CollectionReference adminsRef;
+    private CollectionReference adminAuthCodesRef;
 
     private String currentUserId;
     private StorageReference storageReference;
@@ -60,6 +60,7 @@ public class DatabaseHelper {
         eventsRef = db.collection("events"); // Reference to "events" collection
         usersRef = db.collection("users");   // Reference to "users" collection
         adminsRef = db.collection("admins"); //Reference to the "admin: collection
+        adminAuthCodesRef = db.collection("admin_auth_codes"); //Reference to the "admin_auth_codes" collection
         storageReference = FirebaseStorage.getInstance().getReference("profile_images");
 
         // Retrieve and store the Device ID as the currentUserId
@@ -78,11 +79,12 @@ public class DatabaseHelper {
 
     public interface UsersCallback {
         void onUsersFetched(List<User> users);
+        void onUserFetched(User user);
         void onError(Exception e);
     }
 
-    public interface UserCountCallback {
-        void onUserCountFetched(int count);
+    public interface CountCallback {
+        void onCountFetched(int count);
         void onError(Exception e);
     }
 
@@ -98,8 +100,99 @@ public class DatabaseHelper {
 
     public interface StatusCallback {
         void onStatusUpdated();
-
         void onError(Exception e);
+    }
+
+    public interface Callback {
+        void onSuccess(String message);
+        void onFailure(Exception e);
+    }
+
+    // Callback interface for verifying the admin code
+    public interface VerificationCallback {
+        void onResult(boolean exists);
+        void onError(Exception e);
+    }
+
+    /**
+     * Checks if a user with the given userId exists in the admins collection.
+     *
+     * @param userId The ID of the user to check.
+     * @param callback A callback that returns true if the user exists, false otherwise.
+     */
+    public void isAdminUser(String userId, final VerificationCallback callback) {
+        Log.e("DatabaseHelper", "Checking admin status for userId: " + userId); // Log userId being checked
+        adminsRef.document(userId).get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot document = task.getResult();
+                        if (document != null && document.exists()) {
+                            Log.e("DatabaseHelper", "User is admin: " + userId); // Log if user is admin
+                            callback.onResult(true); // User exists in admins collection
+                        } else {
+                            Log.e("DatabaseHelper", "User is not admin: " + userId); // Log if user is not admin
+                            callback.onResult(false); // User does not exist in admins collection
+                        }
+                    } else {
+                        Log.e("DatabaseHelper", "Error checking admin status for userId: " + userId, task.getException());
+                        callback.onError(task.getException());
+                    }
+                });
+    }
+
+    /**
+     * Stores a generated admin code in the 'admin_auth_codes' collection.
+     *
+     * @param generatedCode The code to store in Firestore.
+     * @param callback Callback to handle success or failure.
+     */
+    public void storeAdminAuthCode(String generatedCode, final Callback callback) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("timestamp", com.google.firebase.firestore.FieldValue.serverTimestamp());
+
+        adminAuthCodesRef.document(generatedCode)
+                .set(data)
+                .addOnSuccessListener(aVoid -> callback.onSuccess("Admin Auth Code Stored"))
+                .addOnFailureListener(callback::onFailure);
+    }
+
+    /**
+     * Adds a user to the 'admins' collection in Firestore.
+     * Deletes the admin auth code from 'admin_auth_codes' after successful admin addition.
+     *
+     * @param deviceId The device ID to add as an admin.
+     * @param authCode The admin auth code to delete after verification.
+     * @param callback Callback to handle success or failure.
+     */
+    public void addUserToAdmins(String deviceId, String authCode, final Callback callback) {
+        adminsRef.document(deviceId).set(new HashMap<>())
+                .addOnSuccessListener(aVoid -> {
+                    deleteAdminAuthCode(authCode, new Callback() {
+                        @Override
+                        public void onSuccess(String message) {
+                            Log.d("DatabaseHelper", "User " + deviceId +" has been added as an Admin");
+                            callback.onSuccess("User successfully added as Admin");
+                        }
+
+                        @Override
+                        public void onFailure(Exception e) {
+                            Log.d("DatabaseHelper", "Failed to add User " + deviceId +" as an Admin", e);
+                        }
+                    });
+                })
+                .addOnFailureListener(callback::onFailure);
+    }
+
+    /**
+     * This method removes unused admin authentication codes
+     * @param code - auth that needs to be removed
+     * @param callback - Callback to handle success or failure.
+     */
+    public void deleteAdminAuthCode(String code, final Callback callback) {
+        adminAuthCodesRef.document(code)
+                .delete()
+                .addOnSuccessListener(aVoid -> callback.onSuccess("Admin code deleted successfully"))
+                .addOnFailureListener(callback::onFailure);
     }
 
     /**
@@ -234,7 +327,6 @@ public class DatabaseHelper {
         return String.valueOf(uniqueId);
     }
 
-
     /** Update the hosted events field for a user when they create an event and become the organizer of it
      *
      *
@@ -267,31 +359,37 @@ public class DatabaseHelper {
     }
 
 
-    /**
-     * Fetch all events from the events collection without any conditions.
-     * The @param line was throwing an error so I got rid of it for now --- FIX ALL THAT LATER
-     */
-    public void fetchAllEvents(final EventsCallback callback) {
-        eventsRef.addSnapshotListener(new EventListener<QuerySnapshot>() {
-            @Override
-            public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException e) {
-                if (e != null) {
-                    Log.w(TAG, "Error fetching events.", e);
-                    callback.onError(e); // Pass error to callback
-                    return;
-                }
-
-                List<Event> events = new ArrayList<>();
-                if (value != null) {
-                    for (QueryDocumentSnapshot doc : value) {
-                        Event event = doc.toObject(Event.class); // Automatic mapping to Event object
-                        events.add(event);
-                    }
-                }
-                callback.onEventsFetched(events); // Pass fetched events to callback
+    public void getEventCount(final CountCallback callback) {
+        eventsRef.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                int eventCount = task.getResult().size();
+                callback.onCountFetched(eventCount);
+            } else {
+                callback.onError(task.getException());
             }
         });
     }
+  
+    
+     /**
+     * Fetch all events from the events collection without any conditions.
+     * The @param line was throwing an error so I got rid of it for now --- FIX ALL THAT LATER
+     */
+     public void fetchAllEvents(final EventsCallback callback) {
+         eventsRef.get()
+                 .addOnCompleteListener(task -> {
+                     if (task.isSuccessful()) {
+                         List<Event> events = new ArrayList<>();
+                         for (QueryDocumentSnapshot doc : task.getResult()) {
+                             Event event = doc.toObject(Event.class);
+                             events.add(event);
+                         }
+                         callback.onEventsFetched(events); // Pass the list of events to the callback
+                     } else {
+                         callback.onError(task.getException()); // Handle any errors
+                     }
+                 });
+     }
 
     /**
      * Deletes a particular event
@@ -716,6 +814,39 @@ public class DatabaseHelper {
         }
     }
 
+    /**
+     * Grabs a user from the users collection by the userID
+     * @param userId - Device of that linked user
+     * @param callback - callback interface for users
+     */
+    public void fetchUserById(String userId, final UsersCallback callback) {
+        usersRef.whereEqualTo("user_id", userId).get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        List<DocumentSnapshot> documents = task.getResult().getDocuments();
+
+                        if (documents != null && !documents.isEmpty()) {
+                            if (documents.size() == 1) {
+                                // If exactly one user is found, map it to the User class
+                                User user = documents.get(0).toObject(User.class);
+                                callback.onUserFetched(user);
+                            } else {
+                                // If multiple users are found for the same ID, return placeholder user
+                                User user = new User();
+                                user.setFirstName("No Organizer Found");
+                                callback.onUserFetched(user);
+                            }
+                        } else {
+                            // No documents found; return placeholder user
+                            User user = new User();
+                            user.setFirstName("No Organizer Found");
+                            callback.onUserFetched(user);
+                        }
+                    } else {
+                        callback.onError(task.getException());
+                    }
+                });
+    }
 
     /**
      * Chekc if the user exists in the database
@@ -748,13 +879,13 @@ public class DatabaseHelper {
      *
      * @param callback The callback to handle the user count or error.
      */
-    public void getUserCount(final UserCountCallback callback) {
+    public void getUserCount(final CountCallback callback) {
         usersRef.get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         QuerySnapshot snapshot = task.getResult();
                         int userCount = (snapshot != null) ? snapshot.size() : 0;
-                        callback.onUserCountFetched(userCount);
+                        callback.onCountFetched(userCount);
                     } else {
                         Log.e(TAG, "Error fetching user count", task.getException());
                         callback.onError(task.getException());
@@ -1040,6 +1171,61 @@ public class DatabaseHelper {
             }
         }).addOnFailureListener(e -> {
             Log.e("Firestore", "Error retrieving document");
+        });
+    }
+
+    /**
+     * Method to add an entrant to a waitlist using the eventId of the event.
+     * User is added to waitlist if they are not already a part of it.
+     *
+     * @param eventId to be joined
+     * @param userId current user that wants to join the waitlist
+     * @param callback handles the results of the method
+     */
+
+    public void addEntrantWaitlist(int eventId, String userId, EventsCallback callback){
+        fetchEventById(eventId, new EventsCallback() {
+            /**
+             * Required, unused.
+             * @param events
+             */
+            @Override
+            public void onEventsFetched(List<Event> events) {
+
+            }
+
+            /**
+             * Adds the user to the waitlisted entrants list through the database if the user
+             * is not already a part of the event.
+             *
+             * @param event to be joined
+             */
+            @Override
+            public void onEventFetched(Event event) {
+            List<String> waitlistedEntrants = event.getWaitlistedEntrants();
+            if(!waitlistedEntrants.contains(userId)){
+                waitlistedEntrants.add(userId);
+
+                eventsRef.document(Integer.toString(eventId))
+                        .update("waitlisted_entrants", waitlistedEntrants)
+                        .addOnSuccessListener(aVoid ->{
+                            callback.onEventFetched(event);
+                        }).addOnFailureListener(callback::onError);
+            } else {
+                callback.onError(new Exception("Entrant alr in waitlist"));
+            }
+
+            }
+
+            /**
+             *
+             * @param e exception catcher.
+             */
+
+            @Override
+            public void onError(Exception e) {
+                callback.onError(e);
+            }
         });
     }
 }

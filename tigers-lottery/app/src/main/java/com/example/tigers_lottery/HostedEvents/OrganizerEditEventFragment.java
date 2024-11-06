@@ -10,6 +10,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -23,6 +24,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import androidx.fragment.app.Fragment;
+
 import com.example.tigers_lottery.DatabaseHelper;
 import com.example.tigers_lottery.R;
 import com.example.tigers_lottery.models.Event;
@@ -35,6 +38,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * Fragment for editing an event's details within the organizer dashboard.
+ * allows for inputs from the organizer and initializes the dbHelper to find the event's
+ * current details
+ */
 public class OrganizerEditEventFragment extends Fragment {
 
     private EditText inputEventName, inputEventLocation, inputRegistrationOpens, inputRegistrationDeadline, inputEventDate, inputEventDescription, inputWaitlistLimit, inputOccupantLimit;
@@ -43,6 +51,7 @@ public class OrganizerEditEventFragment extends Fragment {
     private DatabaseHelper dbHelper;
     private Event event; // Store the event being edited
 
+
     private ImageView imagePoster;
     private TextView photoPlaceholderText;
     private Uri imageUri;
@@ -50,9 +59,27 @@ public class OrganizerEditEventFragment extends Fragment {
     private StorageReference storageReference;
     private boolean isImageUpdated = false;
 
+    /**
+     * Required empty public constructor
+     */
     public OrganizerEditEventFragment() {
-        // Required empty public constructor
     }
+
+    /**
+     * Inflates the layout of the edit event screen, retrieves event details from arguments
+     * initializes the databaseHelper, and the button to save changes to the event details
+     *
+     *
+     * @param inflater The LayoutInflater object that can be used to inflate
+     * any views in the fragment,
+     * @param container If non-null, this is the parent view that the fragment's
+     * UI should be attached to.  The fragment should not add the view itself,
+     * but this can be used to generate the LayoutParams of the view.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed
+     * from a previous saved state as given here.
+     *
+     * @return
+     */
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -103,6 +130,7 @@ public class OrganizerEditEventFragment extends Fragment {
 
         return view;
     }
+
 
     private void fetchEventById(int eventId) {
         dbHelper.fetchEventById(eventId, new DatabaseHelper.EventsCallback() {
@@ -157,6 +185,10 @@ public class OrganizerEditEventFragment extends Fragment {
 
 
 
+    /**
+     * Loads the stored event data and populates the edit text fields.
+     * @param event to be edited.
+     */
     private void loadEventData(Event event) {
         // Populate input fields with event data
         inputEventName.setText(event.getEventName());
@@ -191,6 +223,10 @@ public class OrganizerEditEventFragment extends Fragment {
                 .into(imageView);
     }
 
+    /**
+     * Validates inputs and saves the entries, event is then repopulated
+     * and updated.
+     */
     private void saveEvent() {
         // Capture updated values from user input
         String eventName = inputEventName.getText().toString().trim();
@@ -313,20 +349,34 @@ public class OrganizerEditEventFragment extends Fragment {
             updateEventInDatabase(); // Save event without updating the poster
         }
 
-
     }
 
     private void updateEventInDatabase() {
+        // Updates the event's fields using DatabaseHelper
         dbHelper.updateEvent(event, new DatabaseHelper.EventsCallback() {
+            /**
+             * Navigates back to the dashboard and displays the organizer's events
+             * @param events list of events from the organizer.
+             */
             @Override
             public void onEventsFetched(List<Event> events) {
                 Toast.makeText(getContext(), "Event updated successfully", Toast.LENGTH_SHORT).show();
                 requireActivity().getSupportFragmentManager().popBackStack();
             }
 
+            /**
+             * Unused in this fragment.
+             * @param event single event.
+             */
+
             @Override
             public void onEventFetched(Event event) {
             }
+
+            /**
+             * Handles error during event updating.
+             * @param e exception catcher for event updating.
+             */
 
             @Override
             public void onError(Exception e) {
@@ -335,10 +385,23 @@ public class OrganizerEditEventFragment extends Fragment {
         });
     }
 
+    /**
+     * Converts the date from timestamp to string format.
+     * @param timestamp format of the date.
+     * @return string version of the date.
+     */
+
     private String formatTimestamp(Timestamp timestamp) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         return dateFormat.format(timestamp.toDate());
     }
+
+    /**
+     * Converts the date from string to timestamp format.
+     *
+     * @param date the valid date.
+     * @return a timestamp format of the date.
+     */
 
     private Timestamp convertToTimestamp(String date) {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
@@ -350,6 +413,12 @@ public class OrganizerEditEventFragment extends Fragment {
             return Timestamp.now(); // Fallback to current time
         }
     }
+
+    /**
+     * Validates the date format inputted
+     * @param date in the format "YYYY-MM-DD"
+     * @return true if the date is valid. false otherwise.
+     */
 
     private boolean isValidDateFormat(String date) {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());

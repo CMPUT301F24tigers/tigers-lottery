@@ -6,6 +6,7 @@ import android.os.Bundle;
 import com.example.tigers_lottery.Admin.AdminDashboardFragment;
 import com.example.tigers_lottery.HostedEvents.OrganizerDashboardFragment;
 import com.example.tigers_lottery.JoinedEvents.EntrantDashboardFragment;
+import com.example.tigers_lottery.utils.DeviceIDHelper;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
 
@@ -13,6 +14,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
@@ -32,11 +34,6 @@ public class MainActivity extends AppCompatActivity {
     ImageButton editProfile;
 
     /**
-     * Database helper instance to check if the user's profile exists.
-     */
-    private DatabaseHelper dbHelpter;
-
-    /**
      * Called when the activity is first created. Sets up the UI components,
      * checks if the user's profile exists, and configures the bottom navigation bar.
      *
@@ -48,11 +45,16 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
 
+        String deviceId = DeviceIDHelper.getDeviceId(this);
         editProfile = findViewById(R.id.profileButton);
-        dbHelpter = new DatabaseHelper(getApplicationContext());
+        DatabaseHelper dbHelper = new DatabaseHelper(getApplicationContext());
+
+        // BottomNavigationView setup
+        BottomNavigationView bottomNav = findViewById(R.id.nav_view);
+        MenuItem adminMenuItem = bottomNav.getMenu().findItem(R.id.navigation_admin);
 
         // Check if the user profile exists; if not, navigate to CreateEntrantProfileActivity
-        dbHelpter.checkUserExists(new DatabaseHelper.ProfileCallback() {
+        dbHelper.checkUserExists(new DatabaseHelper.ProfileCallback() {
             @Override
             public void onProfileExists() {
                 // Profile exists; no action needed
@@ -65,7 +67,30 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        BottomNavigationView bottomNav = findViewById(R.id.nav_view);
+        // Initially hide the admin menu item
+        if (adminMenuItem != null) {
+            adminMenuItem.setVisible(false);
+        }
+
+        // Check if the device ID exists in the admins collection
+        dbHelper.isAdminUser(deviceId, new DatabaseHelper.VerificationCallback() {
+            @Override
+            public void onResult(boolean exists) {
+                Log.e("DatabaseHelper", "Is Admin User: " + exists);
+
+                if (adminMenuItem != null && exists) {
+                    adminMenuItem.setVisible(true);
+                }
+
+                Log.e("DatabaseHelper", "Admin status verification complete.");
+            }
+
+            @Override
+            public void onError(Exception e) {
+                Log.e("DatabaseHelper", "Error verifying Admin Status", e);
+            }
+        });
+
         loadFragment(new EntrantDashboardFragment());
 
         // Set up listener for bottom navigation to switch between fragments
@@ -80,8 +105,7 @@ public class MainActivity extends AppCompatActivity {
                 } else if (item.getItemId() == R.id.navigation_organizer) {
                     selectedFragment = new OrganizerDashboardFragment();
                 }
-                loadFragment(selectedFragment);
-                return true;
+                return loadFragment(selectedFragment);
             }
         });
 

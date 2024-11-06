@@ -14,12 +14,25 @@ import com.example.tigers_lottery.R;
 import com.example.tigers_lottery.models.Event;
 import java.util.List;
 
+/**
+ * Adapter for displaying a list of events held by the organizer.
+ */
+
 public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHolder> {
 
     private final List<Event> events;
     private final Context context;
     private final OnEventOptionSelectedListener optionSelectedListener;
     private final OnEventClickListener eventClickListener;
+
+    /**
+     * Constructor for EventAdapter
+     *
+     * @param context Context in which the adapter is used.
+     * @param events EventList to display.
+     * @param optionListener Listener for event option selection.
+     * @param eventClickListener Listener for event click action.
+     */
 
     // Constructor for the adapter, including both listeners
     public EventAdapter(Context context, List<Event> events, OnEventOptionSelectedListener optionListener, OnEventClickListener eventClickListener) {
@@ -29,12 +42,32 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
         this.eventClickListener = eventClickListener;
     }
 
+    /**
+     * Creates a new ViewHolder for EventView
+     *
+     * @param parent The ViewGroup into which the new View will be added after it is bound to
+     *               an adapter position.
+     * @param viewType The view type of the new View.
+     *
+     * @return inflated new instance of EventViewHolder.
+     */
+
     @NonNull
     @Override
     public EventViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.event_item, parent, false);
         return new EventViewHolder(view);
     }
+
+    /**
+     * Binds the event Name,Date,Id,OrganizerId,waitlistLimit, and Geolocation
+     * to the its position.
+     *
+     * @param holder The ViewHolder which should be updated to represent the contents of the
+     *        item at the given position in the data set.
+     * @param position The position of the item within the adapter's data set.
+     */
+
 
     @Override
     public void onBindViewHolder(@NonNull EventViewHolder holder, int position) {
@@ -72,15 +105,30 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
         holder.itemView.setOnClickListener(v -> eventClickListener.onEventClick(event));
     }
 
+    /**
+     * Gets the amount of events in the view.
+     *
+     * @return the number of events.
+     */
+
     @Override
     public int getItemCount() {
         return events.size();
     }
 
-    // ViewHolder class to hold each item view
+    /**
+     * ViewHolder class for holding each item view.
+     */
+
     static class EventViewHolder extends RecyclerView.ViewHolder {
         TextView eventName, eventDate, eventId, organizerId, waitlistLimit, eventGeolocation;
         ImageView optionsMenu;
+
+        /**
+         * Constructor for EventViewHolder,initializes textViews for all event details.
+         *
+         * @param itemView represents a single event.
+         */
 
         public EventViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -94,13 +142,19 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
         }
     }
 
-    // Interface for handling edit and delete actions
+    /**
+     * Interface for handling edit and delete actions.
+     */
+
     public interface OnEventOptionSelectedListener {
         void onEditSelected(Event event);
         void onDeleteSelected(Event event);
     }
 
-    // Interface for handling event item clicks
+    /**
+     * Interface for handling event item clicks.
+     */
+
     public interface OnEventClickListener {
         void onEventClick(Event event);
     }

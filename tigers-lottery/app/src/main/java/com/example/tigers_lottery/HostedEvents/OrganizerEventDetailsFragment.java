@@ -1,6 +1,7 @@
 package com.example.tigers_lottery.HostedEvents;
 
 import android.os.Bundle;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -15,6 +16,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+
 import com.example.tigers_lottery.DatabaseHelper;
 import com.example.tigers_lottery.R;
 import com.example.tigers_lottery.models.Event;
@@ -24,6 +29,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * Fragment used by the organizer to view their event's details.
+ */
 public class OrganizerEventDetailsFragment extends Fragment {
 
     private static final String ARG_EVENT_ID = "event_id";
@@ -38,7 +46,19 @@ public class OrganizerEventDetailsFragment extends Fragment {
     private ImageView eventPoster;
     private Button viewRegisteredEntrants, viewWaitlistedEntrants, viewInvitedEntrants, viewDeclinedEntrants, runLotteryButton;
 
+    /**
+     * Required empty public constructor.
+     */
+
     public OrganizerEventDetailsFragment() {}
+
+    /**
+     * Creates a new instance of the organizer's event details identifying the event
+     * to be seen by its id.
+     *
+     * @param eventId to identify which event to setup the details page for.
+     * @return fragment of the specific event's details
+     */
 
     public static OrganizerEventDetailsFragment newInstance(int eventId) {
         OrganizerEventDetailsFragment fragment = new OrganizerEventDetailsFragment();
@@ -48,6 +68,13 @@ public class OrganizerEventDetailsFragment extends Fragment {
         return fragment;
     }
 
+    /**
+     * Initializes the databaseHelper and retrieves the arguments for the event using its
+     * eventID.
+     * @param savedInstanceState If the fragment is being re-created from
+     * a previous saved state, this is the state.
+     */
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,6 +83,21 @@ public class OrganizerEventDetailsFragment extends Fragment {
         }
         dbHelper = new DatabaseHelper(requireContext());
     }
+
+    /**
+     * Inflates the layout of the event details screen, runs the button listeners
+     * and loads the event details.
+     *
+     * @param inflater The LayoutInflater object that can be used to inflate
+     * any views in the fragment,
+     * @param container If non-null, this is the parent view that the fragment's
+     * UI should be attached to.  The fragment should not add the view itself,
+     * but this can be used to generate the LayoutParams of the view.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed
+     * from a previous saved state as given here.
+     *
+     * @return the view for the fragment's UI.
+     */
 
     @Nullable
     @Override
@@ -87,8 +129,18 @@ public class OrganizerEventDetailsFragment extends Fragment {
         return view;
     }
 
+    /**
+     * Loads the event details using the databaseHelper instance and the eventId.
+     */
+
     private void loadEventDetails() {
         dbHelper.fetchEventById(eventId, new DatabaseHelper.EventsCallback() {
+            /**
+             * Handles event fetching from db, if loaded successfully the lottery
+             * button becomes available.
+             *
+             * @param fetchedEvent whose details are to be taken
+             */
             @Override
             public void onEventFetched(Event fetchedEvent) {
                 if (fetchedEvent != null) {
@@ -103,10 +155,20 @@ public class OrganizerEventDetailsFragment extends Fragment {
                 }
             }
 
+            /**
+             * Unused, required.
+             * @param events organizer's list of events.
+             */
+
             @Override
             public void onEventsFetched(List<Event> events) {
                 // Not used here
             }
+
+            /**
+             * Handles error during event detail loading.
+             * @param e exception catcher for event creation.
+             */
 
             @Override
             public void onError(Exception e) {
@@ -115,6 +177,14 @@ public class OrganizerEventDetailsFragment extends Fragment {
             }
         });
     }
+
+    /**
+     * Sets the event's details to the specific fields, and displays them.
+     * Required entrant lists are initialized if they are null. If the lottery is ran;
+     * Invited entrants is initialized, otherwise it is untouched.
+     *
+     * @param event whose details have to be displayed
+     */
 
 
     private void displayEventDetails(Event event) {
@@ -154,7 +224,9 @@ public class OrganizerEventDetailsFragment extends Fragment {
     }
 
 
-
+    /**
+     * Button listeners for getting to entrant list screens tied to the event.
+     */
     private void setupButtonListeners() {
         viewRegisteredEntrants.setOnClickListener(v -> openEntrantFragment(new OrganizerRegisteredEntrantsFragment()));
         viewWaitlistedEntrants.setOnClickListener(v -> openEntrantFragment(new OrganizerWaitingListFragment()));
@@ -162,6 +234,11 @@ public class OrganizerEventDetailsFragment extends Fragment {
         viewDeclinedEntrants.setOnClickListener(v -> openEntrantFragment(new OrganizerDeclinedEntrantsFragment()));
     }
 
+    /**
+     * Sets up the lottery button, the lottery is set to run automatically if it is
+     * exactly 1 day from the event and the lottery hasn't been ran. The button is enabled
+     * if the waiting list has been closed and the event has not happened.
+     */
 
     private void setupLotteryButton() {
         Timestamp currentTimestamp = Timestamp.now();
@@ -196,6 +273,10 @@ public class OrganizerEventDetailsFragment extends Fragment {
         }
     }
 
+    /**
+     * Runs the lottery system fetching from the list of waitlisted entrants under the limit.
+     * The database is then updated with the invited entrants and the lottery is marked as ran.
+     */
 
 
     private void runLottery() {
@@ -205,6 +286,10 @@ public class OrganizerEventDetailsFragment extends Fragment {
         }
 
         dbHelper.fetchWaitlistedEntrants(event.getEventId(), new DatabaseHelper.EntrantsCallback() {
+            /**
+             * Selects random entrants with the databaseHelper using
+             * @param waitlistedEntrants list of entrants in the waitingList for the event.
+             */
             @Override
             public void onEntrantsFetched(List<String> waitlistedEntrants) {
                 int occupantLimit = event.getOccupantLimit();
@@ -212,6 +297,10 @@ public class OrganizerEventDetailsFragment extends Fragment {
 
                 // Update Firestore with invited entrants and mark lottery as run
                 dbHelper.updateInvitedEntrantsAndSetLotteryRan(event.getEventId(), invitedEntrants, new DatabaseHelper.EventsCallback() {
+                    /**
+                     * The runLottery button is disabled and the lottery is marked as ran.
+                     * @param events organizer's events
+                     */
                     @Override
                     public void onEventsFetched(List<Event> events) {
                         Toast.makeText(getContext(), "Lottery run successfully!", Toast.LENGTH_SHORT).show();
@@ -219,8 +308,18 @@ public class OrganizerEventDetailsFragment extends Fragment {
                         event.setLotteryRan(true); // Mark the event's lottery as run
                     }
 
+                    /**
+                     * Unused, required.
+                     * @param event selected.
+                     */
+
                     @Override
                     public void onEventFetched(Event event) { }
+
+                    /**
+                     * Handles error when running the lottery.
+                     * @param e exception catcher for event creation.
+                     */
 
                     @Override
                     public void onError(Exception e) {
@@ -229,6 +328,11 @@ public class OrganizerEventDetailsFragment extends Fragment {
                 });
             }
 
+            /**
+             * Handles error when fetching the waitlist.
+             * @param e exception catcher for waitlist fetching.
+             */
+
             @Override
             public void onError(Exception e) {
                 Toast.makeText(getContext(), "Error fetching waitlisted entrants", Toast.LENGTH_SHORT).show();
@@ -236,7 +340,9 @@ public class OrganizerEventDetailsFragment extends Fragment {
         });
     }
 
-
+    /**
+     * Handles the decline choice for the entrants.
+     */
     private void setupDeclineListener() {
         dbHelper.addDeclineListener(eventId, new DatabaseHelper.DeclineCallback() {
             @Override

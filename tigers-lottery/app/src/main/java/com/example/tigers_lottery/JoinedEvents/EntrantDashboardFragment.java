@@ -1,13 +1,19 @@
 package com.example.tigers_lottery.JoinedEvents;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
+import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -76,9 +82,17 @@ public class EntrantDashboardFragment extends Fragment {
 
         LinearLayout eventsListLinearLayout = view.findViewById(R.id.linear_layout_events_list);
         dbHelper = new DatabaseHelper(getContext());
+        Button joinEventButton = view.findViewById(R.id.join_event_button);
 
         LayoutInflater layoutInflater = LayoutInflater.from(getContext());
         List<Event> entrantsEvents = new ArrayList<>();
+
+        joinEventButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                entrantIdInput();
+            }
+        });
 
         dbHelper.entrantFetchEvents(new DatabaseHelper.EventsCallback() {
             @SuppressLint({"SetTextI18n", "SimpleDateFormat"})
@@ -128,6 +142,7 @@ public class EntrantDashboardFragment extends Fragment {
                         }
                     });
 
+
                     eventsListLinearLayout.addView(eventView);
                 }
             }
@@ -144,5 +159,70 @@ public class EntrantDashboardFragment extends Fragment {
         });
 
         return view;
+
+    }
+
+    /**
+     * Handles the input for an event by the entrant. Invalid Ids do not have any effect.
+     */
+    private void entrantIdInput(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle("Enter an eventId");
+
+        String deviceId = dbHelper.getCurrentUserId();
+        final EditText input = new EditText(getActivity());
+        input.setInputType(InputType.TYPE_CLASS_NUMBER);
+        builder.setView(input);
+
+        builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                String entered = input.getText().toString();
+                if(!entered.isEmpty()){
+                    try{
+                        int eventId = Integer.parseInt(entered);
+                        dbHelper.addEntrantWaitlist(eventId, deviceId, new DatabaseHelper.EventsCallback() {
+                            /**
+                             * Required, unused.
+                             * @param events
+                             */
+                            @Override
+                            public void onEventsFetched(List<Event> events) {
+
+                            }
+
+                            /**
+                             * Pops a message up if the entrant joined the waiting list successfully
+                             * @param event to be joined
+                             */
+                            @Override
+                            public void onEventFetched(Event event) {
+                                Toast.makeText(getActivity(), "Worked!", Toast.LENGTH_SHORT).show();
+
+                            }
+
+                            /**
+                             * Error handling for an invalid event id.
+                             * @param e exception catcher.
+                             */
+
+                            @Override
+                            public void onError(Exception e) {
+                                Toast.makeText(getActivity(), "Didn't Work!", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+
+                    } catch (NumberFormatException e){
+                }} else{
+
+                    }
+            }
+        }); builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.cancel();
+            }
+        });
+        builder.show();
     }
 }

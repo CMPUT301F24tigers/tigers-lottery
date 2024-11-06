@@ -13,7 +13,26 @@ import androidx.fragment.app.Fragment;
 
 import com.example.tigers_lottery.R;
 
+
+/**
+ * Organizer view of the QRCode for their event. The organizer has
+ * access to a button to regenerate to a new unique QRCode.
+ */
 public class OrganizerQRCodeFragment extends Fragment {
+    /**
+     * Inflates the layout for the image displaying the QRCode, and the button to regenerate
+     * the QRCode.
+     *
+     * @param inflater The LayoutInflater object that can be used to inflate
+     * any views in the fragment,
+     * @param container If non-null, this is the parent view that the fragment's
+     * UI should be attached to.  The fragment should not add the view itself,
+     * but this can be used to generate the LayoutParams of the view.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed
+     * from a previous saved state as given here.
+     *
+     * @return the fragment view's UI.
+     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,

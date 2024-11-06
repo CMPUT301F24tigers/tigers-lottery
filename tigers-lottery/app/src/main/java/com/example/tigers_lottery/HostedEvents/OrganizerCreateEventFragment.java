@@ -9,6 +9,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -21,6 +22,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.fragment.app.Fragment;
+
 import com.example.tigers_lottery.DatabaseHelper;
 import com.example.tigers_lottery.R;
 import com.example.tigers_lottery.models.Event;
@@ -32,6 +35,10 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+
+/**
+ * Fragment used by the organizer to create a new event.
+ */
 
 public class OrganizerCreateEventFragment extends Fragment {
 
@@ -47,9 +54,27 @@ public class OrganizerCreateEventFragment extends Fragment {
 
 
 
+    /**
+     * Required empty public constructor
+     */
+
     public OrganizerCreateEventFragment() {
-        // Required empty public constructor
     }
+
+    /**
+     * Inflates the layout of the create event screen, allows
+     * for inputs from the organizer and initializes the dbHelper.
+     *
+     * @param inflater The LayoutInflater object that can be used to inflate
+     * any views in the fragment,
+     * @param container If non-null, this is the parent view that the fragment's
+     * UI should be attached to.  The fragment should not add the view itself,
+     * but this can be used to generate the LayoutParams of the view.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed
+     * from a previous saved state as given here.
+     *
+     * @return the view for the fragment's UI.
+     */
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -97,10 +122,19 @@ public class OrganizerCreateEventFragment extends Fragment {
         });
 
         // Set click listener for Create Event button
-        btnCreateEvent.setOnClickListener(v -> createEvent());
+        btnCreateEvent.setOnClickListener(
+                v -> createEvent()
+
+        );
 
         return view;
     }
+
+    /**
+     * Creates a new event using the input parameters and validates the entries
+     * Event is then populated and organizerId is set from current userId
+     */
+
 
     private void createEvent() {
         // Capture user input
@@ -241,17 +275,29 @@ public class OrganizerCreateEventFragment extends Fragment {
     // Helper method to save the event
     private void saveEvent(Event event) {
         dbHelper.createEvent(event, new DatabaseHelper.EventsCallback() {
+            /**
+             * Navigates back to the dashboard and displays the organizer's events.
+             * @param events list of events from the organizer.
+             */
             @Override
             public void onEventsFetched(List<Event> events) {
                 Toast.makeText(getContext(), "Event created successfully!", Toast.LENGTH_SHORT).show();
-                // Navigate back to the dashboard
                 requireActivity().getSupportFragmentManager().popBackStack();
             }
 
+            /**
+             * Unused in this fragment.
+             * @param event single event.
+             */
+
             @Override
             public void onEventFetched(Event event) {
-                // Not used in this fragment
             }
+
+            /**
+             * Handles error during event creation.
+             * @param e exception catcher for event creation.
+             */
 
             @Override
             public void onError(Exception e) {
@@ -259,6 +305,12 @@ public class OrganizerCreateEventFragment extends Fragment {
             }
         });
     }
+
+    /**
+     * Validates the date format inputted.
+     * @param date in the format "YYYY-MM-DD"
+     * @return true if the date is valid. false otherwise.
+     */
 
     private boolean isValidDateFormat(String date) {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
@@ -270,6 +322,13 @@ public class OrganizerCreateEventFragment extends Fragment {
             return false;  // Date format is invalid
         }
     }
+
+    /**
+     * Converts the date from string into timestamp format.
+     *
+     * @param date the valid date.
+     * @return a timestamp format of the date.
+     */
 
     private Timestamp convertToTimestamp(String date) {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
