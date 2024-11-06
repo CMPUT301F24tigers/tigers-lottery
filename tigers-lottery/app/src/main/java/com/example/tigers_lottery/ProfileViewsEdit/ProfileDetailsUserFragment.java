@@ -164,6 +164,22 @@ public class ProfileDetailsUserFragment extends Fragment {
                 fragmentTransaction.commit();
             }
         });
+
+        dbHelper.isAdminUser(deviceId, new DatabaseHelper.VerificationCallback() {
+            @Override
+            public void onResult(boolean exists) {
+                if(exists){
+                    adminVerifyBtn.setVisibility(View.GONE);
+                } else {
+                    adminVerifyBtn.setVisibility(View.VISIBLE);
+                }
+            }
+
+            @Override
+            public void onError(Exception e) {
+                Log.d("ProfileDetailsUserFragment", "Couldn't check if user " + deviceId + " is an Admin");
+            }
+        });
         setupAdminVerifyButton();
 
         return view;
@@ -228,12 +244,12 @@ public class ProfileDetailsUserFragment extends Fragment {
             dbHelper.deleteAdminAuthCode(authCode, new DatabaseHelper.Callback() {
                 @Override
                 public void onSuccess(String message) {
-                    Log.d("DatabaseHelper", "Admin code deleted upon cancel");
+                    Log.d("ProfileDetailsUserFragment", "Admin code deleted upon cancel");
                 }
 
                 @Override
                 public void onFailure(Exception e) {
-                    Log.e("DatabaseHelper", "Failed to delete admin code on cancel", e);
+                    Log.e("ProfileDetailsUserFragment", "Failed to delete admin code on cancel", e);
                 }
             });
             dialog.dismiss();
