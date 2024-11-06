@@ -9,7 +9,6 @@ import androidx.annotation.Nullable;
 
 import com.example.tigers_lottery.models.*;
 import com.example.tigers_lottery.utils.DeviceIDHelper;
-import com.google.android.gms.common.api.internal.StatusCallback;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -47,6 +46,7 @@ public class DatabaseHelper {
     private CollectionReference eventsRef;
     private CollectionReference usersRef;
     private CollectionReference adminsRef;
+    private CollectionReference adminAuthCodesRef;
 
     private String currentUserId;
     private StorageReference storageReference;
@@ -60,6 +60,7 @@ public class DatabaseHelper {
         eventsRef = db.collection("events"); // Reference to "events" collection
         usersRef = db.collection("users");   // Reference to "users" collection
         adminsRef = db.collection("admins"); //Reference to the "admin: collection
+        adminAuthCodesRef = db.collection("admin_auth_codes"); //Reference to the "admin_auth_codes" collection
         storageReference = FirebaseStorage.getInstance().getReference("profile_images");
 
         // Retrieve and store the Device ID as the currentUserId
@@ -98,8 +99,99 @@ public class DatabaseHelper {
 
     public interface StatusCallback {
         void onStatusUpdated();
-
         void onError(Exception e);
+    }
+
+    public interface Callback {
+        void onSuccess(String message);
+        void onFailure(Exception e);
+    }
+
+    // Callback interface for verifying the admin code
+    public interface VerificationCallback {
+        void onResult(boolean exists);
+        void onError(Exception e);
+    }
+
+    /**
+     * Checks if a user with the given userId exists in the admins collection.
+     *
+     * @param userId The ID of the user to check.
+     * @param callback A callback that returns true if the user exists, false otherwise.
+     */
+    public void isAdminUser(String userId, final VerificationCallback callback) {
+        Log.e("DatabaseHelper", "Checking admin status for userId: " + userId); // Log userId being checked
+        adminsRef.document(userId).get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot document = task.getResult();
+                        if (document != null && document.exists()) {
+                            Log.e("DatabaseHelper", "User is admin: " + userId); // Log if user is admin
+                            callback.onResult(true); // User exists in admins collection
+                        } else {
+                            Log.e("DatabaseHelper", "User is not admin: " + userId); // Log if user is not admin
+                            callback.onResult(false); // User does not exist in admins collection
+                        }
+                    } else {
+                        Log.e("DatabaseHelper", "Error checking admin status for userId: " + userId, task.getException());
+                        callback.onError(task.getException());
+                    }
+                });
+    }
+
+    /**
+     * Stores a generated admin code in the 'admin_auth_codes' collection.
+     *
+     * @param generatedCode The code to store in Firestore.
+     * @param callback Callback to handle success or failure.
+     */
+    public void storeAdminAuthCode(String generatedCode, final Callback callback) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("timestamp", com.google.firebase.firestore.FieldValue.serverTimestamp());
+
+        adminAuthCodesRef.document(generatedCode)
+                .set(data)
+                .addOnSuccessListener(aVoid -> callback.onSuccess("Admin Auth Code Stored"))
+                .addOnFailureListener(callback::onFailure);
+    }
+
+    /**
+     * Adds a user to the 'admins' collection in Firestore.
+     * Deletes the admin auth code from 'admin_auth_codes' after successful admin addition.
+     *
+     * @param deviceId The device ID to add as an admin.
+     * @param authCode The admin auth code to delete after verification.
+     * @param callback Callback to handle success or failure.
+     */
+    public void addUserToAdmins(String deviceId, String authCode, final Callback callback) {
+        adminsRef.document(deviceId).set(new HashMap<>())
+                .addOnSuccessListener(aVoid -> {
+                    deleteAdminAuthCode(authCode, new Callback() {
+                        @Override
+                        public void onSuccess(String message) {
+                            Log.d("DatabaseHelper", "User " + deviceId +" has been added as an Admin");
+                            callback.onSuccess("User successfully added as Admin");
+                        }
+
+                        @Override
+                        public void onFailure(Exception e) {
+                            Log.d("DatabaseHelper", "Failed to add User " + deviceId +" as an Admin", e);
+                        }
+                    });
+                })
+                .addOnFailureListener(callback::onFailure);
+    }
+
+    /**
+     * This method removes unused admin authentication codes
+     * @param code - auth that needs to be removed
+     * @param callback - Callback to handle success or failure.
+     */
+    public void deleteAdminAuthCode(String code, final Callback callback) {
+        adminAuthCodesRef.document(code)
+                .delete()
+                .addOnSuccessListener(aVoid -> callback.onSuccess("Admin code deleted successfully"))
+                .addOnFailureListener(callback::onFailure);
     }
 
     /**
