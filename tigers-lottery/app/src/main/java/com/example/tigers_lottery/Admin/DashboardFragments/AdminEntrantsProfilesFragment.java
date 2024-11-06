@@ -50,7 +50,7 @@ public class AdminEntrantsProfilesFragment extends Fragment implements OnActionL
                         itemList.add(new AdminListItemModel(
                                 user.getUserId(),
                                 user.getFirstName() + " " + user.getLastName(),
-                                user.getUserId(), //TODO Chathila: Change this to email later
+                                user.getEmailAddress(),
                                 "Remove Profile Photo",
                                 "View User Profile",
                                 "Remove User"

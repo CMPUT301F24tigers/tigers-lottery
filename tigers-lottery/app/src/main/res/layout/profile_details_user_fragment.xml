@@ -22,32 +22,32 @@
 
     <ImageView
         android:id="@+id/userProfilePic"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.53"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.166"
-        app:srcCompat="@drawable/baseline_account_circle_24"
         android:layout_width="111dp"
         android:layout_height="107dp"
-        tools:layout_editor_absoluteX="150dp"
-        tools:layout_editor_absoluteY="34dp" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.163"
+        app:srcCompat="@drawable/baseline_account_circle_24" />
 
     <TextView
         android:id="@+id/userName"
-        android:layout_width="112dp"
-        android:layout_height="17dp"
+        android:layout_width="324dp"
+        android:layout_height="34dp"
         android:text="user name"
         android:textAlignment="center"
+        android:textSize="25sp"
+        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.528"
+        app:layout_constraintHorizontal_bias="0.459"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.344" />
+        app:layout_constraintVertical_bias="0.299" />
 
     <LinearLayout
+        android:id="@+id/linearLayout"
         android:layout_width="320dp"
         android:layout_height="273dp"
         android:orientation="vertical"
@@ -64,13 +64,16 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="3sp"
             android:text="Email"
-            android:textColor="@color/gray" />
+            android:textColor="@color/gray"
+            android:textSize="16sp"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/userEmail"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="user email" />
+            android:text="user email"
+            android:textSize="16sp" />
 
         <TextView
             android:id="@+id/textView6"
@@ -79,13 +82,16 @@
             android:layout_marginTop="10dp"
             android:layout_marginBottom="3sp"
             android:text="Date of Birth"
-            android:textColor="@color/gray" />
+            android:textColor="@color/gray"
+            android:textSize="16sp"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/userBirthday"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="user birthday" />
+            android:text="user birthday"
+            android:textSize="16sp" />
 
         <TextView
             android:id="@+id/textView8"
@@ -94,26 +100,40 @@
             android:layout_marginTop="10dp"
             android:layout_marginBottom="3sp"
             android:text="Mobile Number"
-            android:textColor="@color/gray" />
+            android:textColor="@color/gray"
+            android:textSize="16sp"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/userMobile"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="user mobile" />
+            android:text="user mobile"
+            android:textSize="16sp" />
+
+        <Button
+            android:id="@+id/adminVerifyBtn"
+            android:layout_width="318dp"
+            android:layout_height="45dp"
+            android:layout_marginTop="65dp"
+            android:background="#00FFFFFF"
+            android:text="Are you an Admin ?"
+            android:textColor="#6750A4"
+            app:strokeColor="#AA00FF" />
 
     </LinearLayout>
 
+
     <Button
         android:id="@+id/editUserProfileButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="318dp"
+        android:layout_height="45dp"
+        android:layout_marginTop="12dp"
         android:text="Edit Profile"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.542"
+        app:layout_constraintHorizontal_bias="0.495"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.918" />
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout"
+        app:layout_goneMarginBottom="12dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
