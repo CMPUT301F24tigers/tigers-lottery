@@ -302,23 +302,73 @@ public class DatabaseHelper {
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful() && !task.getResult().isEmpty()) {
-                        //  event IDs are unique, so we can delete the first document found
-                        String documentId = task.getResult().getDocuments().get(0).getId();
-                        eventsRef.document(documentId).delete()
-                                .addOnSuccessListener(aVoid -> {
-                                    Log.d(TAG, "Event deleted successfully");
-                                    callback.onEventsFetched(null); // Notify deletion success
-                                })
-                                .addOnFailureListener(e -> {
-                                    Log.w(TAG, "Error deleting event", e);
-                                    callback.onError(e);
-                                });
+                        // Retrieve the event document to get the organizer ID
+                        DocumentSnapshot eventDoc = task.getResult().getDocuments().get(0);
+                        Event event = eventDoc.toObject(Event.class);
+
+                        if (event != null) {
+                            String organizerId = event.getOrganizerId(); // Get the organizer ID
+
+                            // Proceed to delete the event document
+                            eventsRef.document(eventDoc.getId()).delete()
+                                    .addOnSuccessListener(aVoid -> {
+                                        Log.d(TAG, "Event deleted successfully");
+
+                                        // Remove event ID from user records, including organizer’s hosted_events
+                                        removeEventFromUserRecords(eventId, organizerId, callback);
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        Log.w(TAG, "Error deleting event", e);
+                                        callback.onError(e);
+                                    });
+                        } else {
+                            callback.onError(new Exception("Event data missing"));
+                        }
                     } else {
                         callback.onError(new Exception("Event not found"));
                     }
                 })
                 .addOnFailureListener(callback::onError);
     }
+
+    /** removes event from an organizer's hosted events, and from an entrant's joined events
+     *
+     * @param eventId
+     * @param organizerId
+     * @param callback
+     */
+    private void removeEventFromUserRecords(int eventId, String organizerId, final EventsCallback callback) {
+        // Update organizer's hosted_events list
+        usersRef.document(organizerId).get().addOnSuccessListener(document -> {
+            if (document.exists()) {
+                User organizer = document.toObject(User.class);
+                if (organizer != null && organizer.getHostedEvents().contains(eventId)) {
+                    organizer.getHostedEvents().remove((Integer) eventId);
+                    usersRef.document(organizerId).update("hosted_events", organizer.getHostedEvents());
+                }
+            }
+        });
+
+        // Update each user's joined_events list
+        usersRef.whereArrayContains("joined_events", eventId).get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                for (DocumentSnapshot userDoc : task.getResult().getDocuments()) {
+                    User user = userDoc.toObject(User.class);
+                    if (user != null) {
+                        List<Integer> joinedEvents = user.getJoinedEvents();
+                        if (joinedEvents.contains(eventId)) {
+                            joinedEvents.remove((Integer) eventId);
+                            usersRef.document(user.getUserId()).update("joined_events", joinedEvents);
+                        }
+                    }
+                }
+                callback.onEventsFetched(null); // Notify once all updates complete
+            } else {
+                callback.onError(new Exception("Error updating users' joined_events lists"));
+            }
+        });
+    }
+
 
 
     /** Update an event
