@@ -21,11 +21,23 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * Fragment that displays a list of user profiles within the admin dashboard.
+ * This fragment enables the admin to view, remove profile photos, and delete user profiles.
+ */
 public class AdminEntrantsProfilesFragment extends Fragment implements OnActionListener {
 
     private AdminRecyclerViewAdapter userAdapter;
     private final List<AdminListItemModel> itemList = new ArrayList<>();
 
+    /**
+     * Inflates the layout for this fragment and initializes the RecyclerView with an adapter.
+     *
+     * @param inflater LayoutInflater to inflate views in the fragment.
+     * @param container The parent view that this fragment's UI should be attached to.
+     * @param savedInstanceState If non-null, this fragment is being re-created from a previous saved state.
+     * @return The View for the fragment's UI.
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.admin_list_fragment, container, false);
@@ -39,6 +51,10 @@ public class AdminEntrantsProfilesFragment extends Fragment implements OnActionL
         return view;
     }
 
+    /**
+     * Fetches all users from the database, populating the RecyclerView with user data.
+     * Excludes the current user from the displayed list of users.
+     */
     private void fetchUsers() {
         DatabaseHelper dbHelper = new DatabaseHelper(requireContext());
         dbHelper.fetchAllUsers(new DatabaseHelper.UsersCallback() {
@@ -61,8 +77,8 @@ public class AdminEntrantsProfilesFragment extends Fragment implements OnActionL
             }
 
             @Override
-            public void onUserFetched( User user){
-                //Do nothing
+            public void onUserFetched(User user) {
+                // Not implemented as it is not needed in this context.
             }
 
             @Override
@@ -73,27 +89,40 @@ public class AdminEntrantsProfilesFragment extends Fragment implements OnActionL
         });
     }
 
-    // Implement the action listener methods for handling button clicks
+    /**
+     * Handles the action to remove a profile photo for a specific user.
+     * This method is triggered when the "Remove Profile Photo" option is selected.
+     *
+     * @param userId The ID of the user whose profile photo will be removed.
+     */
     @Override
     public void onOptionOneClick(String userId) {
-        // Handle "Remove Profile Photo" action for the specified user
-        // Example: Call a function to remove the user's profile photo from the database
         DatabaseHelper dbHelper = new DatabaseHelper(requireContext());
         Toast.makeText(getContext(), "Removing profile photo for user " + userId, Toast.LENGTH_SHORT).show();
+        // Add further logic to remove the profile photo from the database or storage if required.
     }
 
+    /**
+     * Handles the action to view a specific user's profile.
+     * This method is triggered when the "View User Profile" option is selected.
+     *
+     * @param userId The ID of the user whose profile will be viewed.
+     */
     @Override
     public void onOptionTwoClick(String userId) {
-        // Handle "View User Profile" action
-        // Example: Navigate to the user profile detail view
         DatabaseHelper dbHelper = new DatabaseHelper(requireContext());
         Toast.makeText(getContext(), "Viewing profile for user " + userId, Toast.LENGTH_SHORT).show();
+        // Add logic to navigate to the user's profile details if required.
     }
 
+    /**
+     * Handles the action to remove a specific user from the database.
+     * This method is triggered when the "Remove User" option is selected.
+     *
+     * @param userId The ID of the user who will be removed.
+     */
     @Override
     public void onOptionThreeClick(String userId) {
-        // Handle "Remove User" action
-        // Example: Call a function to delete the user from the database
         DatabaseHelper dbHelper = new DatabaseHelper(requireContext());
         dbHelper.removeUser(userId);
         userAdapter.setExpandedPosition(-1);
@@ -101,6 +130,11 @@ public class AdminEntrantsProfilesFragment extends Fragment implements OnActionL
         Toast.makeText(getContext(), "Removing user " + userId, Toast.LENGTH_SHORT).show();
     }
 
+    /**
+     * Creates a new instance of the AdminEntrantsProfilesFragment.
+     *
+     * @return A new instance of AdminEntrantsProfilesFragment.
+     */
     public static AdminEntrantsProfilesFragment newInstance() {
         return new AdminEntrantsProfilesFragment();
     }

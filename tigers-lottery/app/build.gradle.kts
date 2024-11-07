@@ -38,6 +38,7 @@ android {
 dependencies {
 
     implementation("com.github.bumptech.glide:glide:4.15.0")
+    implementation(libs.fragment.testing)
     annotationProcessor("com.github.bumptech.glide:compiler:4.15.0")
     implementation ("commons-validator:commons-validator:1.9.0")
     implementation(libs.appcompat)
