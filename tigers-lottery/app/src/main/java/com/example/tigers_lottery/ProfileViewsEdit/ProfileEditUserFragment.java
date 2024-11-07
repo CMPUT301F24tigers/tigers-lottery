@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.provider.ContactsContract;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,12 +23,15 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.example.tigers_lottery.DatabaseHelper;
 import com.example.tigers_lottery.R;
+import com.example.tigers_lottery.models.User;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
@@ -127,7 +131,7 @@ public class ProfileEditUserFragment extends Fragment {
         editTextMobile = view.findViewById(R.id.editTextUserProfileMobile);
         Button saveChangesButton = view.findViewById(R.id.saveChangesUserProfileButton);
         ImageButton editProfilePhotoButton = view.findViewById(R.id.editUserProfilePhoto);
-
+        DatabaseHelper dbHelper = new DatabaseHelper(getContext());
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         FirebaseStorage storage = FirebaseStorage.getInstance();
 
@@ -136,6 +140,29 @@ public class ProfileEditUserFragment extends Fragment {
 
         assert getArguments() != null;
         String deviceId = getArguments().getString("deviceId");
+
+        dbHelper.getUser(new DatabaseHelper.UserCallback() {
+            @Override
+            public void onUserFetched(User user) {
+                editTextFirstName.setText(user.getFirstName());
+                editTextLastName.setText(user.getLastName());
+                editTextEmail.setText(user.getEmailAddress());
+                editTextDOB.setText(new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(user.getDateOfBirth().toDate()));
+                editTextMobile.setText(user.getPhoneNumber());
+
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTime(user.getDateOfBirth().toDate());
+
+                selectedYear = calendar.get(Calendar.YEAR);
+                selectedMonth = calendar.get(Calendar.MONTH)+1; // Months are 0-based, so add 1
+                selectedDay = calendar.get(Calendar.DAY_OF_MONTH);
+            }
+
+            @Override
+            public void onError(Exception e) {
+
+            }
+        });
 
         // Listener to save changes to Firestore and Firebase Storage
         saveChangesButton.setOnClickListener(new View.OnClickListener() {
@@ -146,7 +173,7 @@ public class ProfileEditUserFragment extends Fragment {
                 if (selectedMonth != null && selectedDay != null && selectedYear != null) {
                     Calendar calendar = Calendar.getInstance();
                     calendar.set(Calendar.DAY_OF_MONTH, selectedDay);
-                    calendar.set(Calendar.MONTH, selectedMonth);
+                    calendar.set(Calendar.MONTH, selectedMonth-1);
                     calendar.set(Calendar.YEAR, selectedYear);
 
                     // Set time components to zero to represent only the date
@@ -155,6 +182,11 @@ public class ProfileEditUserFragment extends Fragment {
                     calendar.set(Calendar.SECOND, 0);
                     calendar.set(Calendar.MILLISECOND, 0);
                     date = calendar.getTime();
+                }
+
+                if(validatingUserProfileInput(editTextFirstName.getText().toString(), editTextLastName.getText().toString(), editTextEmail.getText().toString(), date)) {
+                    Toast.makeText(getContext(), "Every field except for Phone Number must be filled!", Toast.LENGTH_LONG).show();
+                    return;
                 }
                 
                 // Update user information in Firestore
@@ -244,5 +276,9 @@ public class ProfileEditUserFragment extends Fragment {
 
         datePickerDialog.getDatePicker().setMaxDate(calendar.getTimeInMillis());
         datePickerDialog.show();
+    }
+
+    public boolean validatingUserProfileInput(String firstName, String lastName, String email, Date date) {
+        return (Objects.equals(firstName, "") || Objects.equals(lastName, "") || Objects.equals(email, "") || date == null);
     }
 }

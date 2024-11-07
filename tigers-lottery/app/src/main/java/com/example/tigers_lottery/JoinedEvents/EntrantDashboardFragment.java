@@ -199,6 +199,16 @@ public class EntrantDashboardFragment extends Fragment {
                             public void onEventFetched(Event event) {
                                 Toast.makeText(getActivity(), "Worked!", Toast.LENGTH_SHORT).show();
 
+
+                                FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+                                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+                                Fragment transitionedFragment = new EntrantDashboardFragment();
+
+                                fragmentTransaction.replace(R.id.main_activity_fragment_container, transitionedFragment);
+                                fragmentTransaction.addToBackStack(null);
+                                fragmentTransaction.commit();
+
                             }
 
                             /**
