@@ -32,6 +32,7 @@ public class EntrantDashboardFragmentActionsTest {
     public ActivityScenarioRule<MainActivity> activityScenarioRule = new ActivityScenarioRule<>(MainActivity.class);
     private FragmentManager fragmentManager;
 
+
     @Before
     public void setUp() {
         ActivityScenario<MainActivity> scenario = activityScenarioRule.getScenario();

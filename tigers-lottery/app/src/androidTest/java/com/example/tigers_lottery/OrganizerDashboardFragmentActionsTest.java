@@ -63,6 +63,7 @@ public class OrganizerDashboardFragmentActionsTest {
         onView(withId(R.id.inputWaitlistLimit)).check(matches(isDisplayed()));
         onView(withId(R.id.inputWaitlistLimit)).perform(typeText("100"));
         Espresso.closeSoftKeyboard();
+
         onView(withId(R.id.btnCreateEvent)).perform(click());
     }
 

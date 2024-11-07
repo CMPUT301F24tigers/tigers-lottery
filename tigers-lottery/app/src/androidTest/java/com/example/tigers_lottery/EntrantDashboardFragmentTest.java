@@ -23,6 +23,7 @@ public class EntrantDashboardFragmentTest {
         onView(withId(R.id.navigation_entrant)).perform(click());
         // Check if the RecyclerView in the EntrantDashboardFragment is displayed
         onView(withId(R.id.scrollViewEntrants)).check(matches(isDisplayed()));
+
     }
     @Test
     public void testButtonDisplay () {

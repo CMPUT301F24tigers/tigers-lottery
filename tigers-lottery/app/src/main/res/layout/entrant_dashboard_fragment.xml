@@ -10,7 +10,6 @@
         android:layout_width="408dp"
         android:layout_height="649dp"
         android:id="@+id/scrollViewEntrants"
-
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
