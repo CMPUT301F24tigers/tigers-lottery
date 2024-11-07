@@ -1,6 +1,12 @@
 package com.example.tigers_lottery.HostedEvents;
 
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import com.bumptech.glide.Glide;
+
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -111,6 +117,8 @@ public class OrganizerEventDetailsFragment extends Fragment {
         viewInvitedEntrants = view.findViewById(R.id.viewInvitedEntrants);
         viewDeclinedEntrants = view.findViewById(R.id.viewDeclinedEntrants);
         runLotteryButton = view.findViewById(R.id.runLotteryButton);
+        eventPoster = view.findViewById(R.id.eventPoster);
+
 
         // Fetch and display event details
         loadEventDetails();
@@ -204,6 +212,14 @@ public class OrganizerEventDetailsFragment extends Fragment {
             if (event.getInvitedEntrants() == null) {
                 event.setInvitedEntrants(new ArrayList<>());
             }
+        }
+
+        // Load the poster image if URL is available
+        if (event.getPosterUrl() != null && !event.getPosterUrl().isEmpty()) {
+            Glide.with(this)
+                    .load(event.getPosterUrl())
+                    .placeholder(R.drawable.placeholder_image_background) // find a better background later
+                    .into(eventPoster);
         }
     }
 

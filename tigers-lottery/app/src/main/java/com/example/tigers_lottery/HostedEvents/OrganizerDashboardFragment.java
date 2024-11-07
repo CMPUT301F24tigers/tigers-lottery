@@ -147,7 +147,7 @@ public class OrganizerDashboardFragment extends Fragment implements EventAdapter
     public void onEditSelected(Event event) {
         OrganizerEditEventFragment editFragment = new OrganizerEditEventFragment();
         Bundle args = new Bundle();
-        args.putSerializable("event", event);
+        args.putInt("eventId", event.getEventId()); // Pass only the event ID; if we pass the whole object we get timestamp not parcelable problems
         editFragment.setArguments(args);
 
         requireActivity().getSupportFragmentManager().beginTransaction()

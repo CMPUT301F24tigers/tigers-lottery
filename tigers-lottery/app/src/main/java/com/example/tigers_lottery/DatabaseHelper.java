@@ -299,6 +299,10 @@ public class DatabaseHelper {
                 .set(event)
                 .addOnSuccessListener(aVoid -> {
                     Log.d(TAG, "Event created successfully with event_id: " + uniqueEventId);
+
+                    // Update the organizer's hosted events after creating the event
+                    updateHostedEventsForOrganizer(event.getOrganizerId(), event.getEventId());
+
                     // Notify success by passing the created event
                     callback.onEventsFetched(List.of(event));
                 })
@@ -314,7 +318,7 @@ public class DatabaseHelper {
                 });
     }
 
-  
+
     /**
      * Helper function to generate unique ID.
      */
@@ -322,6 +326,38 @@ public class DatabaseHelper {
         int uniqueId = 10000 + new Random().nextInt(90000); // Generates a number between 10000 and 99999
         return String.valueOf(uniqueId);
     }
+
+    /** Update the hosted events field for a user when they create an event and become the organizer of it
+     *
+     *
+     * @param organizerId
+     * @param eventId
+     */
+    private void updateHostedEventsForOrganizer(String organizerId, int eventId) {
+        usersRef.document(organizerId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        // Get the current list of hosted events
+                        List<Integer> hostedEvents = (List<Integer>) documentSnapshot.get("hosted_events");
+                        if (hostedEvents == null) {
+                            hostedEvents = new ArrayList<>();
+                        }
+                        // Add the new event ID to the list
+                        hostedEvents.add(eventId);
+
+                        // Update the user's document with the new list of hosted events
+                        usersRef.document(organizerId)
+                                .update("hosted_events", hostedEvents)
+                                .addOnSuccessListener(aVoid -> Log.d(TAG, "Successfully updated hosted events for organizer"))
+                                .addOnFailureListener(e -> Log.e(TAG, "Error updating hosted events", e));
+                    } else {
+                        Log.e(TAG, "Organizer document not found");
+                    }
+                })
+                .addOnFailureListener(e -> Log.e(TAG, "Failed to fetch organizer document", e));
+    }
+
 
     public void getEventCount(final CountCallback callback) {
         eventsRef.get().addOnCompleteListener(task -> {
@@ -361,26 +397,76 @@ public class DatabaseHelper {
      */
     public void deleteEvent(int eventId, final EventsCallback callback) {
         eventsRef.whereEqualTo("event_id", eventId)
-            .get()
-            .addOnCompleteListener(task -> {
-                if (task.isSuccessful() && !task.getResult().isEmpty()) {
-                    //  event IDs are unique, so we can delete the first document found
-                    String documentId = task.getResult().getDocuments().get(0).getId();
-                    eventsRef.document(documentId).delete()
-                            .addOnSuccessListener(aVoid -> {
-                                Log.d(TAG, "Event deleted successfully");
-                                callback.onEventsFetched(null); // Notify deletion success
-                            })
-                            .addOnFailureListener(e -> {
-                                Log.w(TAG, "Error deleting event", e);
-                                callback.onError(e);
-                            });
-                } else {
-                    callback.onError(new Exception("Event not found"));
-                }
-            })
-            .addOnFailureListener(callback::onError);
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                        // Retrieve the event document to get the organizer ID
+                        DocumentSnapshot eventDoc = task.getResult().getDocuments().get(0);
+                        Event event = eventDoc.toObject(Event.class);
+
+                        if (event != null) {
+                            String organizerId = event.getOrganizerId(); // Get the organizer ID
+
+                            // Proceed to delete the event document
+                            eventsRef.document(eventDoc.getId()).delete()
+                                    .addOnSuccessListener(aVoid -> {
+                                        Log.d(TAG, "Event deleted successfully");
+
+                                        // Remove event ID from user records, including organizer’s hosted_events
+                                        removeEventFromUserRecords(eventId, organizerId, callback);
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        Log.w(TAG, "Error deleting event", e);
+                                        callback.onError(e);
+                                    });
+                        } else {
+                            callback.onError(new Exception("Event data missing"));
+                        }
+                    } else {
+                        callback.onError(new Exception("Event not found"));
+                    }
+                })
+                .addOnFailureListener(callback::onError);
     }
+
+    /** removes event from an organizer's hosted events, and from an entrant's joined events
+     *
+     * @param eventId
+     * @param organizerId
+     * @param callback
+     */
+    private void removeEventFromUserRecords(int eventId, String organizerId, final EventsCallback callback) {
+        // Update organizer's hosted_events list
+        usersRef.document(organizerId).get().addOnSuccessListener(document -> {
+            if (document.exists()) {
+                User organizer = document.toObject(User.class);
+                if (organizer != null && organizer.getHostedEvents().contains(eventId)) {
+                    organizer.getHostedEvents().remove((Integer) eventId);
+                    usersRef.document(organizerId).update("hosted_events", organizer.getHostedEvents());
+                }
+            }
+        });
+
+        // Update each user's joined_events list
+        usersRef.whereArrayContains("joined_events", eventId).get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                for (DocumentSnapshot userDoc : task.getResult().getDocuments()) {
+                    User user = userDoc.toObject(User.class);
+                    if (user != null) {
+                        List<Integer> joinedEvents = user.getJoinedEvents();
+                        if (joinedEvents.contains(eventId)) {
+                            joinedEvents.remove((Integer) eventId);
+                            usersRef.document(user.getUserId()).update("joined_events", joinedEvents);
+                        }
+                    }
+                }
+                callback.onEventsFetched(null); // Notify once all updates complete
+            } else {
+                callback.onError(new Exception("Error updating users' joined_events lists"));
+            }
+        });
+    }
+
 
 
     /** Update an event
@@ -918,6 +1004,33 @@ public class DatabaseHelper {
                     }
                 });
     }
+
+    /** uploads image to firebase storage and passes url back to callback
+     *
+     * @param imageUri
+     * @param callback
+     */
+    public void uploadPosterImageToFirebase(Uri imageUri, UploadCallback callback) {
+        String fileName = "event_posters/" + UUID.randomUUID().toString() + ".jpg";
+        StorageReference fileRef = storageReference.child(fileName);
+
+        // Upload the image to Firebase Storage
+        fileRef.putFile(imageUri)
+                .addOnSuccessListener(taskSnapshot -> fileRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                    String downloadUrl = uri.toString();
+                    callback.onUploadSuccess(downloadUrl);  // Pass the URL back to the callback
+                }))
+                .addOnFailureListener(e -> {
+                    callback.onUploadFailure(e);  // Pass the error back to the callback
+                });
+    }
+
+    // callback for upload functionality
+    public interface UploadCallback {
+        void onUploadSuccess(String downloadUrl);
+        void onUploadFailure(Exception e);
+    }
+
 
     public void entrantFetchEvents(EventsCallback callback) {
         List<Event> entrantsEvents = new ArrayList<>();

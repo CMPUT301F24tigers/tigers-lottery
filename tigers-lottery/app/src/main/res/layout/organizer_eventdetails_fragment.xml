@@ -27,14 +27,15 @@
             android:background="#D3D3D3"
             android:layout_marginBottom="16dp">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Poster Placeholder"
-                android:textSize="16sp"
-                android:layout_gravity="center"
-                android:textColor="#808080" />
+            <!-- ImageView for displaying the event poster -->
+            <ImageView
+                android:id="@+id/eventPoster"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop" />
+
         </FrameLayout>
+
 
         <!-- Event Description in a box -->
         <TextView
