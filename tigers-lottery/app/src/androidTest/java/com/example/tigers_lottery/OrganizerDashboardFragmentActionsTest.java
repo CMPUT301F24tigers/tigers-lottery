@@ -110,7 +110,6 @@ public class OrganizerDashboardFragmentActionsTest {
     public void testEInvitedEntrantsTest() {
         onView(withId(R.id.navigation_organizer)).perform(click());
         onView(withText("Test Running Event")).perform(ViewActions.click());
-
         onView(withId(R.id.viewInvitedEntrants)).perform(click());
         onView(withId(R.id.invitedEntrantsTitle)).check(matches(isDisplayed()));
         onView(withId(R.id.invitedEntrantsRecyclerView)).check(matches(withEffectiveVisibility(GONE)));

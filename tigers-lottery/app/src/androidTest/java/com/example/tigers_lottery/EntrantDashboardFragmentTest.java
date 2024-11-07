@@ -24,7 +24,6 @@ public class EntrantDashboardFragmentTest {
         // Check if the RecyclerView in the EntrantDashboardFragment is displayed
         onView(withId(R.id.scrollViewEntrants)).check(matches(isDisplayed()));
     }
-
     @Test
     public void testButtonDisplay () {
 

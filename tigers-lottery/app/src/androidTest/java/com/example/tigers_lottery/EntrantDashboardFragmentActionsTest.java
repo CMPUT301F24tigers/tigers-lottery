@@ -66,7 +66,6 @@ public class EntrantDashboardFragmentActionsTest {
         onView(withId(R.id.eventDetailsTextViewDate)).check(matches(isDisplayed()));
         onView(withId(R.id.eventDetailsTextViewRegistrationDeadline)).check(matches(isDisplayed()));
         onView(withId(R.id.eventDetailsTextViewStatus)).check(matches(isDisplayed()));
-
     }
 
     @Test
