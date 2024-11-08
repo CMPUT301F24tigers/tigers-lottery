@@ -15,6 +15,7 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -807,6 +808,34 @@ public class DatabaseHelper {
                 });
             }
         }).addOnFailureListener(e -> Log.e("DatabaseHelper", "Error fetching event document", e));
+    }
+
+
+    /**
+     * Clears the waitlisted, invited, and declined entrants lists for a given event.
+     *
+     * @param eventId   The ID of the event whose lists need to be cleared.
+     * @param callback  The EventsCallback to handle success or failure.
+     */
+    public void clearEventLists(int eventId, EventsCallback callback) {
+        // Reference to the event document in Firestore
+        DocumentReference eventRef = eventsRef.document(String.valueOf(eventId));
+
+        // Create an empty list to clear the lists in Firestore
+        List<String> emptyList = new ArrayList<>();
+
+        // Update the Firestore document with empty lists for the specified fields
+        eventRef.update("waitlisted_entrants", emptyList,
+                        "invited_entrants", emptyList,
+                        "declined_entrants", emptyList)
+                .addOnSuccessListener(aVoid -> {
+                    Log.d(TAG, "Successfully cleared event lists for event ID: " + eventId);
+                    callback.onEventsFetched(null);  // Trigger callback on success
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error clearing event lists for event ID: " + eventId, e);
+                    callback.onError(e);  // Trigger error callback
+                });
     }
 
 

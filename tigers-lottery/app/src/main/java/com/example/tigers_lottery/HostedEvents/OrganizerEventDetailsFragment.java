@@ -44,7 +44,7 @@ public class OrganizerEventDetailsFragment extends Fragment {
     // UI Components
     private TextView eventTitle, eventDescription, eventLocation, waitlistOpenDate, waitlistCloseDate, eventDate, waitlistLimit;
     private ImageView eventPoster;
-    private Button viewRegisteredEntrants, viewWaitlistedEntrants, viewInvitedEntrants, viewDeclinedEntrants, runLotteryButton;
+    private Button viewRegisteredEntrants, viewWaitlistedEntrants, viewInvitedEntrants, viewDeclinedEntrants, runLotteryButton, clearListsButton;
 
     /**
      * Required empty public constructor.
@@ -118,7 +118,7 @@ public class OrganizerEventDetailsFragment extends Fragment {
         viewDeclinedEntrants = view.findViewById(R.id.viewDeclinedEntrants);
         runLotteryButton = view.findViewById(R.id.runLotteryButton);
         eventPoster = view.findViewById(R.id.eventPoster);
-
+        clearListsButton = view.findViewById(R.id.clearListsButton);
 
         // Fetch and display event details
         loadEventDetails();
@@ -148,7 +148,8 @@ public class OrganizerEventDetailsFragment extends Fragment {
                     displayEventDetails(event);
                     setupLotteryButton();
                     setupDeclineListener();
-                    Log.d("EventDetails", "Event data loaded successfully"); // Log for debugging
+                    setupClearListsButton();
+                    Log.d("EventDetails", "Event data loaded successfully");
                 } else {
                     Toast.makeText(getContext(), "Event not found", Toast.LENGTH_SHORT).show();
                     requireActivity().getSupportFragmentManager().popBackStack();
@@ -221,6 +222,42 @@ public class OrganizerEventDetailsFragment extends Fragment {
                     .placeholder(R.drawable.placeholder_image_background) // find a better background later
                     .into(eventPoster);
         }
+    }
+
+    private void setupClearListsButton() {
+        Timestamp currentTimestamp = Timestamp.now();
+
+        // Enable the button only if the event date has passed
+        if (currentTimestamp.compareTo(event.getEventDate()) >= 0) {
+            clearListsButton.setEnabled(true);
+            clearListsButton.setOnClickListener(v -> clearEntrantLists());
+        } else {
+            clearListsButton.setEnabled(false);
+        }
+    }
+
+    private void clearEntrantLists() {
+        event.setWaitlistedEntrants(new ArrayList<>()); // Clear the lists in the Event object
+        event.setInvitedEntrants(new ArrayList<>());
+        event.setDeclinedEntrants(new ArrayList<>());
+
+        dbHelper.clearEventLists(event.getEventId(), new DatabaseHelper.EventsCallback() {
+            @Override
+            public void onEventsFetched(List<Event> events) {
+                Toast.makeText(getContext(), "Lists cleared successfully!", Toast.LENGTH_SHORT).show();
+                clearListsButton.setEnabled(false); // Disable after clearing
+            }
+
+            @Override
+            public void onEventFetched(Event event) {
+                // Not used in this context
+            }
+
+            @Override
+            public void onError(Exception e) {
+                Toast.makeText(getContext(), "Error clearing lists: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
 
@@ -428,7 +465,7 @@ public class OrganizerEventDetailsFragment extends Fragment {
     /**
      * Helper function to select a random entrant from waitlistedEntrants
      * (similar to the method in db helper but this is simpler as its just for 1 entrant
-      * @param waitlistedEntrants list of entrants in the waitlist
+     * @param waitlistedEntrants list of entrants in the waitlist
      * @return id of the chosen waitlisted entrant
      */
     private String selectRandomEntrant(List<String> waitlistedEntrants) {
