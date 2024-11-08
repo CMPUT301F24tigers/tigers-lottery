@@ -10,6 +10,35 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * Class representing an event in the Tigers Lottery application.
+ * This class holds details about an event, such as its name, organizer, location, date,
+ * and lists of entrants in various states (registered, waitlisted, invited, declined).
+ * It also includes various flags for managing the event's registration process and its waitlist.
+ * The properties in this class are annotated with @PropertyName for seamless mapping to Firestore fields.
+ *
+ * <ul>
+ *   <li>eventId: A unique identifier for the event defaulting to -1.</li>
+ *   <li>eventName: The name of the event defaulting to "Unnamed Event".</li>
+ *   <li>geolocation: The geographical location of the event, represented as a GeoPoint defaulting to(0.0, 0.0).</li>
+ *   <li>organizerId: The unique identifier of the event's organizer defaulting to "".</li>
+ *   <li>posterUrl: The URL for the event's poster image defaulting to "https://example.com/default-poster.png".</li>
+ *   <li>eventDate: The date and time of the event defaulting to current timestamp.</li>
+ *   <li>waitlistOpenDate: The date when the waitlist opens for the event defaulting to current timestamp.</li>
+ *   <li>waitlistDeadline: The deadline for the waitlist defaulting to current timestamp.</li>
+ *   <li>waitlistLimit: The maximum number of people allowed on the waitlist defaulting to 100.</li>
+ *   <li>waitlistLimitFlag: A flag indicating whether a limit is applied to the waitlist defaulting to false.</li>
+ *   <li>location: The location of the event defaulting to "Location not specified".</li>
+ *   <li>description: Description of the event defaulting to"No description available".</li>
+ *   <li>registeredEntrants: List of IDs representing entrants who are registered for the event.</li>
+ *   <li>waitlistedEntrants: List of IDs representing entrants who are waitlisted for the event.</li>
+ *   <li>invitedEntrants: List of IDs representing entrants who have been invited to the event.</li>
+ *   <li>declinedEntrants: List of IDs representing entrants who have declined the event invitation.</li>
+ *   <li>occupantLimit: The maximum number of people allowed to attend the event defaulting to 0.</li>
+ *   <li>isLotteryRan: A flag indicating whether the lottery for the event has been run defaulting to false.</li>
+ * </ul>
+ */
+
 public class Event implements Serializable {
     @PropertyName("event_id")
     private int eventId = -1;

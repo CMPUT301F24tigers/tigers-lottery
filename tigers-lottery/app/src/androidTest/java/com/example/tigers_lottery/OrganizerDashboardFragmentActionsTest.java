@@ -1,25 +1,37 @@
 package com.example.tigers_lottery;
 
 import static androidx.test.espresso.Espresso.onView;
+import static androidx.test.espresso.action.ViewActions.clearText;
 import static androidx.test.espresso.action.ViewActions.click;
+import static androidx.test.espresso.action.ViewActions.scrollTo;
 import static androidx.test.espresso.action.ViewActions.typeText;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.ViewMatchers.Visibility.GONE;
+import static androidx.test.espresso.matcher.ViewMatchers.hasDescendant;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static androidx.test.espresso.matcher.ViewMatchers.isRoot;
 import static androidx.test.espresso.matcher.ViewMatchers.withEffectiveVisibility;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 import static org.junit.Assert.assertTrue;
 
+import android.view.View;
+import android.widget.EditText;
+
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.test.core.app.ActivityScenario;
 import androidx.test.espresso.Espresso;
 import androidx.test.espresso.action.ViewActions;
+import androidx.test.espresso.matcher.RootMatchers;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 
 import com.example.tigers_lottery.HostedEvents.OrganizerDashboardFragment;
 
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
+import org.hamcrest.TypeSafeMatcher;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Rule;
@@ -45,7 +57,7 @@ public class OrganizerDashboardFragmentActionsTest {
         Fragment fragment = fragmentManager.findFragmentById(R.id.main_activity_fragment_container);
         assertTrue(fragment instanceof OrganizerDashboardFragment);
         onView(withId(R.id.fabCreateEvent)).perform(click());
-        onView(withId(R.id.inputEventName)).perform(typeText("Test Running Event"));
+        onView(withId(R.id.inputEventName)).perform(typeText("0000A - Event Running Test"));
         Espresso.closeSoftKeyboard();
         onView(withId(R.id.inputEventLocation)).perform(typeText("Home"));
         Espresso.closeSoftKeyboard();
@@ -70,7 +82,7 @@ public class OrganizerDashboardFragmentActionsTest {
     @Test
     public void testBEventDetailsTest() {
         onView(withId(R.id.navigation_organizer)).perform(click());
-        onView(withText("Test Running Event")).perform(ViewActions.click());
+        onView(withText("0000A - Event Running Test")).perform(ViewActions.click());
         onView(withId(R.id.eventTitle)).check(matches(isDisplayed()));
         onView(withId(R.id.photoPlaceholder)).check(matches(isDisplayed()));
         onView(withId(R.id.eventPoster)).check(matches(isDisplayed()));
@@ -90,7 +102,7 @@ public class OrganizerDashboardFragmentActionsTest {
     @Test
     public void testCRegisteredEntrantsTest() {
         onView(withId(R.id.navigation_organizer)).perform(click());
-        onView(withText("Test Running Event")).perform(ViewActions.click());
+        onView(withText("0000A - Event Running Test")).perform(ViewActions.click());
 
         onView(withId(R.id.viewRegisteredEntrants)).perform(click());
         onView(withId(R.id.registeredEntrantsTitle)).check(matches(isDisplayed()));
@@ -100,7 +112,7 @@ public class OrganizerDashboardFragmentActionsTest {
     @Test
     public void testDWaitlistedEntrantsTest() {
         onView(withId(R.id.navigation_organizer)).perform(click());
-        onView(withText("Test Running Event")).perform(ViewActions.click());
+        onView(withText("0000A - Event Running Test")).perform(ViewActions.click());
 
         onView(withId(R.id.viewWaitlistedEntrants)).perform(click());
         onView(withId(R.id.waitlistedEntrantsTitle)).check(matches(isDisplayed()));
@@ -110,23 +122,54 @@ public class OrganizerDashboardFragmentActionsTest {
     @Test
     public void testEInvitedEntrantsTest() {
         onView(withId(R.id.navigation_organizer)).perform(click());
-        onView(withText("Test Running Event")).perform(ViewActions.click());
+        onView(withText("0000A - Event Running Test")).perform(ViewActions.click());
         onView(withId(R.id.viewInvitedEntrants)).perform(click());
         onView(withId(R.id.invitedEntrantsTitle)).check(matches(isDisplayed()));
         onView(withId(R.id.invitedEntrantsRecyclerView)).check(matches(withEffectiveVisibility(GONE)));
     }
 
-
-/*
     @Test
-    public void deleteEvent(){
+    public void testFEditEvent() {
         onView(withId(R.id.navigation_organizer)).perform(click());
-
-        onView(withId(R.id.eventsRecyclerView)).atPositionOnView(0, R.id.eventMenu)
-                        .perform(click());
-        onView(withText("Delete")).perform(ViewActions.click());
+        onView(atPositionOnView(0,R.id.optionsMenu)).perform(click());
+        onView(withText("Edit")).perform(click());
+        onView(withId(R.id.inputEventLocation)).perform(clearText());
+        onView(withId(R.id.inputEventLocation)).perform(typeText("Brand New Event Location"));
+        Espresso.closeSoftKeyboard();
+        onView(withId(R.id.inputEventDescription)).perform(scrollTo());
     }
 
-}
-*/
+    @Test
+    public void testGDeleteEvent() {
+        onView(withId(R.id.navigation_organizer)).perform(click());
+        onView(atPositionOnView(0,R.id.optionsMenu)).perform(click());
+        onView(withText("Delete")).perform(click());
+    }
+
+    public static Matcher<View> atPositionOnView(final int position, final int targetViewId) {
+        return new TypeSafeMatcher<View>() {
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("at position " + position + " on view with id " + targetViewId);
+            }
+
+            @Override
+            public boolean matchesSafely(View view) {
+                View rootView = view.getRootView();
+                RecyclerView recyclerView = rootView.findViewById(R.id.eventsRecyclerView);
+                if (recyclerView == null || recyclerView.getAdapter() == null) {
+                    return false;
+                }
+                RecyclerView.ViewHolder viewHolder = recyclerView.findViewHolderForAdapterPosition(position);
+                if (viewHolder == null) {
+                    return false;
+                }
+
+                View targetView = viewHolder.itemView.findViewById(targetViewId);
+                return view.equals(targetView);
+            }
+        };
+    }
+
+
 }

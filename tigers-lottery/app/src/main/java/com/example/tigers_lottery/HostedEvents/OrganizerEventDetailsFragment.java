@@ -362,8 +362,10 @@ public class OrganizerEventDetailsFragment extends Fragment {
         });
     }
 
-
-    // Helper function to fetch event details, this is so that we can handle the case of finding someone new to invite when an entrant declines an invitation
+    /**
+     * Helper function to fetch event details,this is so that we can
+     * handle the case of finding someone new to invite when an entrant declines an invitation
+     */
     private void fetchEventDetails() {
         dbHelper.fetchEventById(eventId, new DatabaseHelper.EventsCallback() {
             @Override
@@ -423,12 +425,21 @@ public class OrganizerEventDetailsFragment extends Fragment {
     }
 
 
-    // Helper function to select a random entrant from waitlistedEntrants (similar to the method in db helper but this is simpler as its just for 1 entrant
+    /**
+     * Helper function to select a random entrant from waitlistedEntrants
+     * (similar to the method in db helper but this is simpler as its just for 1 entrant
+      * @param waitlistedEntrants list of entrants in the waitlist
+     * @return id of the chosen waitlisted entrant
+     */
     private String selectRandomEntrant(List<String> waitlistedEntrants) {
         int index = new Random().nextInt(waitlistedEntrants.size());
         return waitlistedEntrants.get(index);
     }
 
+    /**
+     * Opens the entrant fragment and passes the event ID as argument
+     * @param fragment to be opened.
+     */
 
     private void openEntrantFragment(Fragment fragment) {
         Bundle args = new Bundle();
