@@ -243,7 +243,7 @@ public class EntrantDashboardFragment extends Fragment {
 
                             @Override
                             public void onError(Exception e) {
-                                Toast.makeText(getActivity(), "Didn't Work!", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getActivity(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                             }
                         });
 

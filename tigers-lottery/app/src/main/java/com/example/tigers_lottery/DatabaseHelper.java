@@ -15,6 +15,7 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -1283,49 +1284,69 @@ public class DatabaseHelper {
      * @param userId current user that wants to join the waitlist
      * @param callback handles the results of the method
      */
-
-    public void addEntrantWaitlist(int eventId, String userId, EventsCallback callback){
+    public void addEntrantWaitlist(int eventId, String userId, EventsCallback callback) {
         fetchEventById(eventId, new EventsCallback() {
-            /**
-             * Required, unused.
-             * @param events
-             */
             @Override
             public void onEventsFetched(List<Event> events) {
-
+                // Required but unused in this context
             }
 
-            /**
-             * Adds the user to the waitlisted entrants list through the database if the user
-             * is not already a part of the event.
-             *
-             * @param event to be joined
-             */
             @Override
             public void onEventFetched(Event event) {
-            List<String> waitlistedEntrants = event.getWaitlistedEntrants();
-            if(!waitlistedEntrants.contains(userId)){
-                waitlistedEntrants.add(userId);
+                List<String> waitlistedEntrants = event.getWaitlistedEntrants();
+                List<String> declinedEntrants = event.getDeclinedEntrants();
 
+                // Check if user is already in waitlisted or declined entrants
+                if (waitlistedEntrants.contains(userId)) {
+                    callback.onError(new Exception("User is already on the waitlist."));
+                    return;
+                }
+
+                if (declinedEntrants.contains(userId)) {
+                    callback.onError(new Exception("User has declined and cannot be added to the waitlist."));
+                    return;
+                }
+
+                // Check if waitlist limit has been reached
+                if (event.getWaitlistLimit() > 0 && waitlistedEntrants.size() >= event.getWaitlistLimit()) {
+                    callback.onError(new Exception("Waitlist limit has been reached."));
+                    return;
+                }
+
+                // Add the user to the waitlist
+                waitlistedEntrants.add(userId);
                 eventsRef.document(Integer.toString(eventId))
                         .update("waitlisted_entrants", waitlistedEntrants)
-                        .addOnSuccessListener(aVoid ->{
-                            callback.onEventFetched(event);
-                        }).addOnFailureListener(callback::onError);
-            } else {
-                callback.onError(new Exception("Entrant alr in waitlist"));
-            }
+                        .addOnSuccessListener(aVoid -> {
+                            // Now add the event ID to the user's joined_events list as an int
+                            DocumentReference userRef = usersRef.document(userId);
+                            userRef.get().addOnSuccessListener(userSnapshot -> {
+                                if (userSnapshot.exists()) {
+                                    List<Long> joinedEvents = (List<Long>) userSnapshot.get("joined_events");
+                                    if (joinedEvents == null) {
+                                        joinedEvents = new ArrayList<>();
+                                    }
 
+                                    // Add the eventId as an int if not already present
+                                    if (!joinedEvents.contains((long) eventId)) {
+                                        joinedEvents.add((long) eventId);
+                                        userRef.update("joined_events", joinedEvents)
+                                                .addOnSuccessListener(unused -> callback.onEventFetched(event))
+                                                .addOnFailureListener(callback::onError);
+                                    } else {
+                                        callback.onEventFetched(event); // Already in the joined events, proceed without error
+                                    }
+                                } else {
+                                    callback.onError(new Exception("User document not found."));
+                                }
+                            }).addOnFailureListener(callback::onError);
+                        })
+                        .addOnFailureListener(callback::onError);
             }
-
-            /**
-             *
-             * @param e exception catcher.
-             */
 
             @Override
             public void onError(Exception e) {
-                callback.onError(e);
+                callback.onError(e); // Handle errors if fetchEventById fails
             }
         });
     }
