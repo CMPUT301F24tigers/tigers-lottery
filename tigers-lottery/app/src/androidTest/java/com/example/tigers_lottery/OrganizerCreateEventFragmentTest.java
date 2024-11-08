@@ -28,7 +28,7 @@ public class OrganizerCreateEventFragmentTest {
         onView(withId(R.id.scrollViewCreateEvent)).check(matches(isDisplayed()));
     }
 
-    /*@Test
+    @Test
     public void testCreateEvent() {
         FragmentScenario<OrganizerCreateEventFragment> scenario = FragmentScenario.launchInContainer(OrganizerCreateEventFragment.class);
 
@@ -45,12 +45,11 @@ public class OrganizerCreateEventFragmentTest {
         onView(withId(R.id.inputOccupantLimit)).perform(typeText("50"));
         Espresso.closeSoftKeyboard();
         onView(withId(R.id.scrollViewCreateEvent)).perform(ViewActions.swipeUp());
-        onView(withId(R.id.checkboxWaitlistLimit)).perform(scrollTo(), click());
         onView(withId(R.id.inputWaitlistLimit)).check(matches(isDisplayed()));
         onView(withId(R.id.inputWaitlistLimit)).perform(typeText("100"));
         Espresso.closeSoftKeyboard();
 
-    }*/
+    }
 
 
 
