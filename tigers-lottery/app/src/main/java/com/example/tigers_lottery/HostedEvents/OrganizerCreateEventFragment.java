@@ -272,7 +272,10 @@ public class OrganizerCreateEventFragment extends Fragment {
 
     }
 
-    // Helper method to save the event
+    /**
+     * Helper method to save the event made.
+     * @param event to be saved.
+     */
     private void saveEvent(Event event) {
         dbHelper.createEvent(event, new DatabaseHelper.EventsCallback() {
             /**

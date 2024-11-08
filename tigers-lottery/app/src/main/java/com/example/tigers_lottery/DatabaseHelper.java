@@ -52,8 +52,9 @@ public class DatabaseHelper {
     private StorageReference storageReference;
 
     /**
-     * Constructor for DatabaseHelper.
-     * Initializes Firestore instance and sets up references to "events" and "users" collections.
+     * Constructor for DatabaseHelper. Initializes Firestore instance
+     * and sets up references to "events" and "users" collections.
+     * @param context context for the helper's usage.
      */
     public DatabaseHelper(Context context) {
         db = FirebaseFirestore.getInstance();
@@ -196,7 +197,9 @@ public class DatabaseHelper {
     }
 
     /**
-     * Returns the current user's ID, which is the Device ID.
+     * Get the userId of the person running an instance of the app.
+     *
+     * @return user's id
      */
     public String getCurrentUserId() {
         return currentUserId;
@@ -255,7 +258,10 @@ public class DatabaseHelper {
 
 
     /**
-     * Fetch a single event by its eventId.
+     * Finds an event by its eventId.
+     *
+     * @param eventId event to be found.
+     * @param callback handles success/failure of the fetching operation.
      */
     public void fetchEventById(int eventId, final EventsCallback callback) {
         eventsRef.whereEqualTo("event_id", eventId)
@@ -286,7 +292,11 @@ public class DatabaseHelper {
 
 
     /**
-     * Create new event
+     * Creates a new unique event. Hardcoded test code may be removed in the future.
+     * The new event is given a unique 5 digit identification.
+     *
+     * @param event to be created
+     * @param callback handles success/failure of event creation.
      */
     public void createEvent(Event event, EventsCallback callback) {
         String uniqueEventId;
@@ -332,11 +342,12 @@ public class DatabaseHelper {
         return String.valueOf(uniqueId);
     }
 
-    /** Update the hosted events field for a user when they create an event and become the organizer of it
+    /**
+     * Update the hosted events field for a user
+     * when they create an event and become the organizer of it
      *
-     *
-     * @param organizerId
-     * @param eventId
+     * @param organizerId organizer that made the event.
+     * @param eventId event created.
      */
     private void updateHostedEventsForOrganizer(String organizerId, int eventId) {
         usersRef.document(organizerId)
@@ -363,6 +374,11 @@ public class DatabaseHelper {
                 .addOnFailureListener(e -> Log.e(TAG, "Failed to fetch organizer document", e));
     }
 
+    /**
+     * Helper method to find the amount of events.
+     *
+     * @param callback handles success/failure of event count operation.
+     */
 
     public void getEventCount(final CountCallback callback) {
         eventsRef.get().addOnCompleteListener(task -> {
@@ -374,13 +390,14 @@ public class DatabaseHelper {
             }
         });
     }
-  
-    
-     /**
-     * Fetch all events from the events collection without any conditions.
-     * The @param line was throwing an error so I got rid of it for now --- FIX ALL THAT LATER
+
+
+    /**
+     * Fetches all events from the events collection without any conditions.
+     *
+     * @param callback handles success/failure of the fetching process.
      */
-     public void fetchAllEvents(final EventsCallback callback) {
+    public void fetchAllEvents(final EventsCallback callback) {
          eventsRef.get()
                  .addOnCompleteListener(task -> {
                      if (task.isSuccessful()) {
@@ -397,8 +414,10 @@ public class DatabaseHelper {
      }
 
     /**
-     * Deletes a particular event
+     * Deletes a particular event from the database.
      *
+     * @param eventId to be deleted.
+     * @param callback handles success/failure of deletion.
      */
     public void deleteEvent(int eventId, final EventsCallback callback) {
         eventsRef.whereEqualTo("event_id", eventId)
@@ -434,11 +453,12 @@ public class DatabaseHelper {
                 .addOnFailureListener(callback::onError);
     }
 
-    /** removes event from an organizer's hosted events, and from an entrant's joined events
+    /**
+     * Removes event from an organizer's hosted events, and from an entrant's joined events
      *
-     * @param eventId
-     * @param organizerId
-     * @param callback
+     * @param eventId event to be removed from records.
+     * @param organizerId organizer hosting the event.
+     * @param callback handles success/failure of removal.
      */
     private void removeEventFromUserRecords(int eventId, String organizerId, final EventsCallback callback) {
         // Update organizer's hosted_events list
@@ -474,10 +494,11 @@ public class DatabaseHelper {
 
 
 
-    /** Update an event
+    /**
+     * Updates an event
      *
-     * @param event
-     * @param callback
+     * @param event event to be updated
+     * @param callback handles success/failure of updating.
      */
     public void updateEvent(Event event, EventsCallback callback) {
         eventsRef.whereEqualTo("event_id", event.getEventId())
@@ -498,10 +519,11 @@ public class DatabaseHelper {
                 .addOnFailureListener(callback::onError);
     }
 
-    /** Retrieves the registered entrants list for a particular event ID
+    /**
+     * Retrieves the registered entrants list for a particular event ID
      *
-     * @param eventId
-     * @param callback
+     * @param eventId event fetching operation is done on.
+     * @param callback handles success/failure of the fetching operation.
      */
     public void fetchRegisteredEntrants(int eventId, final EntrantsCallback callback) {
         eventsRef.whereEqualTo("event_id", eventId)
@@ -518,10 +540,11 @@ public class DatabaseHelper {
     }
 
 
-    /** Retrieves the waitlisted entrants list for a particular event ID
+    /**
+     * Retrieves the waitlisted entrants list for a particular event ID
      *
-     * @param eventId
-     * @param callback
+     * @param eventId event operation is done on.
+     * @param callback handles success/failure of fetching operation.
      */
     public void fetchWaitlistedEntrants(int eventId, final EntrantsCallback callback) {
         eventsRef.whereEqualTo("event_id", eventId)
@@ -538,10 +561,11 @@ public class DatabaseHelper {
     }
 
 
-    /** Retrieves the invited entrants list for a particular event id
+    /**
+     * Retrieves the invited entrants list for a particular event id
      *
-     * @param eventId
-     * @param callback
+     * @param eventId event operation is done on.
+     * @param callback handles success/failure of fetching operation.
      */
     public void fetchInvitedEntrants(int eventId, final EntrantsCallback callback) {
         eventsRef.whereEqualTo("event_id", eventId)
@@ -558,10 +582,11 @@ public class DatabaseHelper {
     }
 
 
-    /** Retrieves the declined entrants list for an event id
+    /**
+     * Retrieves the declined entrants list for an event id
      *
-     * @param eventId
-     * @param callback
+     * @param eventId event operation is done on.
+     * @param callback handles success/failure of fetching operation.
      */
     public void fetchDeclinedEntrants(int eventId, final EntrantsCallback callback) {
         eventsRef.whereEqualTo("event_id", eventId)
@@ -584,12 +609,12 @@ public class DatabaseHelper {
         void onError(Exception e);
     }
 
-    /** Updates invited entrants list after lottery is ran by organizer
+    /**
+     * Updates invited entrants list after lottery is ran by organizer
      *
-     *
-     * @param eventId
-     * @param invitedEntrants
-     * @param callback
+     * @param eventId event to be updated.
+     * @param invitedEntrants entrants that have won the lottery.
+     * @param callback handles success/failure of the update process.
      */
     public void updateInvitedEntrantsAndSetLotteryRan(int eventId, List<String> invitedEntrants, final EventsCallback callback) {
         eventsRef.whereEqualTo("event_id", eventId)
@@ -627,7 +652,13 @@ public class DatabaseHelper {
     }
 
 
-    // Helper function to select random entrants
+    /**
+     * Helper function to select random entrants.
+     *
+     * @param entrants to choose from.
+     * @param count amount of entrants to choose.
+     * @return entrants that were selected
+     */
     public List<String> selectRandomEntrants(List<String> entrants, int count) {
         List<String> selectedEntrants = new ArrayList<>();
         Random random = new Random();
@@ -639,10 +670,12 @@ public class DatabaseHelper {
     }
 
 
-    /** Listen for changes in the declined entrants list; If someone declines they're added here and we must repick randomly to fill their spot
+    /**
+     * Listen for changes in the declined entrants list;
+     * If someone declines they're added here and we must re-pick randomly to fill their spot
      *
-     * @param eventId
-     * @param callback
+     * @param eventId event whose declined list changed.
+     * @param callback handles success/failure of the listener.
      */
     public void addDeclineListener(int eventId, DeclineCallback callback) {
         eventsRef.whereEqualTo("event_id", eventId)
@@ -665,12 +698,13 @@ public class DatabaseHelper {
     }
 
 
-    /** Update both the waitlisted entrants list as well as the invited entrants list, after someone declines an invitation and someone else is picked to fill that spot
+    /**
+     * Update both the waitlisted entrants list as well as the invited entrants list, after someone declines an invitation and someone else is picked to fill that spot
      *
-     * @param eventId
-     * @param invitedEntrants
-     * @param waitlistedEntrants
-     * @param callback
+     * @param eventId to be updated
+     * @param invitedEntrants list of invited entrants
+     * @param waitlistedEntrants list of waitlisted entrants
+     * @param callback handles success/failure of the update operation.
      */
     public void updateEntrantsAfterDecline(int eventId, List<String> invitedEntrants, List<String> waitlistedEntrants, final EventsCallback callback) {
         eventsRef.whereEqualTo("event_id", eventId)
@@ -724,6 +758,13 @@ public class DatabaseHelper {
         }).addOnFailureListener(e -> Log.e("DatabaseHelper", "Error fetching event document", e));
     }
 
+    /**
+     * Removes a user from the registered entrants list of an event.
+     *
+     * @param eventId event the user is a part of.
+     * @param userId user to be removed from the registered entrants list.
+     */
+
     public void removeUserFromRegisteredEntrants(Integer eventId, String userId) {
         eventsRef.whereEqualTo("event_id", eventId).get().addOnSuccessListener(querySnapshot -> {
             if (!querySnapshot.isEmpty()) {
@@ -739,6 +780,13 @@ public class DatabaseHelper {
             }
         }).addOnFailureListener(e -> Log.e("DatabaseHelper", "Error fetching event document", e));
     }
+
+    /**
+     * Removes a user from the declined entrants list of an event.
+     *
+     * @param eventId event the user is a part of.
+     * @param userId user to be removed from the registered entrants list.
+     */
 
     public void removeUserFromDeclinedEntrants(Integer eventId, String userId) {
         eventsRef.whereEqualTo("event_id", eventId).get().addOnSuccessListener(querySnapshot -> {
@@ -787,11 +835,11 @@ public class DatabaseHelper {
     }
 
     /**
-     * Adds a new user to Firestore.
+     * Adds a user to the firestore database along with their data.
+     *
+     * @param userData user object to be added
+     * @param imageUri user's photo
      */
-//     * @param user The User object to be added.
-//     *              Ensures user ID is set before attempting to add to Firestore.
-//     */
     public void addUser(HashMap<String, Object> userData, Uri imageUri) {
 //        if (user.getUserId() == null || user.getUserId().isEmpty() || Objects.equals(user.getUserId(), "NoUserId")) {
 //            Log.e(TAG, "User ID is required to add a user. Use the Device ID of the user added");
@@ -854,9 +902,9 @@ public class DatabaseHelper {
     }
 
     /**
-     * Chekc if the user exists in the database
+     * Check if the user exists in the database.
      *
-     * @param
+     * @param callback handles success/failure of checking if a user exists.
      */
     public void checkUserExists(ProfileCallback callback) {
         usersRef.document(currentUserId)
@@ -1010,10 +1058,11 @@ public class DatabaseHelper {
                 });
     }
 
-    /** uploads image to firebase storage and passes url back to callback
+    /**
+     * Uploads image to firebase storage and passes url back through callback
      *
-     * @param imageUri
-     * @param callback
+     * @param imageUri URI of image to be uploaded.
+     * @param callback methods for handling success/failure of upload.
      */
     public void uploadPosterImageToFirebase(Uri imageUri, UploadCallback callback) {
         String fileName = "event_posters/" + UUID.randomUUID().toString() + ".jpg";
@@ -1036,6 +1085,12 @@ public class DatabaseHelper {
         void onUploadFailure(Exception e);
     }
 
+    /**
+     * Gets the events that the user is apart of, for any list that the user is part of
+     * for any event, that event is passed to callback.
+     *
+     * @param callback methods for handling success/failure.
+     */
 
     public void entrantFetchEvents(EventsCallback callback) {
         List<Event> entrantsEvents = new ArrayList<>();
@@ -1095,6 +1150,13 @@ public class DatabaseHelper {
                 });
     }
 
+    /**
+     * Removes the current user from a waiting list for an event.
+     *
+     * @param eventId event that the entrant should be removed from the waiting list of.
+     * @param callback handles success/failure of waiting list removal for an entrant.
+     */
+
     public void entrantLeaveWaitingList(int eventId, StatusCallback callback) {
         eventsRef.document(Integer.toString(eventId)).get().addOnSuccessListener(documentSnapshot -> {
             if (documentSnapshot.exists()) {
@@ -1130,6 +1192,15 @@ public class DatabaseHelper {
             Log.e("Firestore", "Error retrieving document");
         });
     }
+
+    /**
+     * Handles the actions for an entrant to accept or decline an invitation for an event
+     * after being a part of the event and winning the lottery.
+     *
+     * @param eventId event that the user won the lottery for
+     * @param action accept or decline from the user.
+     * @param callback handles success/failure of add/decline operation.
+     */
 
     public void entrantAcceptDeclineInvitation(int eventId, String action, StatusCallback callback) {
         eventsRef.document(Integer.toString(eventId)).get().addOnSuccessListener(documentSnapshot -> {

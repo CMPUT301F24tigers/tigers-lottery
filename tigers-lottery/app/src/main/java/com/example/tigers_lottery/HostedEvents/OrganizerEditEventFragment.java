@@ -132,6 +132,11 @@ public class OrganizerEditEventFragment extends Fragment {
     }
 
 
+    /**
+     * Finds the event that is to be displayed by the fragment and populates its fields
+     * @param eventId for event identification.
+     */
+
     private void fetchEventById(int eventId) {
         dbHelper.fetchEventById(eventId, new DatabaseHelper.EventsCallback() {
             @Override
@@ -151,6 +156,12 @@ public class OrganizerEditEventFragment extends Fragment {
             }
         });
     }
+
+    /**
+     *Sets up the image picker for selecting an image from the device.
+     * When the user selects an image, it updates the imagePoster ImageView
+     * with the selected image and hides the placeholder text.
+     */
 
     private void setUpImagePicker() {
         activityResultLauncher = registerForActivityResult(
@@ -351,8 +362,11 @@ public class OrganizerEditEventFragment extends Fragment {
 
     }
 
+    /**
+     * Updates the event's fields using dbHelper.
+     */
+
     private void updateEventInDatabase() {
-        // Updates the event's fields using DatabaseHelper
         dbHelper.updateEvent(event, new DatabaseHelper.EventsCallback() {
             /**
              * Navigates back to the dashboard and displays the organizer's events

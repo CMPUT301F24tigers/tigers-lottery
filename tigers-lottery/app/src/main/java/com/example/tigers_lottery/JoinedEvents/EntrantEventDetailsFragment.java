@@ -54,6 +54,14 @@ public class EntrantEventDetailsFragment extends Fragment {
         return fragment;
     }
 
+    /**
+     * Called when the fragment is created. If being recreated saved state is restored
+     * Retrieves arguments passed into the fragment
+     *
+     * @param savedInstanceState If the fragment is being re-created from
+     * a previous saved state, this is the state.
+     */
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,6 +70,23 @@ public class EntrantEventDetailsFragment extends Fragment {
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
     }
+
+    /**
+     * Inflates the fragment's layout and initializes the UI components.
+     * Retrieves event details from the database and updates the UI accordingly.
+     * It also handles user-specific event status, handles depending on the waitlist the user is a
+     * part of.
+     *
+     * @param inflater The LayoutInflater object that can be used to inflate
+     * any views in the fragment,
+     * @param container If non-null, this is the parent view that the fragment's
+     * UI should be attached to.  The fragment should not add the view itself,
+     * but this can be used to generate the LayoutParams of the view.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed
+     * from a previous saved state as given here.
+     *
+     * @return the view.
+     */
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {

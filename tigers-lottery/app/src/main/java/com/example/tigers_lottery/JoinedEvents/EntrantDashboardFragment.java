@@ -66,6 +66,14 @@ public class EntrantDashboardFragment extends Fragment {
         return fragment;
     }
 
+    /**
+     * Called when the fragment is created. If being recreated saved state is restored
+     * Retrieves arguments passed into the fragment
+     *
+     * @param savedInstanceState If the fragment is being re-created from
+     * a previous saved state, this is the state.
+     */
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,6 +82,21 @@ public class EntrantDashboardFragment extends Fragment {
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
     }
+
+    /**
+     * Inflate the view and populate the layout with the events the entrant has joined.
+     * dbHelper and button to join event also initialized.
+     *
+     * @param inflater The LayoutInflater object that can be used to inflate
+     * any views in the fragment,
+     * @param container If non-null, this is the parent view that the fragment's
+     * UI should be attached to.  The fragment should not add the view itself,
+     * but this can be used to generate the LayoutParams of the view.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed
+     * from a previous saved state as given here.
+     *
+     * @return the view.
+     */
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -94,9 +117,11 @@ public class EntrantDashboardFragment extends Fragment {
             }
         });
 
+
         dbHelper.entrantFetchEvents(new DatabaseHelper.EventsCallback() {
             @SuppressLint({"SetTextI18n", "SimpleDateFormat"})
             @Override
+
             public void onEventsFetched(List<Event> events) {
                 entrantsEvents.clear();
                 entrantsEvents.addAll(events);
@@ -184,7 +209,7 @@ public class EntrantDashboardFragment extends Fragment {
                         dbHelper.addEntrantWaitlist(eventId, deviceId, new DatabaseHelper.EventsCallback() {
                             /**
                              * Required, unused.
-                             * @param events
+                             * @param events unused.
                              */
                             @Override
                             public void onEventsFetched(List<Event> events) {
