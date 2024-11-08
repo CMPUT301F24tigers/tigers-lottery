@@ -30,28 +30,6 @@ public class AdminFacilitiesFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.admin_facilities_fragment, container, false);
 
-        ImageButton backButton = requireActivity().findViewById(R.id.globalBackButton);
-        backButton.setVisibility(View.VISIBLE);
-
-        // Set click listener for the back button
-        backButton.setOnClickListener(v -> {
-            getParentFragmentManager().beginTransaction()
-                    .replace(R.id.main_activity_fragment_container, new AdminDashboardFragment())
-                    .commit();
-            backButton.setVisibility(View.INVISIBLE);
-        });
-
         return view;
-    }
-
-    /**
-     * Hides the back button when the fragment is destroyed.
-     */
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        // Hide the back button if fragment is destroyed
-        ImageButton backButton = requireActivity().findViewById(R.id.globalBackButton);
-        backButton.setVisibility(View.INVISIBLE);
     }
 }

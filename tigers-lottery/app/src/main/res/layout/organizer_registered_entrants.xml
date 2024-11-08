@@ -11,10 +11,10 @@
         android:id="@+id/registeredEntrantsTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Registered Entrants"
+        android:paddingBottom="8dp"
+        android:text="Registered Entrants(device IDs)"
         android:textSize="24sp"
-        android:textStyle="bold"
-        android:paddingBottom="8dp" />
+        android:textStyle="bold" />
 
     <!-- Message to show if there are no entrants -->
     <TextView
