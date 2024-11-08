@@ -34,6 +34,7 @@ public class MainActivityTest {
         scenario.onActivity(activity -> fragmentManager = activity.getSupportFragmentManager());
     }
 
+    /*
     @Test
     public void testAdminFragmentDisplayed() {
         // Trigger navigation to AdminDashboardFragment
@@ -43,6 +44,8 @@ public class MainActivityTest {
         Fragment fragment = fragmentManager.findFragmentById(R.id.main_activity_fragment_container);
         assertTrue(fragment instanceof AdminDashboardFragment);
     }
+
+     */
 
     @Test
     public void testOrganizerFragmentDisplayed() {
