@@ -39,6 +39,19 @@ jobs:
         working-directory: tigers-lottery
         run: chmod +x gradlew
 
-      - name: Build and test without lint checks
+      # Step to run unit tests
+      - name: Run Unit Tests
+        working-directory: tigers-lottery
+        run: ./gradlew testDebugUnitTest
+        # This will fail the workflow if any unit test fails
+
+      # Step to run Android instrumentation tests
+      - name: Run Instrumentation Tests
+        working-directory: tigers-lottery
+        run: ./gradlew connectedAndroidTest
+        # This will fail the workflow if any instrumentation test fails
+
+      # Step to build the project without lint checks (optional, depending on your needs)
+      - name: Build Project
         working-directory: tigers-lottery
         run: ./gradlew build -x lint
