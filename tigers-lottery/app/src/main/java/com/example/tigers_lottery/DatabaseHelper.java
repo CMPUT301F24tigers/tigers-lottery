@@ -84,6 +84,11 @@ public class DatabaseHelper {
         void onError(Exception e);
     }
 
+    public interface UserCallback {
+        void onUserFetched(User user);
+        void onError(Exception e);
+    }
+
     public interface CountCallback {
         void onCountFetched(int count);
         void onError(Exception e);
@@ -944,6 +949,26 @@ public class DatabaseHelper {
                         callback.onError(task.getException());
                     }
                 });
+    }
+
+    public void getUser(UserCallback callback) {
+        usersRef.document(currentUserId).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document.exists()) {
+                        User user = document.toObject(User.class);
+
+                        callback.onUserFetched(user);
+                    } else {
+                        Log.d("Firestore", "No such user exists");
+                    }
+                } else {
+                    Log.d("Firestore", "Error getting user", task.getException());
+                }
+            }
+        });
     }
 
     /**

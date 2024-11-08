@@ -11,6 +11,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -26,6 +27,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Objects;
 
 /**
  * This activity allows users to create a new entrant profile with details such as name, email, date of birth,
@@ -96,7 +98,7 @@ public class CreateEntrantProfileActivity extends AppCompatActivity {
                 if (selectedMonth != null && selectedDay != null && selectedYear != null) {
                     Calendar calendar = Calendar.getInstance();
                     calendar.set(Calendar.DAY_OF_MONTH, selectedDay);
-                    calendar.set(Calendar.MONTH, selectedMonth);
+                    calendar.set(Calendar.MONTH, selectedMonth-1);
                     calendar.set(Calendar.YEAR, selectedYear);
 
                     // Set time components to zero to represent only the date
@@ -105,6 +107,11 @@ public class CreateEntrantProfileActivity extends AppCompatActivity {
                     calendar.set(Calendar.SECOND, 0);
                     calendar.set(Calendar.MILLISECOND, 0);
                     date = calendar.getTime();
+                }
+
+                if(validatingUserProfileInput(firstnameEditText.getText().toString(), lastnameEditText.getText().toString(), emailEditText.getText().toString(), date)) {
+                    Toast.makeText(CreateEntrantProfileActivity.this, "Every field except for Phone Number must be filled!", Toast.LENGTH_LONG).show();
+                    return;
                 }
 
                 userData.put("first_name", firstnameEditText.getText().toString());
@@ -172,5 +179,7 @@ public class CreateEntrantProfileActivity extends AppCompatActivity {
         datePickerDialog.show();
     }
 
-
+    public boolean validatingUserProfileInput(String firstName, String lastName, String email, Date date) {
+        return (Objects.equals(firstName, "") || Objects.equals(lastName, "") || Objects.equals(email, "") || date == null);
+    }
 }

@@ -1,6 +1,7 @@
 package com.example.tigers_lottery.ProfileViewsEdit;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -21,12 +22,15 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.example.tigers_lottery.DatabaseHelper;
 import com.example.tigers_lottery.R;
+import com.example.tigers_lottery.models.User;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -113,6 +117,7 @@ public class ProfileEditFacilityFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.profile_edit_facility_fragment, container, false);
+        DatabaseHelper dbHelper = new DatabaseHelper(getContext());
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         FirebaseStorage storage = FirebaseStorage.getInstance();
@@ -128,10 +133,32 @@ public class ProfileEditFacilityFragment extends Fragment {
 
         String deviceId = getArguments().getString("deviceId");
 
+        dbHelper.getUser(new DatabaseHelper.UserCallback() {
+            @Override
+            public void onUserFetched(User user) {
+                nameEditText.setText(user.getFacilityName());
+                emailEditText.setText(user.getFacilityEmail());
+                mobileEditText.setText(user.getFacilityPhone());
+                locationEditText.setText(user.getFacilityLocation());
+
+            }
+
+            @Override
+            public void onError(Exception e) {
+
+            }
+        });
+
         // Listener to save changes to Firestore and Firebase Storage
         saveChangesButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+                if(!validatingFacilityProfileInput(getContext(), nameEditText.getText().toString(), emailEditText.getText().toString(), locationEditText.getText().toString(), mobileEditText.getText().toString())) {
+                    Toast.makeText(getContext(), "Every field must be filled!", Toast.LENGTH_LONG).show();
+                    return;
+                }
+
                 // Update user information in Firestore
                 db.collection("users").document(deviceId)
                         .update(
@@ -187,6 +214,10 @@ public class ProfileEditFacilityFragment extends Fragment {
         });
 
         return view;
+    }
+
+    public boolean validatingFacilityProfileInput(Context context, String name, String email, String location, String mobile) {
+        return (!Objects.equals(name, "") && !Objects.equals(email, "") && !Objects.equals(location, "") && mobile != null);
     }
 
 }
