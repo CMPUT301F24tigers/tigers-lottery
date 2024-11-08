@@ -145,18 +145,13 @@ public class AdminEventsFragment extends Fragment implements OnActionListener {
             @Override
             public void onEventFetched(Event event) { /* Do nothing */ }
             @Override
-            public void onError(Exception e) { /* Handle error if needed */ }
+            public void onError(Exception e) { /* Do nothing */ }
         });
         eventsAdapter.setExpandedPosition(-1); // Collapse any expanded menus
-        eventsAdapter.notifyDataSetChanged(); // Refresh adapter
+        eventsAdapter.notifyDataSetChanged();
         Toast.makeText(getContext(), "Removing Event " + eventId, Toast.LENGTH_SHORT).show();
     }
 
-    /**
-     * Handles the click action for the third option in the expandable menu (unused).
-     *
-     * @param userId The user ID associated with the action.
-     */
     @Override
     public void onOptionThreeClick(String userId) {
         // Unused in this fragment for events

@@ -30,7 +30,6 @@ public class AdminRecyclerViewAdapter extends RecyclerView.Adapter<AdminRecycler
 
     /**
      * Constructs an adapter for a list of admin items.
-     *
      * @param itemList       The list of items to display in the RecyclerView.
      * @param actionListener Listener to handle actions on the expandable menu.
      */
@@ -49,7 +48,6 @@ public class AdminRecyclerViewAdapter extends RecyclerView.Adapter<AdminRecycler
 
     /**
      * Sets whether the second expandable section should be hidden.
-     *
      * @param hideExpandableSection True if expandable section 2 should be hidden; false otherwise.
      */
     public void setHideExpandableSection2(boolean hideExpandableSection) {
@@ -93,7 +91,6 @@ public class AdminRecyclerViewAdapter extends RecyclerView.Adapter<AdminRecycler
 
     /**
      * Sets the position of the currently expanded item.
-     *
      * @param position The position of the item to expand.
      */
     public void setExpandedPosition(int position) {
@@ -117,7 +114,6 @@ public class AdminRecyclerViewAdapter extends RecyclerView.Adapter<AdminRecycler
 
         /**
          * Initializes the views within each item in the RecyclerView.
-         *
          * @param itemView The item view.
          */
         public UserViewHolder(@NonNull View itemView) {
