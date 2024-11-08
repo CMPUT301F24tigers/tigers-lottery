@@ -1200,7 +1200,38 @@ public class DatabaseHelper {
                             .addOnSuccessListener(aVoid -> {
                                 // Successfully updated the lists
                                 Log.d("Firestore", "Value moved successfully.");
-                                callback.onStatusUpdated();
+
+                                usersRef.document(currentUserId).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                        if (task.isSuccessful()) {
+                                            DocumentSnapshot document = task.getResult();
+                                            if (document.exists()) {
+                                                User user = document.toObject(User.class);
+
+                                                if (user != null) {
+                                                    List<Integer> joinedEvents = user.getJoinedEvents();
+                                                    if (joinedEvents.contains(eventId)) {
+                                                        joinedEvents.remove((Integer) eventId);
+                                                        usersRef.document(currentUserId)
+                                                                .update("joined_events", joinedEvents)
+                                                                .addOnSuccessListener(aVoid -> {
+                                                                    callback.onStatusUpdated();
+                                                                })
+                                                                .addOnFailureListener(e -> {
+                                                                    Log.e(TAG,"Failed to modify users joined events list", e);
+                                                                    callback.onError(e);
+                                                                });
+                                                    }
+                                                }
+                                            } else {
+                                                Log.d("Firestore", "No such user exists");
+                                            }
+                                        } else {
+                                            Log.d("Firestore", "Error getting user", task.getException());
+                                        }
+                                    }
+                                });;
                             })
                             .addOnFailureListener(e -> {
                                 // Failed to update
