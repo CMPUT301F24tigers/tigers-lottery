@@ -67,6 +67,7 @@ public class EntrantDashboardFragmentActionsTest {
     public void testCLeaveWaitingList() throws InterruptedException {
         onView(withId(R.id.navigation_entrant)).perform(click());
         Thread.sleep(2000);
+
         onView(withText("EntrantDashboardTestEvent")).perform(ViewActions.click());
         Thread.sleep(2000);
         onView(withId(R.id.eventDetailsButton)).perform(click());
