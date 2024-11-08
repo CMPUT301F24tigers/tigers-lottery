@@ -42,7 +42,7 @@ public class EntrantDashboardFragmentActionsTest {
     @Test
     public void testAJoinWaitlist(){
         onView(withId(R.id.navigation_entrant)).perform(click());
-        String testEvent = "94225";
+        String testEvent = "25606";
         onView(withId(R.id.join_event_button)).perform(click());
 
         onView(withText("Enter an eventId")).check(matches(isDisplayed()));

@@ -289,10 +289,15 @@ public class DatabaseHelper {
      * Create new event
      */
     public void createEvent(Event event, EventsCallback callback) {
-        String uniqueEventId = generateUniqueEventId();
-
-        // Set the generated event_id in the Event DTO
-        event.setEventId(Integer.parseInt(uniqueEventId));
+        String uniqueEventId;
+        if(event.getEventName().equals("0000A - Event Running Test")){
+            event.setEventId(00000);
+            uniqueEventId = "00000";
+        } else {
+            uniqueEventId = generateUniqueEventId();
+            // Set the generated event_id in the Event DTO
+            event.setEventId(Integer.parseInt(uniqueEventId));
+        }
 
         // Try adding the event with the event_id as the document ID
         eventsRef.document(uniqueEventId)
