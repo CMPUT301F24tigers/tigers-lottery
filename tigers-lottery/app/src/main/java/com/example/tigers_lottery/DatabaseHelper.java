@@ -813,6 +813,7 @@ public class DatabaseHelper {
 
     /**
      * Clears the waitlisted, invited, and declined entrants lists for a given event.
+     * Also removes this event ID from each user's joined events list.
      *
      * @param eventId   The ID of the event whose lists need to be cleared.
      * @param callback  The EventsCallback to handle success or failure.
@@ -821,21 +822,77 @@ public class DatabaseHelper {
         // Reference to the event document in Firestore
         DocumentReference eventRef = eventsRef.document(String.valueOf(eventId));
 
-        // Create an empty list to clear the lists in Firestore
-        List<String> emptyList = new ArrayList<>();
+        // Fetch the event first to access the lists before clearing them
+        eventRef.get().addOnSuccessListener(documentSnapshot -> {
+            if (documentSnapshot.exists()) {
+                Event event = documentSnapshot.toObject(Event.class);
+                if (event != null) {
+                    // Collect user IDs from all lists to update their joined_events
+                    List<String> userIdsToUpdate = new ArrayList<>();
+                    userIdsToUpdate.addAll(event.getWaitlistedEntrants());
+                    userIdsToUpdate.addAll(event.getInvitedEntrants());
+                    userIdsToUpdate.addAll(event.getDeclinedEntrants());
 
-        // Update the Firestore document with empty lists for the specified fields
-        eventRef.update("waitlisted_entrants", emptyList,
-                        "invited_entrants", emptyList,
-                        "declined_entrants", emptyList)
-                .addOnSuccessListener(aVoid -> {
-                    Log.d(TAG, "Successfully cleared event lists for event ID: " + eventId);
-                    callback.onEventsFetched(null);  // Trigger callback on success
-                })
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error clearing event lists for event ID: " + eventId, e);
-                    callback.onError(e);  // Trigger error callback
-                });
+                    // Clear the lists in Firestore
+                    eventRef.update("waitlisted_entrants", new ArrayList<>(),
+                                    "invited_entrants", new ArrayList<>(),
+                                    "declined_entrants", new ArrayList<>())
+                            .addOnSuccessListener(aVoid -> {
+                                Log.d(TAG, "Successfully cleared event lists for event ID: " + eventId);
+
+                                // Remove the event from each user's joined_events list
+                                for (String userId : userIdsToUpdate) {
+                                    removeEventFromJoinedEvents(userId, eventId);
+                                }
+
+                                callback.onEventsFetched(null);  // Trigger callback on success
+                            })
+                            .addOnFailureListener(e -> {
+                                Log.e(TAG, "Error clearing event lists for event ID: " + eventId, e);
+                                callback.onError(e);  // Trigger error callback
+                            });
+                } else {
+                    callback.onError(new Exception("Event data could not be parsed."));
+                }
+            } else {
+                callback.onError(new Exception("Event does not exist."));
+            }
+        }).addOnFailureListener(e -> {
+            callback.onError(e);  // Trigger error if fetching event fails
+        });
+    }
+
+
+
+    /**
+     * Removes a specific event ID from a user's joined events list.
+     *
+     * @param userId  The ID of the user whose joined events need updating.
+     * @param eventId The ID of the event to remove from the user's joined events.
+     */
+    private void removeEventFromJoinedEvents(String userId, int eventId) {
+        DocumentReference userRef = usersRef.document(userId);
+
+        userRef.get().addOnSuccessListener(documentSnapshot -> {
+            if (documentSnapshot.exists()) {
+                User user = documentSnapshot.toObject(User.class);
+                if (user != null) {
+                    List<Integer> joinedEvents = user.getJoinedEvents();
+
+                    // Remove the eventId if it exists in the joined_events list
+                    if (joinedEvents.contains(eventId)) {
+                        joinedEvents.remove(Integer.valueOf(eventId));  // Explicitly remove by Integer value
+                        userRef.update("joined_events", joinedEvents)
+                                .addOnSuccessListener(aVoid ->
+                                        Log.d(TAG, "Successfully removed event ID " + eventId + " from user " + userId + "'s joined events."))
+                                .addOnFailureListener(e ->
+                                        Log.e(TAG, "Error updating joined events for user " + userId, e));
+                    }
+                }
+            }
+        }).addOnFailureListener(e -> {
+            Log.e(TAG, "Error fetching user for joined events update", e);
+        });
     }
 
 
