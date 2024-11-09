@@ -1,58 +1,100 @@
 package com.example.tigers_lottery;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 
 import com.example.tigers_lottery.Admin.AdminDashboardFragment;
 import com.example.tigers_lottery.HostedEvents.OrganizerDashboardFragment;
 import com.example.tigers_lottery.JoinedEvents.EntrantDashboardFragment;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
+import com.example.tigers_lottery.utils.DeviceIDHelper;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.android.material.navigation.NavigationBarView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
-import android.provider.Settings;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
+import android.widget.ImageButton;
 
+import com.example.tigers_lottery.ProfileViewsEdit.ProfileDetailsActivity;
 
+/**
+ * The main activity that acts as a central navigation hub, allowing users to switch between
+ * different dashboards (Admin, Entrant, Organizer) using a bottom navigation bar.
+ * Users can also access their profile details from this screen.
+ */
 public class MainActivity extends AppCompatActivity {
-    Button adminContinue, entrantContinue, organizerContinue;
-    private FirebaseFirestore db;
-    private CollectionReference usersRef;
-    private DatabaseHelper dbHelper;
 
-    //test comment added
+    /**
+     * Button to open the Profile Details Activity.
+     */
+    ImageButton editProfile;
+
+    /**
+     * Called when the activity is first created. Sets up the UI components,
+     * checks if the user's profile exists, and configures the bottom navigation bar.
+     *
+     * @param savedInstanceState If the activity is being re-initialized after previously being shut down,
+     *                           this Bundle contains the most recent data, otherwise it is null.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
 
-        db = FirebaseFirestore.getInstance();
-        usersRef = db.collection("users");
+        String deviceId = DeviceIDHelper.getDeviceId(this);
+        editProfile = findViewById(R.id.profileButton);
+        DatabaseHelper dbHelper = new DatabaseHelper(getApplicationContext());
 
-        // Initialize DatabaseHelper, which will ensure user existence in Firestore
-        dbHelper = new DatabaseHelper(this);
+        // BottomNavigationView setup
+        BottomNavigationView bottomNav = findViewById(R.id.nav_view);
+        MenuItem adminMenuItem = bottomNav.getMenu().findItem(R.id.navigation_admin);
 
-        // Optional: Log or use the current user ID if needed for debugging
-        String userId = dbHelper.getCurrentUserId();
-        Log.d("MainActivity", "Current User ID (Device ID): " + userId);
+        // Check if the user profile exists; if not, navigate to CreateEntrantProfileActivity
+        dbHelper.checkUserExists(new DatabaseHelper.ProfileCallback() {
+            @Override
+            public void onProfileExists() {
+                // Profile exists; no action needed
+            }
 
-        // Load the default fragment
+            @Override
+            public void onProfileNotExists() {
+                Intent createEntrantProfileActivity = new Intent(getApplicationContext(), CreateEntrantProfileActivity.class);
+                startActivity(createEntrantProfileActivity);
+            }
+        });
+
+        // Initially hide the admin menu item
+        if (adminMenuItem != null) {
+            adminMenuItem.setVisible(false);
+        }
+
+        // Check if the device ID exists in the admins collection
+        dbHelper.isAdminUser(deviceId, new DatabaseHelper.VerificationCallback() {
+            @Override
+            public void onResult(boolean exists) {
+                Log.e("DatabaseHelper", "Is Admin User: " + exists);
+
+                if (adminMenuItem != null && exists) {
+                    adminMenuItem.setVisible(true);
+                }
+
+                Log.e("DatabaseHelper", "Admin status verification complete.");
+            }
+
+            @Override
+            public void onError(Exception e) {
+                Log.e("DatabaseHelper", "Error verifying Admin Status", e);
+            }
+        });
+
         loadFragment(new EntrantDashboardFragment());
 
-        // Set up BottomNavigationView
-        BottomNavigationView bottomNav = findViewById(R.id.nav_view);
-        bottomNav.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+        // Set up listener for bottom navigation to switch between fragments
+        bottomNav.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 Fragment selectedFragment = null;
@@ -66,91 +108,32 @@ public class MainActivity extends AppCompatActivity {
                 return loadFragment(selectedFragment);
             }
         });
+
+        // Set listener for profile edit button to navigate to ProfileDetailsActivity
+        editProfile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent profileDetailsActivity = new Intent(getApplicationContext(), ProfileDetailsActivity.class);
+                startActivity(profileDetailsActivity);
+            }
+        });
     }
 
+    /**
+     * Replaces the current fragment in the activity's container with the specified fragment.
+     *
+     * @param fragment The fragment to display.
+     * @return true if the fragment was successfully loaded, false otherwise.
+     */
     private boolean loadFragment(Fragment fragment) {
         if (fragment != null) {
             getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.fragmentContainerView2, fragment)
+                    .replace(R.id.main_activity_fragment_container, fragment)
                     .commit();
             return true;
         }
         return false;
     }
-    //@SuppressLint("HardwareIds") String deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
-        /*adminContinue = findViewById(R.id.adminSelectButton);
-        entrantContinue = findViewById(R.id.entrantSelectButton);
-        organizerContinue = findViewById(R.id.organizerSelectButton);
-
-        db.collection("admins").document(deviceId)
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                        if (task.isSuccessful()) {
-                            DocumentSnapshot document = task.getResult();
-                            if (document.exists()) {
-                                adminContinue.setVisibility(View.VISIBLE);
-                            } else {
-                                adminContinue.setVisibility(View.INVISIBLE);
-                            }
-                        } else {
-                            Log.e("Firestore", "Error getting document: ", task.getException());
-                        }
-                    }
-                });
-
-        entrantContinue.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                db.collection("users").document(deviceId)
-                        .get()
-                        .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                            @Override
-                            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                                if (task.isSuccessful()) {
-                                    DocumentSnapshot document = task.getResult();
-                                    if (document.exists()) {
-                                        Intent entrantActivityIntent = new Intent(getApplicationContext(), EntrantActivity.class);
-                                        startActivity(entrantActivityIntent);
-                                    } else {
-                                        Intent createEntrantProfileActivity = new Intent(getApplicationContext(), CreateEntrantProfileActivity.class);
-                                        createEntrantProfileActivity.putExtra("Device ID", deviceId);
-                                        startActivity(createEntrantProfileActivity);
-                                    }
-                                } else {
-                                    Log.e("Firestore", "Error getting document: ", task.getException());
-                                }
-                            }
-                        });
-            }
-        });
-
-        adminContinue.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                db.collection("users").document(deviceId)
-                        .get()
-                        .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                            @Override
-                            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                                if (task.isSuccessful()) {
-                                    DocumentSnapshot document = task.getResult();
-                                    if (document.exists()) {
-                                        Intent adminActivityIntent = new Intent(getApplicationContext(), AdminActivity.class);
-                                        startActivity(adminActivityIntent);
-                                    } else {
-                                        Intent createEntrantProfileActivity = new Intent(getApplicationContext(), CreateEntrantProfileActivity.class);
-                                        createEntrantProfileActivity.putExtra("Device ID", deviceId);
-                                        startActivity(createEntrantProfileActivity);
-                                    }
-                                } else {
-                                    Log.e("Firestore", "Error getting document: ", task.getException());
-                                }
-                            }
-                        });
-            }
-        });*/
 
 }

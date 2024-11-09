@@ -36,10 +36,10 @@ import java.util.List;
 public class User {
 
     @PropertyName("user_id")
-    private String userId = "NoUserId";
+    private String userId;
 
     @PropertyName("first_name")
-    private String firstName = "";
+    private String firstName = "Unknown User";
 
     @PropertyName("last_name")
     private String lastName = "";
@@ -59,7 +59,7 @@ public class User {
     @PropertyName("DOB")
     private Timestamp dateOfBirth = Timestamp.now();
 
-    @PropertyName("facility-location")
+    @PropertyName("facility_location")
     private String facilityLocation = "";
 
     @PropertyName("facility_name")
@@ -143,10 +143,10 @@ public class User {
     @PropertyName("DOB")
     public void setDateOfBirth(Timestamp dateOfBirth) { this.dateOfBirth = dateOfBirth; }
 
-    @PropertyName("facility-location")
+    @PropertyName("facility_location")
     public String getFacilityLocation() { return facilityLocation; }
 
-    @PropertyName("facility-location")
+    @PropertyName("facility_location")
     public void setFacilityLocation(String facilityLocation) { this.facilityLocation = facilityLocation; }
 
     @PropertyName("facility_name")

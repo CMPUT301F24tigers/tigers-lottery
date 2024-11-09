@@ -1,8 +1,15 @@
 package com.example.tigers_lottery.HostedEvents;
 
+import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -11,12 +18,17 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.fragment.app.Fragment;
 
 import com.example.tigers_lottery.DatabaseHelper;
 import com.example.tigers_lottery.R;
 import com.example.tigers_lottery.models.Event;
 import com.google.firebase.Timestamp;
+import com.google.firebase.storage.StorageReference;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -24,16 +36,45 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * Fragment used by the organizer to create a new event.
+ */
+
 public class OrganizerCreateEventFragment extends Fragment {
 
-    private EditText inputEventName, inputEventLocation, inputRegistrationOpens, inputRegistrationDeadline, inputEventDate, inputEventDescription, inputWaitlistLimit;
+    private EditText inputEventName, inputEventLocation, inputRegistrationOpens, inputRegistrationDeadline, inputEventDate, inputEventDescription, inputWaitlistLimit, inputOccupantLimit;
     private CheckBox checkboxWaitlistLimit;
     private Button btnCreateEvent;
     private DatabaseHelper dbHelper;
+    private ImageView imagePoster;
+    private Uri imageUri;
+    private ActivityResultLauncher<Intent> activityResultLauncher;
+    private StorageReference storageReference;
+    private TextView photoPlaceholderText;
+
+
+
+    /**
+     * Required empty public constructor
+     */
 
     public OrganizerCreateEventFragment() {
-        // Required empty public constructor
     }
+
+    /**
+     * Inflates the layout of the create event screen, allows
+     * for inputs from the organizer and initializes the dbHelper.
+     *
+     * @param inflater The LayoutInflater object that can be used to inflate
+     * any views in the fragment,
+     * @param container If non-null, this is the parent view that the fragment's
+     * UI should be attached to.  The fragment should not add the view itself,
+     * but this can be used to generate the LayoutParams of the view.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed
+     * from a previous saved state as given here.
+     *
+     * @return the view for the fragment's UI.
+     */
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -49,9 +90,31 @@ public class OrganizerCreateEventFragment extends Fragment {
         checkboxWaitlistLimit = view.findViewById(R.id.checkboxWaitlistLimit);
         inputWaitlistLimit = view.findViewById(R.id.inputWaitlistLimit);
         btnCreateEvent = view.findViewById(R.id.btnCreateEvent);
+        inputOccupantLimit = view.findViewById(R.id.inputOccupantLimit);
+        imagePoster = view.findViewById(R.id.photoPlaceholder);
+        photoPlaceholderText = view.findViewById(R.id.photoPlaceholderText);
+
 
         // Initialize DatabaseHelper
         dbHelper = new DatabaseHelper(requireContext());
+
+        // Set up ActivityResultLauncher for image selection
+        activityResultLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                        imageUri = result.getData().getData();
+                        imagePoster.setImageURI(imageUri); // Display selected image in placeholder
+                        photoPlaceholderText.setVisibility(View.GONE); // Hide placeholder text when image is selected
+                    }
+                });
+
+        // Set click listener to open image picker when poster placeholder is clicked
+        imagePoster.setOnClickListener(v -> {
+            Intent intent = new Intent(Intent.ACTION_PICK);
+            intent.setType("image/*");
+            activityResultLauncher.launch(intent);
+        });
 
         // Show/hide waitlist limit input based on checkbox
         checkboxWaitlistLimit.setOnCheckedChangeListener((buttonView, isChecked) -> {
@@ -59,10 +122,19 @@ public class OrganizerCreateEventFragment extends Fragment {
         });
 
         // Set click listener for Create Event button
-        btnCreateEvent.setOnClickListener(v -> createEvent());
+        btnCreateEvent.setOnClickListener(
+                v -> createEvent()
+
+        );
 
         return view;
     }
+
+    /**
+     * Creates a new event using the input parameters and validates the entries
+     * Event is then populated and organizerId is set from current userId
+     */
+
 
     private void createEvent() {
         // Capture user input
@@ -74,6 +146,8 @@ public class OrganizerCreateEventFragment extends Fragment {
         String eventDescription = inputEventDescription.getText().toString().trim();
         boolean assignWaitlistLimit = checkboxWaitlistLimit.isChecked();
         int waitlistLimit = 0;
+        String occupantLimitText = inputOccupantLimit.getText().toString().trim();
+        int occupantLimit = 100;
 
         boolean isValid = true;
 
@@ -113,6 +187,15 @@ public class OrganizerCreateEventFragment extends Fragment {
                     Toast.makeText(getContext(), "Invalid waitlist limit", Toast.LENGTH_SHORT).show();
                     return;
                 }
+            }
+        }
+
+        if (!TextUtils.isEmpty(occupantLimitText)) {
+            try {
+                occupantLimit = Integer.parseInt(occupantLimitText);
+            } catch (NumberFormatException e) {
+                Toast.makeText(getContext(), "Invalid occupant limit", Toast.LENGTH_SHORT).show();
+                return;
             }
         }
 
@@ -162,24 +245,62 @@ public class OrganizerCreateEventFragment extends Fragment {
         event.setDescription(eventDescription);
         event.setWaitlistLimitFlag(assignWaitlistLimit);
         event.setWaitlistLimit(assignWaitlistLimit ? waitlistLimit : 0);
+        event.setOccupantLimit(occupantLimit);
 
         // Set organizer ID from Device ID (current user ID)
         String organizerId = dbHelper.getCurrentUserId(); // Retrieve Device ID
         event.setOrganizerId(organizerId); // Set as organizer ID
 
-        // Save the event using DatabaseHelper
+        if (imageUri != null) {
+            dbHelper.uploadPosterImageToFirebase(imageUri, new DatabaseHelper.UploadCallback() {
+                @Override
+                public void onUploadSuccess(String downloadUrl) {
+                    event.setPosterUrl(downloadUrl);  // Set the poster URL
+                    saveEvent(event);  // Save event with poster URL
+                }
+
+                @Override
+                public void onUploadFailure(Exception e) {
+                    Toast.makeText(getContext(), "Failed to upload poster image", Toast.LENGTH_SHORT).show();
+                }
+            });
+        } else {
+            // Proceed without a poster URL, still save the event
+            photoPlaceholderText.setVisibility(View.VISIBLE);
+            saveEvent(event);
+        }
+
+    }
+
+    /**
+     * Helper method to save the event made.
+     * @param event to be saved.
+     */
+    private void saveEvent(Event event) {
         dbHelper.createEvent(event, new DatabaseHelper.EventsCallback() {
+            /**
+             * Navigates back to the dashboard and displays the organizer's events.
+             * @param events list of events from the organizer.
+             */
             @Override
             public void onEventsFetched(List<Event> events) {
                 Toast.makeText(getContext(), "Event created successfully!", Toast.LENGTH_SHORT).show();
-                // Navigate back to the dashboard
                 requireActivity().getSupportFragmentManager().popBackStack();
             }
 
+            /**
+             * Unused in this fragment.
+             * @param event single event.
+             */
+
             @Override
             public void onEventFetched(Event event) {
-                // Not used in this fragment
             }
+
+            /**
+             * Handles error during event creation.
+             * @param e exception catcher for event creation.
+             */
 
             @Override
             public void onError(Exception e) {
@@ -187,6 +308,12 @@ public class OrganizerCreateEventFragment extends Fragment {
             }
         });
     }
+
+    /**
+     * Validates the date format inputted.
+     * @param date in the format "YYYY-MM-DD"
+     * @return true if the date is valid. false otherwise.
+     */
 
     private boolean isValidDateFormat(String date) {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
@@ -198,6 +325,13 @@ public class OrganizerCreateEventFragment extends Fragment {
             return false;  // Date format is invalid
         }
     }
+
+    /**
+     * Converts the date from string into timestamp format.
+     *
+     * @param date the valid date.
+     * @return a timestamp format of the date.
+     */
 
     private Timestamp convertToTimestamp(String date) {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());

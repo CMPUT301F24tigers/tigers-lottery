@@ -1,0 +1,51 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="horizontal"
+    android:padding="8dp"
+    android:background="@color/background_color">
+
+    <!-- Event Image -->
+    <ImageView
+        android:id="@+id/eventItemPhoto"
+        android:layout_width="99dp"
+        android:layout_height="85dp"
+        android:layout_marginEnd="8dp"
+        tools:srcCompat="@tools:sample/avatars" />
+
+    <!-- Container for event details -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_weight="1">
+
+        <TextView
+            android:id="@+id/eventItemName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="event_name"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/eventItemLocation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="event_location" />
+
+        <TextView
+            android:id="@+id/eventItemTime"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="event_time" />
+
+
+        <TextView
+            android:id="@+id/eventItemStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="event_status" />
+    </LinearLayout>
+
+</LinearLayout>

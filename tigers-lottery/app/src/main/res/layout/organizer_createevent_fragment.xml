@@ -20,15 +20,25 @@
             android:layout_gravity="center"
             android:paddingBottom="16dp" />
 
-        <!-- Placeholder for Photo/Poster -->
+        <!-- FrameLayout to hold image view content -->
         <FrameLayout
-            android:id="@+id/photoPlaceholder"
+            android:id="@+id/photoPlaceholderContainer"
             android:layout_width="match_parent"
             android:layout_height="200dp"
             android:background="#D3D3D3"
             android:layout_marginBottom="16dp">
 
+            <!-- ImageView for Poster -->
+            <ImageView
+                android:id="@+id/photoPlaceholder"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:contentDescription="Event Poster" />
+
+            <!-- TextView as overlay text for placeholder (shown only if no image is selected) -->
             <TextView
+                android:id="@+id/photoPlaceholderText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Poster Placeholder"
@@ -36,6 +46,8 @@
                 android:layout_gravity="center"
                 android:textColor="#808080" />
         </FrameLayout>
+
+
 
         <!-- Event Name Label and Input -->
         <TextView
@@ -115,6 +127,20 @@
             android:inputType="textMultiLine"
             android:layout_marginBottom="12dp" />
 
+        <!-- Occupant Limit Label and Input -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Occupant Limit"
+            android:id="@+id/LabelOccupantLimit" />
+        <EditText
+            android:id="@+id/inputOccupantLimit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter occupant limit"
+            android:inputType="number"
+            android:layout_marginBottom="16dp" />
+
         <!-- Checkbox for Waitlist Limit -->
         <LinearLayout
             android:layout_width="wrap_content"
@@ -131,6 +157,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:id="@+id/assignWaitlistLabel"
                 android:text="Assign Waitlist Limit?"
                 android:paddingStart="8dp"
                 android:textSize="16sp" />

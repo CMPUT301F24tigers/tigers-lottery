@@ -5,95 +5,80 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.tigers_lottery.Admin.AdminDashboardFragment;
 import com.example.tigers_lottery.Admin.AdminRecyclerViewAdapter;
+import com.example.tigers_lottery.Admin.DashboardFragments.ListItems.AdminListItemModel;
+import com.example.tigers_lottery.Admin.DashboardFragments.ListItems.OnActionListener;
 import com.example.tigers_lottery.DatabaseHelper;
 import com.example.tigers_lottery.R;
 import com.example.tigers_lottery.models.User;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
- * Fragment for displaying the entrant profiles within the admin dashboard.
- * This fragment provides a RecyclerView to show a list of user profiles.
- * It includes functionality to navigate back to the main AdminDashboardFragment.
+ * Fragment that displays a list of user profiles within the admin dashboard.
+ * This fragment enables the admin to view, remove profile photos, and delete user profiles.
  */
-public class AdminEntrantsProfilesFragment extends Fragment {
+public class AdminEntrantsProfilesFragment extends Fragment implements OnActionListener {
 
-    private RecyclerView recyclerView;
     private AdminRecyclerViewAdapter userAdapter;
-    private List<User> userList = new ArrayList<>();
+    private final List<AdminListItemModel> itemList = new ArrayList<>();
 
     /**
-     * Inflates the layout for the entrant profiles screen, initializes the RecyclerView,
-     * and sets up the back button to return to the AdminDashboardFragment.
+     * Inflates the layout for this fragment and initializes the RecyclerView with an adapter.
      *
-     * @param inflater           LayoutInflater for inflating the fragment layout.
-     * @param container          The container this fragment belongs to.
-     * @param savedInstanceState Saved state for restoring fragment state.
+     * @param inflater LayoutInflater to inflate views in the fragment.
+     * @param container The parent view that this fragment's UI should be attached to.
+     * @param savedInstanceState If non-null, this fragment is being re-created from a previous saved state.
      * @return The View for the fragment's UI.
      */
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.admin_entrants_profiles_fragment, container, false);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.admin_list_fragment, container, false);
 
-        ImageButton backButton = requireActivity().findViewById(R.id.globalBackButton);
-        backButton.setVisibility(View.VISIBLE);
-
-        // Set click listener for back button
-        backButton.setOnClickListener(v -> {
-            getParentFragmentManager().beginTransaction()
-                    .replace(R.id.fragmentContainerView2, new AdminDashboardFragment())
-                    .commit();
-            backButton.setVisibility(View.INVISIBLE);
-        });
-
-        // Set up RecyclerView for displaying user profiles
-        recyclerView = view.findViewById(R.id.recyclerViewEntrantProfiles);
+        RecyclerView recyclerView = view.findViewById(R.id.adminRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        userAdapter = new AdminRecyclerViewAdapter(userList);
+        userAdapter = new AdminRecyclerViewAdapter(itemList, this);
         recyclerView.setAdapter(userAdapter);
-
-        // Fetch users from the database
         fetchUsers();
-
         return view;
     }
 
     /**
-     * Hides the back button when the fragment view is destroyed.
-     */
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        ImageButton backButton = requireActivity().findViewById(R.id.globalBackButton);
-        backButton.setVisibility(View.INVISIBLE);
-    }
-
-    /**
-     * Fetches all users from the database and updates the RecyclerView.
-     * Utilizes DatabaseHelper's fetchAllUsers method with a callback to handle results.
-     * On success, the user list is updated and the adapter is notified.
-     * On failure, an error message is displayed.
+     * Fetches all users from the database, populating the RecyclerView with user data.
+     * Excludes the current user from the displayed list of users.
      */
     private void fetchUsers() {
         DatabaseHelper dbHelper = new DatabaseHelper(requireContext());
-
         dbHelper.fetchAllUsers(new DatabaseHelper.UsersCallback() {
             @Override
             public void onUsersFetched(List<User> users) {
-                userList.clear();
-                userList.addAll(users);
+                itemList.clear();
+                for (User user : users) {
+                    if (!Objects.equals(user.getUserId(), dbHelper.getCurrentUserId())) {
+                        itemList.add(new AdminListItemModel(
+                                user.getUserId(),
+                                user.getFirstName() + " " + user.getLastName(),
+                                user.getEmailAddress(),
+                                "Remove Profile Photo",
+                                "View User Profile",
+                                "Remove User"
+                        ));
+                    }
+                }
                 userAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onUserFetched(User user) {
+                // Not implemented as it is not needed in this context.
             }
 
             @Override
@@ -102,5 +87,55 @@ public class AdminEntrantsProfilesFragment extends Fragment {
                 Log.e("DatabaseHelper", "Error retrieving users", e);
             }
         });
+    }
+
+    /**
+     * Handles the action to remove a profile photo for a specific user.
+     * This method is triggered when the "Remove Profile Photo" option is selected.
+     *
+     * @param userId The ID of the user whose profile photo will be removed.
+     */
+    @Override
+    public void onOptionOneClick(String userId) {
+        DatabaseHelper dbHelper = new DatabaseHelper(requireContext());
+        Toast.makeText(getContext(), "Removing profile photo for user " + userId, Toast.LENGTH_SHORT).show();
+        // Add further logic to remove the profile photo from the database or storage if required.
+    }
+
+    /**
+     * Handles the action to view a specific user's profile.
+     * This method is triggered when the "View User Profile" option is selected.
+     *
+     * @param userId The ID of the user whose profile will be viewed.
+     */
+    @Override
+    public void onOptionTwoClick(String userId) {
+        DatabaseHelper dbHelper = new DatabaseHelper(requireContext());
+        Toast.makeText(getContext(), "Viewing profile for user " + userId, Toast.LENGTH_SHORT).show();
+        // Add logic to navigate to the user's profile details if required.
+    }
+
+    /**
+     * Handles the action to remove a specific user from the database.
+     * This method is triggered when the "Remove User" option is selected.
+     *
+     * @param userId The ID of the user who will be removed.
+     */
+    @Override
+    public void onOptionThreeClick(String userId) {
+        DatabaseHelper dbHelper = new DatabaseHelper(requireContext());
+        dbHelper.removeUser(userId);
+        userAdapter.setExpandedPosition(-1);
+        userAdapter.notifyDataSetChanged();
+        Toast.makeText(getContext(), "Removing user " + userId, Toast.LENGTH_SHORT).show();
+    }
+
+    /**
+     * Creates a new instance of the AdminEntrantsProfilesFragment.
+     *
+     * @return A new instance of AdminEntrantsProfilesFragment.
+     */
+    public static AdminEntrantsProfilesFragment newInstance() {
+        return new AdminEntrantsProfilesFragment();
     }
 }

@@ -1,0 +1,11 @@
+com.example.tigers_lottery
+com.example.tigers_lottery.Admin
+com.example.tigers_lottery.Admin.DashboardFragments
+com.example.tigers_lottery.Admin.DashboardFragments.ListItems
+com.example.tigers_lottery.HostedEvents
+com.example.tigers_lottery.HostedEvents.Adapters
+com.example.tigers_lottery.JoinedEvents
+com.example.tigers_lottery.models
+com.example.tigers_lottery.placeholder
+com.example.tigers_lottery.ProfileViewsEdit
+com.example.tigers_lottery.utils
