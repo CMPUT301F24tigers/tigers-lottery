@@ -43,7 +43,7 @@ import java.util.Locale;
 public class OrganizerCreateEventFragment extends Fragment {
 
     private EditText inputEventName, inputEventLocation, inputRegistrationOpens, inputRegistrationDeadline, inputEventDate, inputEventDescription, inputWaitlistLimit, inputOccupantLimit;
-    private CheckBox checkboxWaitlistLimit;
+    private CheckBox checkboxWaitlistLimit, checkboxGeolocationRequired;
     private Button btnCreateEvent;
     private DatabaseHelper dbHelper;
     private ImageView imagePoster;
@@ -93,6 +93,7 @@ public class OrganizerCreateEventFragment extends Fragment {
         inputOccupantLimit = view.findViewById(R.id.inputOccupantLimit);
         imagePoster = view.findViewById(R.id.photoPlaceholder);
         photoPlaceholderText = view.findViewById(R.id.photoPlaceholderText);
+        checkboxGeolocationRequired = view.findViewById(R.id.checkboxGeolocationRequired);
 
 
         // Initialize DatabaseHelper
@@ -148,6 +149,7 @@ public class OrganizerCreateEventFragment extends Fragment {
         int waitlistLimit = 0;
         String occupantLimitText = inputOccupantLimit.getText().toString().trim();
         int occupantLimit = 100;
+        boolean geolocationRequired = checkboxGeolocationRequired.isChecked();
 
         boolean isValid = true;
 
@@ -246,6 +248,7 @@ public class OrganizerCreateEventFragment extends Fragment {
         event.setWaitlistLimitFlag(assignWaitlistLimit);
         event.setWaitlistLimit(assignWaitlistLimit ? waitlistLimit : 0);
         event.setOccupantLimit(occupantLimit);
+        event.setGeolocationRequired(geolocationRequired);
 
         // Set organizer ID from Device ID (current user ID)
         String organizerId = dbHelper.getCurrentUserId(); // Retrieve Device ID

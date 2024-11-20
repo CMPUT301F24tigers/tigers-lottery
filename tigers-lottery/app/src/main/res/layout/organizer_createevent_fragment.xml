@@ -75,6 +75,15 @@
             android:layout_marginBottom="12dp"
             android:inputType="text" />
 
+        <!-- Geolocation checkbox -->
+        <CheckBox
+            android:id="@+id/checkboxGeolocationRequired"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Require Geolocation?"
+            android:layout_marginBottom="12dp" />
+
+
         <!-- Registration Opens Label and Input -->
         <TextView
             android:layout_width="wrap_content"
