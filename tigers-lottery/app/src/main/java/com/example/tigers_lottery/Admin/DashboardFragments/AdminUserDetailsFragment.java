@@ -27,6 +27,9 @@ import java.util.Objects;
 
 /**
  * Fragment for displaying and managing user details for admins.
+ * This fragment allows an admin to view detailed information about a user,
+ * including their name, email, phone number, date of birth, and profile picture.
+ * The admin can also remove the user's profile picture if one exists.
  */
 public class AdminUserDetailsFragment extends Fragment {
 
@@ -43,6 +46,12 @@ public class AdminUserDetailsFragment extends Fragment {
     private ImageView userPhoto;
     private Button removeUserProfilePhoto;
 
+    /**
+     * Factory method to create a new instance of this fragment.
+     *
+     * @param userId The ID of the user whose details are to be displayed.
+     * @return A new instance of AdminUserDetailsFragment.
+     */
     public static AdminUserDetailsFragment newInstance(String userId) {
         AdminUserDetailsFragment fragment = new AdminUserDetailsFragment();
         Bundle args = new Bundle();
@@ -51,6 +60,12 @@ public class AdminUserDetailsFragment extends Fragment {
         return fragment;
     }
 
+    /**
+     * Called when the fragment is being created.
+     * Retrieves the user ID from the arguments and initializes the DatabaseHelper.
+     *
+     * @param savedInstanceState Saved state of the fragment, if available.
+     */
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,6 +75,14 @@ public class AdminUserDetailsFragment extends Fragment {
         dbHelper = new DatabaseHelper(requireContext());
     }
 
+    /**
+     * Inflates the layout for this fragment and initializes UI components.
+     *
+     * @param inflater           LayoutInflater to inflate the layout.
+     * @param container          Parent container for the fragment.
+     * @param savedInstanceState Saved state of the fragment, if available.
+     * @return The root view of the fragment's layout.
+     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -73,13 +96,14 @@ public class AdminUserDetailsFragment extends Fragment {
         userPhoto = view.findViewById(R.id.eventPoster);
         removeUserProfilePhoto = view.findViewById(R.id.runLotteryButton);
 
-        //UI components to hide
+        // Hide unrelated UI components
         TextView description = view.findViewById(R.id.eventDescription);
         Button viewRegistered = view.findViewById(R.id.viewRegisteredEntrants);
-        Button viewDeclined =  view.findViewById(R.id.viewDeclinedEntrants);
+        Button viewDeclined = view.findViewById(R.id.viewDeclinedEntrants);
         Button viewWaitlisted = view.findViewById(R.id.viewWaitlistedEntrants);
         Button viewInvited = view.findViewById(R.id.viewInvitedEntrants);
         Button clearLists = view.findViewById(R.id.clearListsButton);
+
         clearLists.setVisibility(View.GONE);
         viewInvited.setVisibility(View.GONE);
         viewDeclined.setVisibility(View.GONE);
@@ -88,8 +112,6 @@ public class AdminUserDetailsFragment extends Fragment {
         description.setVisibility(View.GONE);
         removeUserProfilePhoto.setVisibility(View.GONE);
 
-
-        // Adjust button texts for admin actions
         removeUserProfilePhoto.setText("Remove User Profile Photo");
 
         // Load user details
@@ -101,6 +123,10 @@ public class AdminUserDetailsFragment extends Fragment {
         return view;
     }
 
+    /**
+     * Fetches user details from the database using the user ID
+     * and updates the UI to display the details.
+     */
     private void loadUserDetails() {
         dbHelper.fetchUserById(userId, new DatabaseHelper.UsersCallback() {
             @Override
@@ -126,10 +152,16 @@ public class AdminUserDetailsFragment extends Fragment {
         });
     }
 
+    /**
+     * Displays user details in the UI components.
+     * If a profile picture exists, it is loaded into the ImageView.
+     *
+     * @param user The user object containing the details to display.
+     */
     private void displayUserDetails(User user) {
         userName.setText(user.getFirstName() + " " + user.getLastName());
         userEmail.setText("Email Address: " + user.getEmailAddress());
-        if (!Objects.equals(user.getPhoneNumber(), "")){
+        if (!Objects.equals(user.getPhoneNumber(), "")) {
             userMobile.setText("Phone Number: " + user.getPhoneNumber());
         } else {
             userMobile.setText("Phone Number: No Phone Number Added");
@@ -142,7 +174,7 @@ public class AdminUserDetailsFragment extends Fragment {
         userDOB.setText("Date of Birth: " + formattedDate);
 
         // Display the placeholder image initially
-        userPhoto.setImageResource(R.drawable.placeholder_user_image); // Placeholder image
+        userPhoto.setImageResource(R.drawable.placeholder_user_image);
 
         // Fetch and display the profile image
         dbHelper.getUserProfileImage(user.getUserId(), new DatabaseHelper.Callback() {
@@ -153,13 +185,13 @@ public class AdminUserDetailsFragment extends Fragment {
                     Glide.with(requireContext())
                             .load(imageUrl)
                             .into(userPhoto);
+
                     // Make ImageView clickable
                     userPhoto.setOnClickListener(v -> showImagePreviewDialog(imageUrl));
 
                     // Show the "Remove Profile Photo" button
                     removeUserProfilePhoto.setVisibility(View.VISIBLE);
                 } else {
-                    // If no image exists, keep the placeholder and hide the button
                     userPhoto.setImageResource(R.drawable.placeholder_user_image);
                     userPhoto.setOnClickListener(null);
                     removeUserProfilePhoto.setVisibility(View.GONE);
@@ -174,15 +206,18 @@ public class AdminUserDetailsFragment extends Fragment {
                 Toast.makeText(getContext(), "Failed to load profile image: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
-
     }
 
+    /**
+     * Sets up button listeners for admin actions, including
+     * removing the user's profile photo.
+     */
     private void setupButtonListeners() {
-        //TODO:Dispatch notification to user
         removeUserProfilePhoto.setOnClickListener(v -> {
             dbHelper.removeUserProfileImage(userId, new DatabaseHelper.Callback() {
                 @Override
                 public void onSuccess(String message) {
+                    //TODO: Dispatch notification to the user
                     Toast.makeText(getContext(), user.getFirstName() + " " + user.getLastName() + "'s profile picture has been removed", Toast.LENGTH_SHORT).show();
                     loadUserDetails();
                 }
@@ -195,13 +230,17 @@ public class AdminUserDetailsFragment extends Fragment {
         });
     }
 
+    /**
+     * Shows a dialog to preview the user's profile image in fullscreen.
+     *
+     * @param imageUrl The URL of the profile image to preview.
+     */
     private void showImagePreviewDialog(String imageUrl) {
         View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.image_preview, null);
 
         androidx.appcompat.app.AlertDialog dialog = new androidx.appcompat.app.AlertDialog.Builder(requireContext())
                 .setView(dialogView)
                 .create();
-
 
         ImageView imagePreview = dialogView.findViewById(R.id.imagePreview);
         Glide.with(requireContext()).load(imageUrl).into(imagePreview);
