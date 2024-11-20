@@ -26,7 +26,6 @@ public class AdminRecyclerViewAdapter extends RecyclerView.Adapter<AdminRecycler
     private List<AdminListItemModel> itemList;
     private OnActionListener actionListener;
     private int expandedPosition = -1;
-    private boolean hideExpandableSection2;
 
     /**
      * Constructs an adapter for a list of admin items.
@@ -46,13 +45,6 @@ public class AdminRecyclerViewAdapter extends RecyclerView.Adapter<AdminRecycler
         return new UserViewHolder(view);
     }
 
-    /**
-     * Sets whether the second expandable section should be hidden.
-     * @param hideExpandableSection True if expandable section 2 should be hidden; false otherwise.
-     */
-    public void setHideExpandableSection2(boolean hideExpandableSection) {
-        this.hideExpandableSection2 = hideExpandableSection;
-    }
 
     @Override
     public void onBindViewHolder(@NonNull UserViewHolder holder, int position) {
@@ -64,11 +56,9 @@ public class AdminRecyclerViewAdapter extends RecyclerView.Adapter<AdminRecycler
         holder.expandableMenuTextView.setText("Actions for " + item.getDisplayName());
         holder.expandableMenuOption1.setText(item.getOption1Text());
         holder.expandableMenuOption2.setText(item.getOption2Text());
-        holder.expandableMenuOption3.setText(item.getOption3Text());
 
         // Expand or collapse the menu based on the current position
         holder.expandableMenuLayout.setVisibility(holder.getAdapterPosition() == expandedPosition ? View.VISIBLE : View.GONE);
-        holder.expandableMenuBtnSection2.setVisibility(hideExpandableSection2 ? View.GONE : View.VISIBLE);
 
         // Toggle menu visibility on options button click
         holder.optionsButton.setOnClickListener(v -> {
@@ -86,7 +76,6 @@ public class AdminRecyclerViewAdapter extends RecyclerView.Adapter<AdminRecycler
         // Set click listeners for each option in the expandable menu
         holder.expandableMenuOption1.setOnClickListener(v -> actionListener.onOptionOneClick(item.getUniqueIdentifier()));
         holder.expandableMenuOption2.setOnClickListener(v -> actionListener.onOptionTwoClick(item.getUniqueIdentifier()));
-        holder.expandableMenuOption3.setOnClickListener(v -> actionListener.onOptionThreeClick(item.getUniqueIdentifier()));
     }
 
     /**
@@ -110,7 +99,6 @@ public class AdminRecyclerViewAdapter extends RecyclerView.Adapter<AdminRecycler
         ImageButton optionsButton;
         Button expandableMenuOption1, expandableMenuOption2, expandableMenuOption3;
         ConstraintLayout expandableMenuLayout;
-        LinearLayout expandableMenuBtnSection2;
 
         /**
          * Initializes the views within each item in the RecyclerView.
@@ -125,8 +113,6 @@ public class AdminRecyclerViewAdapter extends RecyclerView.Adapter<AdminRecycler
             expandableMenuTextView = itemView.findViewById(R.id.expandableMenuTextView);
             expandableMenuOption1 = itemView.findViewById(R.id.expandableMenuOption1);
             expandableMenuOption2 = itemView.findViewById(R.id.expandableMenuOption2);
-            expandableMenuOption3 = itemView.findViewById(R.id.expandableMenuOption3);
-            expandableMenuBtnSection2 = itemView.findViewById(R.id.expandableMenuBtnSection2);
         }
     }
 }
