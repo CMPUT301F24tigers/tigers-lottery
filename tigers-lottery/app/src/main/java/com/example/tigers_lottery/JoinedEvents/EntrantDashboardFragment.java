@@ -203,55 +203,41 @@ public class EntrantDashboardFragment extends Fragment {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 String entered = input.getText().toString();
-                if(!entered.isEmpty()){
-                    try{
+                if(!entered.isEmpty()) {
+                    try {
                         int eventId = Integer.parseInt(entered);
-                        dbHelper.addEntrantWaitlist(eventId, deviceId, new DatabaseHelper.EventsCallback() {
-                            /**
-                             * Required, unused.
-                             * @param events unused.
-                             */
-                            @Override
-                            public void onEventsFetched(List<Event> events) {
-
-                            }
-
-                            /**
-                             * Pops a message up if the entrant joined the waiting list successfully
-                             * @param event to be joined
-                             */
-                            @Override
-                            public void onEventFetched(Event event) {
-                                Toast.makeText(getActivity(), "Worked!", Toast.LENGTH_SHORT).show();
 
 
-                                FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-                                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                        Bundle bundle = new Bundle();
+                        bundle.putInt("eventId", eventId);
 
-                                Fragment transitionedFragment = new EntrantDashboardFragment();
+                        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+                        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
-                                fragmentTransaction.replace(R.id.main_activity_fragment_container, transitionedFragment);
-                                fragmentTransaction.addToBackStack(null);
-                                fragmentTransaction.commit();
+                        Fragment transitionedFragment = new EntrantEventDetailsFragment();
+                        transitionedFragment.setArguments(bundle);
 
-                            }
+                        fragmentTransaction.replace(R.id.main_activity_fragment_container, transitionedFragment);
+                        fragmentTransaction.addToBackStack(null);
+                        fragmentTransaction.commit();
 
-                            /**
-                             * Error handling for an invalid event id.
-                             * @param e exception catcher.
-                             */
+                    } catch (NumberFormatException e) {
 
-                            @Override
-                            public void onError(Exception e) {
-                                Toast.makeText(getActivity(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                            }
-                        });
-
-                    } catch (NumberFormatException e){
-                }} else{
 
                     }
-            }
+
+                }
+
+                else {
+
+
+
+                    }
+
+
+                }
+
+
         }); builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
