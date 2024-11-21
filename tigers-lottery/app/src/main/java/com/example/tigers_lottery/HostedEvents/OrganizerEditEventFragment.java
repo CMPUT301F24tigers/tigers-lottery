@@ -46,7 +46,7 @@ import java.util.Locale;
 public class OrganizerEditEventFragment extends Fragment {
 
     private EditText inputEventName, inputEventLocation, inputRegistrationOpens, inputRegistrationDeadline, inputEventDate, inputEventDescription, inputWaitlistLimit, inputOccupantLimit;
-    private CheckBox checkboxWaitlistLimit;
+    private CheckBox checkboxWaitlistLimit, checkboxGeolocationRequired;
     private Button btnSaveEvent;
     private DatabaseHelper dbHelper;
     private Event event; // Store the event being edited
@@ -98,6 +98,7 @@ public class OrganizerEditEventFragment extends Fragment {
         inputOccupantLimit = view.findViewById(R.id.inputOccupantLimit);
         imagePoster = view.findViewById(R.id.photoPlaceholder);
         photoPlaceholderText = view.findViewById(R.id.photoPlaceholderText);
+        checkboxGeolocationRequired = view.findViewById(R.id.checkboxGeolocationRequired);
 
         // Hide occupant limit whilst editing
         TextView labelOccupantLimit = view.findViewById(R.id.LabelOccupantLimit);
@@ -194,8 +195,6 @@ public class OrganizerEditEventFragment extends Fragment {
 
 
 
-
-
     /**
      * Loads the stored event data and populates the edit text fields.
      * @param event to be edited.
@@ -215,6 +214,8 @@ public class OrganizerEditEventFragment extends Fragment {
 
         // Hide the waitlist limit input field regardless of any external listener
         inputWaitlistLimit.setVisibility(View.GONE);
+
+        checkboxGeolocationRequired.setChecked(event.isGeolocationRequired());
 
         // Display existing poster only if no new image was picked
         if (event.getPosterUrl() != null && !event.getPosterUrl().isEmpty()) {
@@ -248,6 +249,7 @@ public class OrganizerEditEventFragment extends Fragment {
         String eventDescription = inputEventDescription.getText().toString().trim();
         boolean assignWaitlistLimit = checkboxWaitlistLimit.isChecked();
         int waitlistLimit = 0;
+        boolean geolocationRequired = checkboxGeolocationRequired.isChecked();
 
         boolean isValid = true;
 
@@ -334,6 +336,7 @@ public class OrganizerEditEventFragment extends Fragment {
         event.setDescription(eventDescription);
         event.setWaitlistLimitFlag(assignWaitlistLimit);
         event.setWaitlistLimit(assignWaitlistLimit ? waitlistLimit : 0);
+        event.setGeolocationRequired(geolocationRequired);
 
         if (isImageUpdated && imageUri != null) {
             dbHelper.uploadPosterImageToFirebase(imageUri, new DatabaseHelper.UploadCallback() {
