@@ -2,6 +2,8 @@ package com.example.tigers_lottery.HostedEvents;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.location.Address;
+import android.location.Geocoder;
 import android.net.Uri;
 import android.os.Bundle;
 import com.bumptech.glide.Glide;
@@ -29,9 +31,11 @@ import androidx.fragment.app.Fragment;
 import com.example.tigers_lottery.DatabaseHelper;
 import com.example.tigers_lottery.R;
 import com.example.tigers_lottery.models.Event;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.Timestamp;
 import com.google.firebase.storage.StorageReference;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -327,6 +331,22 @@ public class OrganizerEditEventFragment extends Fragment {
             return;
         }
 
+        // Validate address
+        if (!validateAddress(eventLocation)) {
+            inputEventLocation.setError("Please enter a valid address.");
+            return;
+        }
+
+        // Convert validated address to LatLng
+        LatLng geocodedLocation = getLatLngFromAddress(eventLocation);
+        if (geocodedLocation == null) {
+            inputEventLocation.setError("Failed to resolve address to location.");
+            return;
+        }
+
+        // Log the geocoded location
+        Log.d("Geolocation", "Resolved location: Latitude = " + geocodedLocation.latitude + ", Longitude = " + geocodedLocation.longitude);
+
         // Set the updated values to the event object
         event.setEventName(eventName);
         event.setLocation(eventLocation);
@@ -337,6 +357,9 @@ public class OrganizerEditEventFragment extends Fragment {
         event.setWaitlistLimitFlag(assignWaitlistLimit);
         event.setWaitlistLimit(assignWaitlistLimit ? waitlistLimit : 0);
         event.setGeolocationRequired(geolocationRequired);
+
+        // Set geolocation (convert LatLng to GeoPoint)
+        event.setGeolocation(new com.google.firebase.firestore.GeoPoint(geocodedLocation.latitude, geocodedLocation.longitude));
 
         if (isImageUpdated && imageUri != null) {
             dbHelper.uploadPosterImageToFirebase(imageUri, new DatabaseHelper.UploadCallback() {
@@ -447,5 +470,35 @@ public class OrganizerEditEventFragment extends Fragment {
             return false;  // Date format is invalid
         }
     }
+
+    private boolean validateAddress(String address) {
+        Geocoder geocoder = new Geocoder(requireContext(), Locale.getDefault());
+        try {
+            List<Address> addresses = geocoder.getFromLocationName(address, 1);
+            return addresses != null && !addresses.isEmpty();
+        } catch (IOException e) {
+            Log.e("GeocoderError", "Error validating address", e);
+            return false;
+        }
+    }
+
+    private LatLng getLatLngFromAddress(String address) {
+        Geocoder geocoder = new Geocoder(requireContext(), Locale.getDefault());
+        try {
+            Log.d("Geocoder", "Resolving address: " + address);
+            List<Address> addresses = geocoder.getFromLocationName(address, 1);
+            if (addresses != null && !addresses.isEmpty()) {
+                Address location = addresses.get(0);
+                Log.d("Geocoder", "Resolved LatLng: Latitude = " + location.getLatitude() + ", Longitude = " + location.getLongitude());
+                return new LatLng(location.getLatitude(), location.getLongitude());
+            } else {
+                Log.w("Geocoder", "No results for address: " + address);
+            }
+        } catch (IOException e) {
+            Log.e("GeocoderError", "Error resolving address to LatLng", e);
+        }
+        return null;
+    }
+
 
 }

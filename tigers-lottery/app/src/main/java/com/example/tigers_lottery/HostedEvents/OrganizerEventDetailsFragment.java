@@ -44,7 +44,7 @@ public class OrganizerEventDetailsFragment extends Fragment {
     // UI Components
     private TextView eventTitle, eventDescription, eventLocation, waitlistOpenDate, waitlistCloseDate, eventDate, waitlistLimit;
     private ImageView eventPoster;
-    private Button viewRegisteredEntrants, viewWaitlistedEntrants, viewInvitedEntrants, viewDeclinedEntrants, runLotteryButton, clearListsButton;
+    private Button viewRegisteredEntrants, viewWaitlistedEntrants, viewInvitedEntrants, viewDeclinedEntrants, runLotteryButton, clearListsButton, viewMapButton;
 
     /**
      * Required empty public constructor.
@@ -119,6 +119,7 @@ public class OrganizerEventDetailsFragment extends Fragment {
         runLotteryButton = view.findViewById(R.id.runLotteryButton);
         eventPoster = view.findViewById(R.id.eventPoster);
         clearListsButton = view.findViewById(R.id.clearListsButton);
+        viewMapButton = view.findViewById(R.id.viewMapButton);
 
         // Fetch and display event details
         loadEventDetails();
@@ -269,6 +270,7 @@ public class OrganizerEventDetailsFragment extends Fragment {
         viewWaitlistedEntrants.setOnClickListener(v -> openEntrantFragment(new OrganizerWaitingListFragment()));
         viewInvitedEntrants.setOnClickListener(v -> openEntrantFragment(new OrganizerInvitedEntrantsFragment()));
         viewDeclinedEntrants.setOnClickListener(v -> openEntrantFragment(new OrganizerDeclinedEntrantsFragment()));
+        viewMapButton.setOnClickListener(v -> openMapFragment());
     }
 
     /**
@@ -488,5 +490,14 @@ public class OrganizerEventDetailsFragment extends Fragment {
                 .addToBackStack(null)
                 .commit();
     }
+
+    private void openMapFragment() {
+        OrganizerMapFragment mapFragment = OrganizerMapFragment.newInstance(eventId);
+        requireActivity().getSupportFragmentManager().beginTransaction()
+                .replace(R.id.main_activity_fragment_container, mapFragment)
+                .addToBackStack(null)
+                .commit();
+    }
+
 
 }
