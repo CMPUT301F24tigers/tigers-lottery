@@ -1,12 +1,15 @@
 package com.example.tigers_lottery.HostedEvents;
 
 import android.app.AlertDialog;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -23,12 +26,15 @@ import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.firestore.GeoPoint;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class OrganizerMapFragment extends Fragment implements OnMapReadyCallback {
@@ -41,6 +47,8 @@ public class OrganizerMapFragment extends Fragment implements OnMapReadyCallback
     private DatabaseHelper dbHelper; // Database helper for fetching event data
 
     private LatLng fallbackLocation = new LatLng(40.7128, -74.0060); // Default: New York City
+
+    private Map<Marker, User> markerUserMap = new HashMap<>();
 
     public static OrganizerMapFragment newInstance(int eventId) {
         OrganizerMapFragment fragment = new OrganizerMapFragment();
@@ -84,6 +92,16 @@ public class OrganizerMapFragment extends Fragment implements OnMapReadyCallback
         googleMap.getUiSettings().setZoomControlsEnabled(true);
         googleMap.getUiSettings().setCompassEnabled(true);
         googleMap.getUiSettings().setScrollGesturesEnabled(true);
+
+        // Set up marker click listener
+        googleMap.setOnMarkerClickListener(marker -> {
+            User user = markerUserMap.get(marker); // Retrieve associated user
+            if (user != null) {
+                showUserDetailsDialog(user); // Show dialog for the user
+                return true; // Consume the click event
+            }
+            return false; // Allow default behavior for untracked markers
+        });
 
         // Fetch and set the starting location
         fetchEventGeolocationAndMarkers();
@@ -143,13 +161,13 @@ public class OrganizerMapFragment extends Fragment implements OnMapReadyCallback
                         );
 
                         if (event.getRegisteredEntrants().contains(user.getUserId())) {
-                            addMarker(userLocation, "Registered Entrant", BitmapDescriptorFactory.HUE_GREEN);
+                            addMarker(userLocation, "Registered Entrant", BitmapDescriptorFactory.HUE_GREEN, user);
                         } else if (event.getWaitlistedEntrants().contains(user.getUserId())) {
-                            addMarker(userLocation, "Waitlisted Entrant", BitmapDescriptorFactory.HUE_YELLOW);
+                            addMarker(userLocation, "Waitlisted Entrant", BitmapDescriptorFactory.HUE_YELLOW, user);
                         } else if (event.getInvitedEntrants().contains(user.getUserId())) {
-                            addMarker(userLocation, "Invited Entrant", BitmapDescriptorFactory.HUE_ORANGE);
+                            addMarker(userLocation, "Invited Entrant", BitmapDescriptorFactory.HUE_ORANGE, user);
                         } else if (event.getDeclinedEntrants().contains(user.getUserId())) {
-                            addMarker(userLocation, "Declined Entrant", BitmapDescriptorFactory.HUE_RED);
+                            addMarker(userLocation, "Declined Entrant", BitmapDescriptorFactory.HUE_RED, user);
                         }
                     } else {
                         Log.w("OrganizerMapFragment", "Missing geolocation for user: " + user.getUserId());
@@ -169,13 +187,58 @@ public class OrganizerMapFragment extends Fragment implements OnMapReadyCallback
         });
     }
 
-    private void addMarker(LatLng location, String title, float hue) {
+    private void addMarker(LatLng location, String title, float hue, User user) {
         if (googleMap != null) {
-            googleMap.addMarker(new MarkerOptions()
+            Marker marker = googleMap.addMarker(new MarkerOptions()
                     .position(location)
                     .title(title)
                     .icon(BitmapDescriptorFactory.defaultMarker(hue))
             );
+            if (marker != null && user != null) {
+                markerUserMap.put(marker, user); // Map marker to user
+            }
+        }
+    }
+
+    private void showUserDetailsDialog(User user) {
+        // Inflate the custom dialog layout
+        View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.user_details_dialog, null);
+
+        // Populate dialog with user data
+        TextView userNameTextView = dialogView.findViewById(R.id.userNameTextView);
+        TextView userEmailTextView = dialogView.findViewById(R.id.userEmailTextView);
+        TextView userPhoneTextView = dialogView.findViewById(R.id.userPhoneTextView);
+
+        userNameTextView.setText(user.getFirstName() + " " + user.getLastName());
+        userEmailTextView.setText("Email: " + user.getEmailAddress());
+        userPhoneTextView.setText("Phone number: " + user.getPhoneNumber());
+
+        // Make email and phone clickable
+        userEmailTextView.setOnClickListener(v -> openEmailApp(user.getEmailAddress()));
+        userPhoneTextView.setOnClickListener(v -> openPhoneDialer(user.getPhoneNumber()));
+
+        // Build and show the dialog
+        new AlertDialog.Builder(requireContext())
+                .setView(dialogView)
+                .setTitle("Entrant Details")
+                .setPositiveButton("Close", null)
+                .create()
+                .show();
+    }
+
+    private void openEmailApp(String email) {
+        Intent intent = new Intent(Intent.ACTION_SENDTO);
+        intent.setData(Uri.parse("mailto:" + email));
+        if (intent.resolveActivity(requireContext().getPackageManager()) != null) {
+            startActivity(intent);
+        }
+    }
+
+    private void openPhoneDialer(String phone) {
+        Intent intent = new Intent(Intent.ACTION_DIAL);
+        intent.setData(Uri.parse("tel:" + phone));
+        if (intent.resolveActivity(requireContext().getPackageManager()) != null) {
+            startActivity(intent);
         }
     }
 
