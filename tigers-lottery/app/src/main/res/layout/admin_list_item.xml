@@ -4,7 +4,9 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="#F5EAF6"
-    android:padding="8dp">
+    android:padding="8dp"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintEnd_toEndOf="parent">
 
     <LinearLayout
         android:id="@+id/user_info_layout"
@@ -53,8 +55,8 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/expandableMenuLayout"
-        android:layout_width="351dp"
-        android:layout_height="154dp"
+        android:layout_width="353dp"
+        android:layout_height="103dp"
         android:layout_marginLeft="12dp"
         android:layout_marginTop="4dp"
         android:layout_marginEnd="12dp"
@@ -62,7 +64,7 @@
         android:gravity="center_horizontal"
         android:orientation="horizontal"
         android:padding="8dp"
-        android:visibility="gone"
+        android:visibility="visible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.687"
         app:layout_constraintStart_toStartOf="parent"
@@ -79,21 +81,21 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/expandableMenuBtnSection1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="317dp"
+            android:layout_height="48dp"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="40dp"
+            android:layout_marginTop="28dp"
             android:gravity="center_horizontal"
             android:orientation="horizontal"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.473"
+            app:layout_constraintHorizontal_bias="0.333"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@id/expandableMenuTextView">
 
             <Button
                 android:id="@+id/expandableMenuOption1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="113dp"
+                android:layout_height="43dp"
                 android:padding="8dp"
                 android:text="Option 1"
                 app:cornerRadius="8dp"
@@ -103,8 +105,8 @@
 
             <Button
                 android:id="@+id/expandableMenuOption2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="113dp"
+                android:layout_height="43dp"
                 android:layout_marginStart="8dp"
                 android:padding="8dp"
                 android:text="Option 2"
@@ -114,30 +116,6 @@
                 app:layout_constraintTop_toTopOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <LinearLayout
-            android:id="@+id/expandableMenuBtnSection2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="144dp"
-            android:layout_marginTop="56dp"
-            android:gravity="center_horizontal"
-            android:orientation="horizontal"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@id/expandableMenuBtnSection1">
-
-
-
-        <Button
-            android:id="@+id/expandableMenuOption3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="8dp"
-            android:text="Option 3"
-            android:textColorLink="#FBFBFB"
-            app:cornerRadius="8dp"
-            tools:layout_editor_absoluteX="121dp"
-            tools:layout_editor_absoluteY="90dp" />
-    </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

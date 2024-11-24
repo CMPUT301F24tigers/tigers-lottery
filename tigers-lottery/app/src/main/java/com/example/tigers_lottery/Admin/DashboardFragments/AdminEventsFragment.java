@@ -49,7 +49,6 @@ public class AdminEventsFragment extends Fragment implements OnActionListener {
         View view = inflater.inflate(R.layout.admin_list_fragment, container, false);
 
         eventsAdapter = new AdminRecyclerViewAdapter(itemList, this);
-        eventsAdapter.setHideExpandableSection2(true); // Hide section 2 for events
 
         RecyclerView recyclerView = view.findViewById(R.id.adminRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -85,8 +84,7 @@ public class AdminEventsFragment extends Fragment implements OnActionListener {
                                     event.getEventName(),
                                     organizerName,
                                     "View Event Details",
-                                    "Delete Event",
-                                    ""
+                                    "Delete Event"
                             ));
                             eventsAdapter.notifyDataSetChanged();  // Notify adapter after each addition
                         }
@@ -150,11 +148,6 @@ public class AdminEventsFragment extends Fragment implements OnActionListener {
         eventsAdapter.setExpandedPosition(-1); // Collapse any expanded menus
         eventsAdapter.notifyDataSetChanged();
         Toast.makeText(getContext(), "Removing Event " + eventId, Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void onOptionThreeClick(String userId) {
-        // Unused in this fragment for events
     }
 
     /**

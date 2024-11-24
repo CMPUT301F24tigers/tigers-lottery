@@ -18,10 +18,4 @@ public interface OnActionListener {
      * @param uniqueID The unique identifier for the item associated with this action.
      */
     void onOptionTwoClick(String uniqueID);
-
-    /**
-     * Callback for the third option action.
-     * @param uniqueID The unique identifier for the item associated with this action.
-     */
-    void onOptionThreeClick(String uniqueID);
 }

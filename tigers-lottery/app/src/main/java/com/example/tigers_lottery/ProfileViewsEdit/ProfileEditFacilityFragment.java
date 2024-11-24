@@ -133,7 +133,7 @@ public class ProfileEditFacilityFragment extends Fragment {
 
         String deviceId = getArguments().getString("deviceId");
 
-        dbHelper.getUser(new DatabaseHelper.UserCallback() {
+        dbHelper.getUser(deviceId, new DatabaseHelper.UserCallback() {
             @Override
             public void onUserFetched(User user) {
                 nameEditText.setText(user.getFacilityName());

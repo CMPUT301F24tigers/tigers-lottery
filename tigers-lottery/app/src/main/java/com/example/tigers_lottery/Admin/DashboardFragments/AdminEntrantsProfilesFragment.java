@@ -67,9 +67,8 @@ public class AdminEntrantsProfilesFragment extends Fragment implements OnActionL
                                 user.getUserId(),
                                 user.getFirstName() + " " + user.getLastName(),
                                 user.getEmailAddress(),
-                                "Remove Profile Photo",
-                                "View User Profile",
-                                "Remove User"
+                                "Remove User",
+                                "View User Profile"
                         ));
                     }
                 }
@@ -98,8 +97,20 @@ public class AdminEntrantsProfilesFragment extends Fragment implements OnActionL
     @Override
     public void onOptionOneClick(String userId) {
         DatabaseHelper dbHelper = new DatabaseHelper(requireContext());
-        Toast.makeText(getContext(), "Removing profile photo for user " + userId, Toast.LENGTH_SHORT).show();
-        // Add further logic to remove the profile photo from the database or storage if required.
+        dbHelper.getUser(userId, new DatabaseHelper.UserCallback() {
+            @Override
+            public void onUserFetched(User user) {
+                Toast.makeText(getContext(), "Removing user:  " + user.getFirstName() + " " + user.getLastName(), Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onError(Exception e) {
+                //do nothing
+            }
+        });
+        dbHelper.removeUser(userId);
+        userAdapter.setExpandedPosition(-1);
+        userAdapter.notifyDataSetChanged();
     }
 
     /**
@@ -110,24 +121,12 @@ public class AdminEntrantsProfilesFragment extends Fragment implements OnActionL
      */
     @Override
     public void onOptionTwoClick(String userId) {
-        DatabaseHelper dbHelper = new DatabaseHelper(requireContext());
-        Toast.makeText(getContext(), "Viewing profile for user " + userId, Toast.LENGTH_SHORT).show();
-        // Add logic to navigate to the user's profile details if required.
-    }
+        AdminUserDetailsFragment userDetailsFragment = AdminUserDetailsFragment.newInstance(userId);
 
-    /**
-     * Handles the action to remove a specific user from the database.
-     * This method is triggered when the "Remove User" option is selected.
-     *
-     * @param userId The ID of the user who will be removed.
-     */
-    @Override
-    public void onOptionThreeClick(String userId) {
-        DatabaseHelper dbHelper = new DatabaseHelper(requireContext());
-        dbHelper.removeUser(userId);
-        userAdapter.setExpandedPosition(-1);
-        userAdapter.notifyDataSetChanged();
-        Toast.makeText(getContext(), "Removing user " + userId, Toast.LENGTH_SHORT).show();
+        requireActivity().getSupportFragmentManager().beginTransaction()
+                .replace(R.id.main_activity_fragment_container, userDetailsFragment)
+                .addToBackStack(null)
+                .commit();
     }
 
     /**

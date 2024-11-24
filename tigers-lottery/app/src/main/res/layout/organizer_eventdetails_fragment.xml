@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="16dp">
@@ -20,21 +21,25 @@
             android:paddingBottom="16dp" />
 
         <!-- Placeholder for Photo/Poster -->
-        <FrameLayout
+        <androidx.cardview.widget.CardView
             android:id="@+id/photoPlaceholder"
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
+            android:layout_width="360dp"
+            android:layout_height="205dp"
+            android:layout_marginStart="3dp"
+            android:layout_marginEnd="3dp"
+            android:layout_marginBottom="16dp"
             android:background="#D3D3D3"
-            android:layout_marginBottom="16dp">
+            app:cardCornerRadius="16dp">
 
             <!-- ImageView for displaying the event poster -->
             <ImageView
                 android:id="@+id/eventPoster"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:scaleType="centerCrop" />
+                android:scaleType="centerCrop"
+                android:visibility="visible" />
 
-        </FrameLayout>
+        </androidx.cardview.widget.CardView>
 
         <FrameLayout
             android:layout_width="100dp"
