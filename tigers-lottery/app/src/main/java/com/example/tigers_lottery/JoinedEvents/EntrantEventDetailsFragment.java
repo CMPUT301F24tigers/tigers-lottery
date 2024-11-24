@@ -97,7 +97,6 @@ public class EntrantEventDetailsFragment extends Fragment {
         String deviceId = dbHelper.getCurrentUserId();
         ImageButton backButton = view.findViewById(R.id.eventDetailsBackButton);
         Button eventDetailsButton = view.findViewById(R.id.eventDetailsButton);
-        Button waitingListButton = view.findViewById(R.id.joinWaitlistButton);
         TextView eventTextViewName = view.findViewById(R.id.eventDetailsTextViewName);
         TextView eventTextViewDescription = view.findViewById(R.id.eventDetailsTextViewDetails);
         TextView eventTextViewWaitingList = view.findViewById(R.id.eventDetailsTextViewWaitingList);
