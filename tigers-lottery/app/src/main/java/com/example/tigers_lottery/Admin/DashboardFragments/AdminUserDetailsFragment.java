@@ -177,35 +177,16 @@ public class AdminUserDetailsFragment extends Fragment {
         userPhoto.setImageResource(R.drawable.placeholder_user_image);
 
         // Fetch and display the profile image
-        dbHelper.getUserProfileImage(user.getUserId(), new DatabaseHelper.Callback() {
-            @Override
-            public void onSuccess(String imageUrl) {
-                if (imageUrl != null && !imageUrl.isEmpty() && !imageUrl.equals("NoProfilePhoto")) {
-                    // Load the image into the ImageView
-                    Glide.with(requireContext())
-                            .load(imageUrl)
-                            .into(userPhoto);
+        String profileUrl = user.getUserPhoto();
+        if (profileUrl != null && !profileUrl.isEmpty() && !profileUrl.equals("NoProfilePhoto")) {
+            Glide.with(requireContext())
+                    .load(profileUrl)
+                    .placeholder(R.drawable.placeholder_user_image)
+                    .into(userPhoto);
 
-                    // Make ImageView clickable
-                    userPhoto.setOnClickListener(v -> showImagePreviewDialog(imageUrl));
-
-                    // Show the "Remove Profile Photo" button
-                    removeUserProfilePhoto.setVisibility(View.VISIBLE);
-                } else {
-                    userPhoto.setImageResource(R.drawable.placeholder_user_image);
-                    userPhoto.setOnClickListener(null);
-                    removeUserProfilePhoto.setVisibility(View.GONE);
-                }
-            }
-
-            @Override
-            public void onFailure(Exception e) {
-                userPhoto.setImageResource(R.drawable.placeholder_user_image);
-                removeUserProfilePhoto.setVisibility(View.GONE);
-                userPhoto.setOnClickListener(null);
-                Toast.makeText(getContext(), "Failed to load profile image: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
+            removeUserProfilePhoto.setVisibility(View.VISIBLE);
+            userPhoto.setOnClickListener(v -> showImagePreviewDialog(profileUrl));
+        }
     }
 
     /**
@@ -214,11 +195,13 @@ public class AdminUserDetailsFragment extends Fragment {
      */
     private void setupButtonListeners() {
         removeUserProfilePhoto.setOnClickListener(v -> {
-            dbHelper.removeUserProfileImage(userId, new DatabaseHelper.Callback() {
+            dbHelper.removeImage("user", userId, new DatabaseHelper.Callback() {
                 @Override
                 public void onSuccess(String message) {
                     //TODO: Dispatch notification to the user
                     Toast.makeText(getContext(), user.getFirstName() + " " + user.getLastName() + "'s profile picture has been removed", Toast.LENGTH_SHORT).show();
+                    removeUserProfilePhoto.setVisibility(View.GONE);
+                    userPhoto.setOnClickListener(null);
                     loadUserDetails();
                 }
 
