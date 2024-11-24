@@ -213,9 +213,6 @@ public class OrganizerMapFragment extends Fragment implements OnMapReadyCallback
         userEmailTextView.setText("Email: " + user.getEmailAddress());
         userPhoneTextView.setText("Phone number: " + user.getPhoneNumber());
 
-        // Make email and phone clickable
-        userEmailTextView.setOnClickListener(v -> openEmailApp(user.getEmailAddress()));
-        userPhoneTextView.setOnClickListener(v -> openPhoneDialer(user.getPhoneNumber()));
 
         // Build and show the dialog
         new AlertDialog.Builder(requireContext())
@@ -224,22 +221,6 @@ public class OrganizerMapFragment extends Fragment implements OnMapReadyCallback
                 .setPositiveButton("Close", null)
                 .create()
                 .show();
-    }
-
-    private void openEmailApp(String email) {
-        Intent intent = new Intent(Intent.ACTION_SENDTO);
-        intent.setData(Uri.parse("mailto:" + email));
-        if (intent.resolveActivity(requireContext().getPackageManager()) != null) {
-            startActivity(intent);
-        }
-    }
-
-    private void openPhoneDialer(String phone) {
-        Intent intent = new Intent(Intent.ACTION_DIAL);
-        intent.setData(Uri.parse("tel:" + phone));
-        if (intent.resolveActivity(requireContext().getPackageManager()) != null) {
-            startActivity(intent);
-        }
     }
 
     private void showLegend() {
