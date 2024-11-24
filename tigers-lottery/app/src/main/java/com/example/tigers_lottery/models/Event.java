@@ -3,12 +3,14 @@ package com.example.tigers_lottery.models;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.PropertyName;
+import com.google.zxing.qrcode.encoder.QRCode;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * Class representing an event in the Tigers Lottery application.
@@ -93,7 +95,10 @@ public class Event implements Serializable {
 
     @PropertyName("is_lottery_ran")
     private boolean isLotteryRan = false;
-
+/*
+    @PropertyName("QRCode")
+    private Map<Integer, Byte> QRCode;
+*/
     // No-argument constructor
     public Event() {}
 
@@ -163,6 +168,14 @@ public class Event implements Serializable {
 
     @PropertyName("location")
     public void setLocation(String location) { this.location = location; }
+/*
+    @PropertyName("bitmap")
+    public void setQRCode(Map <Integer, Byte> QRCode) {this.QRCode = QRCode;}
+
+    @PropertyName("bitmap")
+    public Map<Integer, Byte> getQRCode() {return QRCode; }
+
+ */
 
     @PropertyName("description")
     public String getDescription() { return description; }
