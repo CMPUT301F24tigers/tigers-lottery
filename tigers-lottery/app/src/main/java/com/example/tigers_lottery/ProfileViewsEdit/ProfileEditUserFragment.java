@@ -141,7 +141,7 @@ public class ProfileEditUserFragment extends Fragment {
         assert getArguments() != null;
         String deviceId = getArguments().getString("deviceId");
 
-        dbHelper.getUser(new DatabaseHelper.UserCallback() {
+        dbHelper.getUser(deviceId, new DatabaseHelper.UserCallback() {
             @Override
             public void onUserFetched(User user) {
                 editTextFirstName.setText(user.getFirstName());
