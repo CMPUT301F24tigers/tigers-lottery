@@ -1,5 +1,6 @@
 package com.example.tigers_lottery.JoinedEvents;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -23,7 +24,6 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.example.tigers_lottery.DatabaseHelper;
-import android.Manifest; // Add this
 import com.example.tigers_lottery.R;
 import com.example.tigers_lottery.models.Event;
 import com.google.zxing.integration.android.IntentIntegrator;
@@ -39,9 +39,37 @@ public class EntrantDashboardFragment extends Fragment {
 
     private static final int CAMERA_PERMISSION_REQUEST_CODE = 100;
 
+    private ActivityResultLauncher<Intent> qrCodeLauncher;
+
     public EntrantDashboardFragment() {
         // Required empty public constructor
     }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // Initialize ActivityResultLauncher for QR code scanning
+        qrCodeLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+            if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                IntentResult intentResult = IntentIntegrator.parseActivityResult(
+                        IntentIntegrator.REQUEST_CODE,
+                        result.getResultCode(),
+                        result.getData()
+                );
+                if (intentResult != null && intentResult.getContents() != null) {
+                    String eventId = intentResult.getContents();
+                    Toast.makeText(getContext(), "Scanned Event ID: " + eventId, Toast.LENGTH_SHORT).show();
+                    Log.d("QRScan", "Navigating to event details with eventId: " + eventId);
+                    navigateToEventDetails(eventId);
+                } else {
+                    Toast.makeText(getContext(), "Scan Cancelled", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -54,7 +82,6 @@ public class EntrantDashboardFragment extends Fragment {
         List<Event> entrantsEvents = new ArrayList<>();
 
         // Set up the Join Event button to launch the camera for QR code scanning
-
         joinEventButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -69,7 +96,6 @@ public class EntrantDashboardFragment extends Fragment {
                 }
             }
         });
-
 
         dbHelper.entrantFetchEvents(new DatabaseHelper.EventsCallback() {
             @Override
@@ -138,7 +164,7 @@ public class EntrantDashboardFragment extends Fragment {
      * Initiates the QR code scanner for joining events.
      */
     private void initiateQRScanner() {
-        IntentIntegrator integrator = new IntentIntegrator(getActivity());
+        IntentIntegrator integrator = IntentIntegrator.forSupportFragment(this); // Use forSupportFragment
         integrator.setDesiredBarcodeFormats(IntentIntegrator.QR_CODE);
         integrator.setPrompt("Scan a QR Code to Join an Event");
         integrator.setCameraId(0);
@@ -146,80 +172,40 @@ public class EntrantDashboardFragment extends Fragment {
         integrator.setBarcodeImageEnabled(true);
 
         Intent intent = integrator.createScanIntent();
-        qrCodeLauncher.launch(intent); // Launch the scanner with the new API
+        qrCodeLauncher.launch(intent); // Launch the scanner
     }
 
 
 
-    /*
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, android.content.Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
-        if (result != null) {
-            if (result.getContents() == null) {
-                Toast.makeText(getContext(), "Scan Cancelled", Toast.LENGTH_SHORT).show();
-            } else {
-                String eventId = result.getContents(); // Extract QR code data
-                Toast.makeText(getContext(), "Scanned Event ID: " + eventId, Toast.LENGTH_SHORT).show();
-
-                // Navigate to Event Details Fragment
-                Bundle bundle = new Bundle();
-                bundle.putString("eventId", eventId);
-
-                FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-                FragmentTransaction transaction = fragmentManager.beginTransaction();
-                EntrantEventDetailsFragment fragment = new EntrantEventDetailsFragment();
-                fragment.setArguments(bundle);
-                transaction.replace(R.id.main_activity_fragment_container, fragment);
-                transaction.addToBackStack(null);
-                transaction.commit();
-            }
-        }
-    }
-
-
+    /**
+     * Navigates to event details based on the scanned QR code result.
      */
-
-    private final ActivityResultLauncher<Intent> qrCodeLauncher =
-            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
-                if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
-                    IntentResult intentResult = IntentIntegrator.parseActivityResult(
-                            IntentIntegrator.REQUEST_CODE,
-                            result.getResultCode(),
-                            result.getData()
-                    );
-                    if (intentResult != null && intentResult.getContents() != null) {
-                        String eventId = intentResult.getContents();
-                        Toast.makeText(getContext(), "Scanned Event ID: " + eventId, Toast.LENGTH_SHORT).show();
-                        Log.d("QRScan", "Navigating to event details with eventId: " + eventId);
-                        navigateToEventDetails(eventId);
-                    } else {
-                        Toast.makeText(getContext(), "Scan Cancelled", Toast.LENGTH_SHORT).show();
-                    }
-                }
-            });
-
-
     private void navigateToEventDetails(String result) {
+        int eventId = Integer.parseInt(result);
+        Bundle bundle = new Bundle();
+        bundle.putInt("eventId", eventId);
 
-            int eventId = Integer.parseInt(result);
-            Bundle bundle = new Bundle();
-            bundle.putInt("eventId", eventId);
+        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+        Fragment currentFragment = fragmentManager.findFragmentById(R.id.main_activity_fragment_container);
 
-            FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-            FragmentTransaction transaction = fragmentManager.beginTransaction();
-            Fragment fragment = new EntrantEventDetailsFragment();
-            fragment.setArguments(bundle);
-            transaction.replace(R.id.main_activity_fragment_container, fragment);
-            transaction.addToBackStack(null);
-            transaction.commit();
-
-
-
+        Log.d("QRScan", "Current Fragment: " + currentFragment);
+        if (currentFragment instanceof EntrantEventDetailsFragment) {
+            Log.d("QRScan", "Already on Event Details Fragment.");
+            return;
         }
+
+        Log.d("QRScan", "Navigating to Event Details Fragment with eventId: " + eventId);
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        EntrantEventDetailsFragment fragment = new EntrantEventDetailsFragment();
+        fragment.setArguments(bundle);
+        transaction.replace(R.id.main_activity_fragment_container, fragment);
+        transaction.addToBackStack(null);
+        transaction.commit();
     }
 
-
-
+    @Override
+    public void onPause() {
+        super.onPause();
+        Log.d("EntrantDashboardFragment", "onPause called");
+    }
+}
