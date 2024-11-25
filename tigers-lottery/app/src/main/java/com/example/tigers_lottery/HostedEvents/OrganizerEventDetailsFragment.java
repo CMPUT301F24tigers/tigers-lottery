@@ -50,7 +50,7 @@ public class OrganizerEventDetailsFragment extends Fragment {
     // UI Components
 
     private TextView eventTitle, eventDescription, eventLocation, waitlistOpenDate, waitlistCloseDate, eventDate, waitlistLimit, entrantLimit;
-    private ImageView eventPoster;
+    private ImageView eventPoster, qrImage;
     private Button viewRegisteredEntrants, viewWaitlistedEntrants, viewInvitedEntrants, viewDeclinedEntrants, runLotteryButton, clearListsButton, viewMapButton;
 
 

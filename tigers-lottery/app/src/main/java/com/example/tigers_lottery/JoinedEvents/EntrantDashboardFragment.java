@@ -178,7 +178,7 @@ public class EntrantDashboardFragment extends Fragment {
         qrCodeLauncher.launch(intent); // Launch the scanner
     }
 
-    private final ActivityResultLauncher<Intent> qrCodeLauncher =
+    /*private final ActivityResultLauncher<Intent> qrCodeLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
                 if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
                     IntentResult intentResult = IntentIntegrator.parseActivityResult(
@@ -195,22 +195,19 @@ public class EntrantDashboardFragment extends Fragment {
                         Toast.makeText(getContext(), "Scan Cancelled", Toast.LENGTH_SHORT).show();
                     }
                 }
-            });
+            });*/
 
 
     private void navigateToEventDetails(String result) {
-        int eventId = Integer.parseInt(result);
-        Bundle bundle = new Bundle();
-        bundle.putInt("eventId", eventId);
 
         FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
 
         dbHelper.isQrCodeValid(result, isValid -> {
             if (isValid) {
                 // If the QR code is valid, navigate to the event details page
-                int eventId = Integer.parseInt(result.substring(0, 5));
-                Bundle bundle = new Bundle();
-                bundle.putInt("eventId", eventId);
+                int eventIdForQR = Integer.parseInt(result.substring(0, 5));
+                Bundle bundleForQR = new Bundle();
+                bundleForQR.putInt("eventId", eventIdForQR);
 
                 Fragment currentFragment = fragmentManager.findFragmentById(R.id.main_activity_fragment_container);
                 if (currentFragment instanceof EntrantEventDetailsFragment) {
@@ -219,7 +216,7 @@ public class EntrantDashboardFragment extends Fragment {
 
                 FragmentTransaction transaction = fragmentManager.beginTransaction();
                 Fragment fragment = new EntrantEventDetailsFragment();
-                fragment.setArguments(bundle);
+                fragment.setArguments(bundleForQR);
                 transaction.replace(R.id.main_activity_fragment_container, fragment);
                 transaction.addToBackStack(null);
                 transaction.commit();
@@ -244,9 +241,9 @@ public class EntrantDashboardFragment extends Fragment {
 
 }
 
-    @Override
+    /*@Override
     public void onPause() {
         super.onPause();
         Log.d("EntrantDashboardFragment", "onPause called");
-    }
-}
+    }*/
+
