@@ -165,7 +165,9 @@ public class EntrantEventDetailsFragment extends Fragment {
                                         new AlertDialog.Builder(getContext())
                                                 .setTitle("Success")
                                                 .setMessage("You have successfully joined the waitlist!")
-                                                .setPositiveButton("OK", null)
+                                                .setPositiveButton("OK", (dialog1, which1)->{
+
+                                                })
                                                 .create()
                                                 .show();
                                     }

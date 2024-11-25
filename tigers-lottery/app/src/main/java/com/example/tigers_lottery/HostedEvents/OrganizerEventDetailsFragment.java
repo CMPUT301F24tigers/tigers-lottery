@@ -305,6 +305,7 @@ public class OrganizerEventDetailsFragment extends Fragment {
         viewWaitlistedEntrants.setOnClickListener(v -> openEntrantFragment(new OrganizerWaitingListFragment()));
         viewInvitedEntrants.setOnClickListener(v -> openEntrantFragment(new OrganizerInvitedEntrantsFragment()));
         viewDeclinedEntrants.setOnClickListener(v -> openEntrantFragment(new OrganizerDeclinedEntrantsFragment()));
+        qrImage.setOnClickListener(v -> openEntrantFragment(new OrganizerQRCodeFragment()));
     }
 
     /**

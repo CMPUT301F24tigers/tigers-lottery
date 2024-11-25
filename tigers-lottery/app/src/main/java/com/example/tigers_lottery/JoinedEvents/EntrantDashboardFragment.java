@@ -24,6 +24,8 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.example.tigers_lottery.DatabaseHelper;
 import android.Manifest; // Add this
+
+import com.example.tigers_lottery.HostedEvents.OrganizerEventDetailsFragment;
 import com.example.tigers_lottery.R;
 import com.example.tigers_lottery.models.Event;
 import com.google.zxing.integration.android.IntentIntegrator;
@@ -131,6 +133,8 @@ public class EntrantDashboardFragment extends Fragment {
             }
         });
 
+        
+
         return view;
     }
 
@@ -204,19 +208,23 @@ public class EntrantDashboardFragment extends Fragment {
 
     private void navigateToEventDetails(String result) {
 
-            int eventId = Integer.parseInt(result);
-            Bundle bundle = new Bundle();
-            bundle.putInt("eventId", eventId);
+        int eventId = Integer.parseInt(result);
+        Bundle bundle = new Bundle();
+        bundle.putInt("eventId", eventId);
 
-            FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-            FragmentTransaction transaction = fragmentManager.beginTransaction();
-            Fragment fragment = new EntrantEventDetailsFragment();
-            fragment.setArguments(bundle);
-            transaction.replace(R.id.main_activity_fragment_container, fragment);
-            transaction.addToBackStack(null);
-            transaction.commit();
+        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
 
+        Fragment currentFragment = fragmentManager.findFragmentById(R.id.main_activity_fragment_container);
+        if (currentFragment instanceof EntrantEventDetailsFragment) {
+            return;
+        }
 
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        Fragment fragment = new EntrantEventDetailsFragment();
+        fragment.setArguments(bundle);
+        transaction.replace(R.id.main_activity_fragment_container, fragment);
+        transaction.addToBackStack(null);
+        transaction.commit();
 
         }
     }
