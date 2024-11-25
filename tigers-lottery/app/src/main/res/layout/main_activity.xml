@@ -13,6 +13,18 @@
         android:layout_height="wrap_content"
         android:background="@color/app_primary_light_purple">
 
+
+        <!-- Notification Icon Button -->
+        <ImageButton
+            android:id="@+id/notificationButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_mailbox"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Notifications"
+            android:layout_gravity="start"
+            android:padding="10dp" />
+
         <!-- Title TextView -->
         <TextView
             android:id="@+id/toolbarTitle"

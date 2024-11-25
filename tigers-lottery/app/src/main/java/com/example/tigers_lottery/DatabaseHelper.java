@@ -9,6 +9,7 @@ import androidx.annotation.Nullable;
 
 import com.example.tigers_lottery.models.Event;
 import com.example.tigers_lottery.models.User;
+import com.example.tigers_lottery.models.Notification;
 import com.example.tigers_lottery.utils.DeviceIDHelper;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -106,6 +107,7 @@ public class DatabaseHelper {
     private CollectionReference usersRef;
     private CollectionReference adminsRef;
     private CollectionReference adminAuthCodesRef;
+    private CollectionReference notificationsRef;
 
     private String currentUserId;
     private StorageReference storageReference;
@@ -122,6 +124,7 @@ public class DatabaseHelper {
         adminsRef = db.collection("admins"); //Reference to the "admin: collection
         adminAuthCodesRef = db.collection("admin_auth_codes"); //Reference to the "admin_auth_codes" collection
         storageReference = FirebaseStorage.getInstance().getReference("profile_images");
+        notificationsRef = db.collection("notifications"); // Reference to notifications collection
 
         // Retrieve and store the Device ID as the currentUserId
         currentUserId = DeviceIDHelper.getDeviceId(context);
@@ -186,12 +189,50 @@ public class DatabaseHelper {
     }
 
     /**
+     * Callback interface for handling notifications fetching results.
+     */
+    public interface NotificationsCallback {
+        void onNotificationsFetched(List<Notification> notifications);
+        void onError(Exception e);
+    }
+
+    /**
      * Callback interface for fetching entrant lists.
      */
     public interface EntrantsListsCallback {
         void onEntrantsListsFetched(List<String> registered, List<String> waitlisted, List<String> invited, List<String> declined);
         void onError(Exception e);
     }
+
+    /**
+     * Fetches notifications for the current user based on their user_id.
+     *
+     * @param userId  The ID of the logged-in user.
+     * @param callback The callback to handle the list of notifications or error.
+     */
+    public void fetchNotificationsForUser(String userId, final NotificationsCallback callback) {
+        notificationsRef.whereEqualTo("user_id", userId)
+                .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException e) {
+                        if (e != null) {
+                            Log.w(TAG, "Error fetching notifications.", e);
+                            callback.onError(e);
+                            return;
+                        }
+
+                        List<Notification> notifications = new ArrayList<>();
+                        if (value != null) {
+                            for (QueryDocumentSnapshot doc : value) {
+                                Notification notification = doc.toObject(Notification.class);
+                                notifications.add(notification);
+                            }
+                        }
+                        callback.onNotificationsFetched(notifications); // Pass fetched notifications to callback
+                    }
+                });
+    }
+
 
     /**
      * Fetch entrant lists (registered, waitlisted, invited, declined) for an event by its ID.
