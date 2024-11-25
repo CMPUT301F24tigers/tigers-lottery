@@ -42,7 +42,7 @@ public class OrganizerEventDetailsFragment extends Fragment {
     private int lastKnownDeclinedEntrantsSize = 0;
 
     // UI Components
-    private TextView eventTitle, eventDescription, eventLocation, waitlistOpenDate, waitlistCloseDate, eventDate, waitlistLimit;
+    private TextView eventTitle, eventDescription, eventLocation, waitlistOpenDate, waitlistCloseDate, eventDate, waitlistLimit, entrantLimit;
     private ImageView eventPoster;
     private Button viewRegisteredEntrants, viewWaitlistedEntrants, viewInvitedEntrants, viewDeclinedEntrants, runLotteryButton, clearListsButton;
 
@@ -112,6 +112,7 @@ public class OrganizerEventDetailsFragment extends Fragment {
         waitlistCloseDate = view.findViewById(R.id.waitlistCloseDate);
         eventDate = view.findViewById(R.id.eventDate);
         waitlistLimit = view.findViewById(R.id.waitlistLimit);
+        entrantLimit = view.findViewById(R.id.entrantLimit);
         viewRegisteredEntrants = view.findViewById(R.id.viewRegisteredEntrants);
         viewWaitlistedEntrants = view.findViewById(R.id.viewWaitlistedEntrants);
         viewInvitedEntrants = view.findViewById(R.id.viewInvitedEntrants);
@@ -196,6 +197,7 @@ public class OrganizerEventDetailsFragment extends Fragment {
         waitlistCloseDate.setText("Waitlist Close Date: " + event.getFormattedWaitlistDeadline());
         eventDate.setText("Event Date: " + event.getFormattedEventDate());
         waitlistLimit.setText("Waitlist Limit: " + (event.isWaitlistLimitFlag() ? event.getWaitlistLimit() : "N/A"));
+        entrantLimit.setText("Entrant Limit: " + (event.getOccupantLimit()));
 
         // Initialize entrant lists only if they are null and avoid altering the invitedEntrants if isLotteryRan is false
         if (event.getRegisteredEntrants() == null) {
