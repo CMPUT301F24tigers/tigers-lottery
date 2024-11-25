@@ -24,6 +24,8 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.example.tigers_lottery.DatabaseHelper;
+import android.Manifest; // Add this
+import com.example.tigers_lottery.HostedEvents.OrganizerEventDetailsFragment;
 import com.example.tigers_lottery.R;
 import com.example.tigers_lottery.models.Event;
 import com.google.zxing.integration.android.IntentIntegrator;
@@ -157,6 +159,7 @@ public class EntrantDashboardFragment extends Fragment {
             }
         });
 
+
         return view;
     }
 
@@ -175,37 +178,72 @@ public class EntrantDashboardFragment extends Fragment {
         qrCodeLauncher.launch(intent); // Launch the scanner
     }
 
+    /*private final ActivityResultLauncher<Intent> qrCodeLauncher =
+            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+                if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                    IntentResult intentResult = IntentIntegrator.parseActivityResult(
+                            IntentIntegrator.REQUEST_CODE,
+                            result.getResultCode(),
+                            result.getData()
+                    );
+                    if (intentResult != null && intentResult.getContents() != null) {
+                        String eventId = intentResult.getContents();
+                        Toast.makeText(getContext(), "Scanned Event ID: " + eventId, Toast.LENGTH_SHORT).show();
+                        Log.d("QRScan", "Navigating to event details with eventId: " + eventId);
+                        navigateToEventDetails(eventId);
+                    } else {
+                        Toast.makeText(getContext(), "Scan Cancelled", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });*/
 
 
-    /**
-     * Navigates to event details based on the scanned QR code result.
-     */
     private void navigateToEventDetails(String result) {
-        int eventId = Integer.parseInt(result);
-        Bundle bundle = new Bundle();
-        bundle.putInt("eventId", eventId);
 
         FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-        Fragment currentFragment = fragmentManager.findFragmentById(R.id.main_activity_fragment_container);
 
-        Log.d("QRScan", "Current Fragment: " + currentFragment);
-        if (currentFragment instanceof EntrantEventDetailsFragment) {
-            Log.d("QRScan", "Already on Event Details Fragment.");
-            return;
-        }
+        dbHelper.isQrCodeValid(result, isValid -> {
+            if (isValid) {
+                // If the QR code is valid, navigate to the event details page
+                int eventIdForQR = Integer.parseInt(result.substring(0, 5));
+                Bundle bundleForQR = new Bundle();
+                bundleForQR.putInt("eventId", eventIdForQR);
 
-        Log.d("QRScan", "Navigating to Event Details Fragment with eventId: " + eventId);
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-        EntrantEventDetailsFragment fragment = new EntrantEventDetailsFragment();
-        fragment.setArguments(bundle);
-        transaction.replace(R.id.main_activity_fragment_container, fragment);
-        transaction.addToBackStack(null);
-        transaction.commit();
+                Fragment currentFragment = fragmentManager.findFragmentById(R.id.main_activity_fragment_container);
+                if (currentFragment instanceof EntrantEventDetailsFragment) {
+                    return; // If already on the details page, do nothing
+                }
+
+                FragmentTransaction transaction = fragmentManager.beginTransaction();
+                Fragment fragment = new EntrantEventDetailsFragment();
+                fragment.setArguments(bundleForQR);
+                transaction.replace(R.id.main_activity_fragment_container, fragment);
+                transaction.addToBackStack(null);
+                transaction.commit();
+            } else {
+                // If the QR code is invalid, show a toast and reload the current fragment
+                Toast.makeText(getActivity(), "Invalid QR Code to Join an Event", Toast.LENGTH_SHORT).show();
+
+                FragmentTransaction transaction = fragmentManager.beginTransaction();
+                Fragment currentFragment = fragmentManager.findFragmentById(R.id.main_activity_fragment_container);
+
+                // Reload the same fragment
+                if (currentFragment instanceof EntrantDashboardFragment) {
+                    transaction.detach(currentFragment);
+                    transaction.attach(currentFragment);
+                } else {
+                    transaction.replace(R.id.main_activity_fragment_container, new EntrantDashboardFragment());
+                }
+                transaction.commit();
+            }
+        });
     }
 
-    @Override
+}
+
+    /*@Override
     public void onPause() {
         super.onPause();
         Log.d("EntrantDashboardFragment", "onPause called");
-    }
-}
+    }*/
+

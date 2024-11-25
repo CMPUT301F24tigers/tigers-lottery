@@ -2,9 +2,11 @@ package com.example.tigers_lottery.HostedEvents;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.location.Address;
 import android.location.Geocoder;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -29,17 +31,26 @@ import androidx.fragment.app.Fragment;
 import com.example.tigers_lottery.DatabaseHelper;
 import com.example.tigers_lottery.R;
 import com.example.tigers_lottery.models.Event;
+import com.example.tigers_lottery.utils.QRCodeGenerator;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.Timestamp;
 import com.google.firebase.storage.StorageException;
 import com.google.firebase.storage.StorageReference;
 
+
+import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
+import java.util.Base64;
+import android.graphics.Bitmap;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * Fragment used by the organizer to create a new event.
@@ -269,6 +280,32 @@ public class OrganizerCreateEventFragment extends Fragment {
         event.setGeolocationRequired(geolocationRequired);
         // Set geolocation (convert LatLng to GeoPoint)
         event.setGeolocation(new com.google.firebase.firestore.GeoPoint(geocodedLocation.latitude, geocodedLocation.longitude));
+
+
+        /*ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        QRCode.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+        byte[] byteArray = outputStream.toByteArray();
+
+        String base64String = Base64.getDecoder(byteArray, Base64.DEFAULT);
+        Map<Integer, Byte> byteMap = new HashMap<>();
+        for (int i = 0; i < byteArray.length; i++) {
+            byteMap.put(i, byteArray[i]);
+        }
+        event.setQRCode(byteMap);
+
+
+        QRCodeGenerator qrCodeGenerator = new QRCodeGenerator();
+        Bitmap QRCode = qrCodeGenerator.generateQRCode(String.valueOf(event.getEventId()));
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        QRCode.compress(Bitmap.CompressFormat.PNG,100, outputStream);
+        byte [] byteArray = outputStream.toByteArray();
+        List<Integer> byteList = new ArrayList<>();
+        for(byte b : byteArray){
+            byteList.add((b & 0xFF));
+        }
+        event.setQRCode(byteList);
+
+         */
 
         // Set organizer ID from Device ID (current user ID)
         String organizerId = dbHelper.getCurrentUserId(); // Retrieve Device ID

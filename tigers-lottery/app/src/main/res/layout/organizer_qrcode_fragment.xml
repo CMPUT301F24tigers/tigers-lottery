@@ -6,11 +6,14 @@
     android:layout_height="match_parent">
 
     <ImageView
-        android:id="@+id/qrCodeImage"
+        android:id="@+id/qrCodeImageLarge"
         android:layout_width="305dp"
         android:layout_height="228dp"
-        tools:layout_editor_absoluteX="53dp"
-        tools:layout_editor_absoluteY="122dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.3"
         tools:srcCompat="@tools:sample/avatars" />
 
     <Button
@@ -18,15 +21,21 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Regenerate QR Code"
-        tools:layout_editor_absoluteX="115dp"
-        tools:layout_editor_absoluteY="392dp" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/qrCodeImageLarge" />
 
     <TextView
         android:id="@+id/qrCodeText"
-        android:layout_width="95dp"
-        android:layout_height="31dp"
-        android:text="QR Code"
+        android:layout_width="256dp"
+        android:layout_height="51dp"
+        android:text="QR CODE VIEWER"
         android:textSize="24sp"
-        tools:layout_editor_absoluteX="16dp"
-        tools:layout_editor_absoluteY="16dp" />
+        app:layout_constraintBottom_toTopOf="@+id/qrCodeImageLarge"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.6"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.63" />
 </androidx.constraintlayout.widget.ConstraintLayout>
