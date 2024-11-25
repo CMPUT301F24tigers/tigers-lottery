@@ -233,6 +233,18 @@ public class DatabaseHelper {
                 });
     }
 
+    /** Update the read status for a selected notification
+     *
+     * @param notification
+     */
+    public void updateNotificationReadStatus(Notification notification) {
+        notificationsRef.document(String.valueOf(notification.getNotificationId()))
+                .update("read_status", true)
+                .addOnSuccessListener(aVoid -> Log.d(TAG, "Notification marked as read"))
+                .addOnFailureListener(e -> Log.e(TAG, "Failed to update notification read status", e));
+    }
+
+
 
     /**
      * Fetch entrant lists (registered, waitlisted, invited, declined) for an event by its ID.

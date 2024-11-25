@@ -6,12 +6,15 @@ import android.graphics.drawable.GradientDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.tigers_lottery.DatabaseHelper;
+import com.example.tigers_lottery.Notifications.NotificationDialog;
 import com.example.tigers_lottery.R;
 import com.example.tigers_lottery.models.Notification;
 
@@ -41,46 +44,38 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
     public void onBindViewHolder(@NonNull NotificationViewHolder holder, int position) {
         Notification notification = notifications.get(position);
 
-        // Set the notification type (title) and message
+        // Set notification details
         holder.notificationType.setText(notification.getType());
         holder.notificationMessage.setText(notification.getMessage());
 
-        // Set the priority text
+        // Priority
         String priority = notification.getPriority();
         holder.notificationPriority.setText(priority + " Priority");
+        // ... Add your priority color logic here ...
 
-        // Dynamically change the background color for priority
-        int backgroundColor;
-        switch (priority.toLowerCase()) {
-            case "high":
-                backgroundColor = Color.RED;
-                break;
-            case "medium":
-                backgroundColor = Color.YELLOW;
-                holder.notificationPriority.setTextColor(Color.BLACK); // Adjust text color for visibility
-                break;
-            case "low":
-                backgroundColor = Color.GREEN;
-                break;
-            default:
-                backgroundColor = Color.GRAY; // Default color
-        }
+        // Handle click to show dialog
+        holder.itemView.setOnClickListener(view -> {
+            // Show the dialog
+            new NotificationDialog(context, notification, updatedNotification -> {
+                // Update read status in database
+                notification.setReadStatus(true);
+                notifyItemChanged(position);
 
-        // Apply priority background color dynamically
-        GradientDrawable priorityBackground = (GradientDrawable) holder.notificationPriority.getBackground();
-        priorityBackground.setColor(backgroundColor);
+                // Update Firestore
+                DatabaseHelper dbHelper = new DatabaseHelper(context);
+                dbHelper.updateNotificationReadStatus(notification);
+            }).showDialog();
+        });
 
-        // Handle unread notifications (add blue border)
-        if (!notification.isReadStatus()) { // If unread
-            GradientDrawable unreadBorder = new GradientDrawable();
-            unreadBorder.setStroke(8, Color.BLUE); // Blue border for unread
-            unreadBorder.setCornerRadius(16); // Optional: Match the card's rounded corners
-            holder.cardView.setBackground(unreadBorder);
+        // Unread indicator (blue border)
+        if (!notification.isReadStatus()) {
+            holder.frameLayout.setBackgroundResource(R.drawable.unread_notifications_border);
         } else {
-            // Remove border for read notifications
-            holder.cardView.setBackground(null);
+            holder.frameLayout.setBackground(null);
         }
     }
+
+
 
 
     @Override
@@ -91,6 +86,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
     static class NotificationViewHolder extends RecyclerView.ViewHolder {
         TextView notificationType, notificationMessage, notificationPriority;
         CardView cardView;
+        FrameLayout frameLayout;
 
         public NotificationViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -98,6 +94,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
             notificationMessage = itemView.findViewById(R.id.notificationMessage);
             notificationPriority = itemView.findViewById(R.id.notificationPriority);
             cardView = itemView.findViewById(R.id.notificationCardView);
+            frameLayout = itemView.findViewById(R.id.notificationFrameView);
         }
     }
 }
