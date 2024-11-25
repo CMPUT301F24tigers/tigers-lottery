@@ -25,10 +25,12 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.google.firestore.admin.v1.Index;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
@@ -39,6 +41,62 @@ import java.util.UUID;
  * Helper class for interacting with Firebase Firestore database.
  * Manages database operations for the "events" and "users" collections.
  * Provides methods to fetch and add events and users, along with utility methods to get user counts.
+ *
+ * ===========================
+ * DatabaseHelper Method Index
+ * ===========================
+ *
+ * User Management:
+ * - getCurrentUserId(): Retrieves the ID of the current user based on their device ID.
+ * - isAdminUser(String userId, VerificationCallback callback): Checks if a user is an admin.
+ * - addUserToAdmins(String deviceId, String authCode, Callback callback): Adds a user to the 'admins' collection.
+ * - removeUser(String userId): Removes a user and cleans up associated events and records.
+ * - fetchAllUsers(UsersCallback callback): Retrieves all users from the database.
+ * - fetchUserById(String userId, UsersCallback callback): Retrieves user details by their user ID.
+ * - checkUserExists(ProfileCallback callback): Checks if a user exists in the database.
+ * - getUserCount(CountCallback callback): Fetches the number of users in the database.
+ * - addUser(HashMap<String, Object> userData, Uri imageUri): Adds a new user to the database.
+
+ * Event Management:
+ * - organizerFetchEvents(EventsCallback callback): Fetches events created by the current user.
+ * - fetchEventById(int eventId, EventsCallback callback): Retrieves event details by its ID.
+ * - createEvent(Event event, EventsCallback callback): Creates a new event with a unique ID.
+ * - deleteEvent(int eventId, EventsCallback callback): Deletes an event and cleans up associated data.
+ * - updateEvent(Event event, EventsCallback callback): Updates event details in the database.
+ * - fetchAllEvents(EventsCallback callback): Fetches all events from the database.
+ * - getEventCount(CountCallback callback): Retrieves the total number of events.
+
+ * Entrants Management:
+ * - fetchRegisteredEntrants(int eventId, EntrantsCallback callback): Fetches registered entrants for an event.
+ * - fetchWaitlistedEntrants(int eventId, EntrantsCallback callback): Fetches waitlisted entrants for an event.
+ * - fetchInvitedEntrants(int eventId, EntrantsCallback callback): Fetches invited entrants for an event.
+ * - fetchDeclinedEntrants(int eventId, EntrantsCallback callback): Fetches declined entrants for an event.
+ * - addEntrantWaitlist(int eventId, String userId, EventsCallback callback): Adds a user to the waitlist of an event.
+ * - entrantFetchEvents(EventsCallback callback): Fetches all events the user is associated with.
+
+ * Image Upload:
+ * - uploadImageToFirebase(Uri imageUri, String field): Uploads a user profile image to Firebase.
+ * - uploadPosterImageToFirebase(Uri imageUri, UploadCallback callback): Uploads an event poster image to Firebase.
+ * - removeImage(String type, String userId, Callback callback) : removes a user profile photo from firebase
+
+ * Admin Authentication:
+ * - storeAdminAuthCode(String generatedCode, Callback callback): Stores an admin authentication code.
+ * - deleteAdminAuthCode(String code, Callback callback): Deletes an admin authentication code.
+
+ * Lottery & Invitation:
+ * - updateInvitedEntrantsAndSetLotteryRan(int eventId, List<String> invitedEntrants, EventsCallback callback): Updates invited entrants after a lottery is run.
+ * - entrantAcceptDeclineInvitation(int eventId, String action, StatusCallback callback): Handles user acceptance or decline of an event invitation.
+
+ * Event Cleanup:
+ * - clearEventLists(int eventId, EventsCallback callback): Clears all lists (waitlisted, invited, declined) for an event.
+ * - removeEventFromUserRecords(int eventId, String organizerId, EventsCallback callback): Cleans up event data for users after an event is deleted.
+
+ * Utility Methods:
+ * - generateUniqueEventId(): Generates a unique ID for events.
+ * - selectRandomEntrants(List<String> entrants, int count): Randomly selects a given number of entrants from a list.
+
+ * Callbacks:
+ * - Various callback interfaces like EventsCallback, UsersCallback, StatusCallback, etc., are defined for handling asynchronous operations.
  */
 public class DatabaseHelper {
 
@@ -119,6 +177,12 @@ public class DatabaseHelper {
     public interface VerificationCallback {
         void onResult(boolean exists);
         void onError(Exception e);
+    }
+
+    // callback for upload functionality
+    public interface UploadCallback {
+        void onUploadSuccess(String downloadUrl);
+        void onUploadFailure(Exception e);
     }
 
     /**
@@ -276,26 +340,6 @@ public class DatabaseHelper {
     public String getCurrentUserId() {
         return currentUserId;
     }
-
-//    /**
-//     * Checks if the user exists in Firestore. If not, creates a new user document.
-//     */
-//    private void ensureUserExists() {
-//        usersRef.document(currentUserId).get().addOnCompleteListener(task -> {
-//            if (task.isSuccessful()) {
-//                if (!task.getResult().exists()) {
-//                    // If user does not exist, create a new one
-//                    User newUser = new User();
-//                    newUser.setUserId(currentUserId);
-//                    addUser(newUser);
-//                } else {
-//                    Log.d(TAG, "User already exists in Firestore: " + currentUserId);
-//                }
-//            } else {
-//                Log.e(TAG, "Error checking user existence", task.getException());
-//            }
-//        });
-//    }
 
 
     /**
@@ -1103,8 +1147,70 @@ public class DatabaseHelper {
                 });
     }
 
-    public void getUser(UserCallback callback) {
-        usersRef.document(currentUserId).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+    /**
+     * Removes a user's profile image or an event poster from Firebase Storage
+     * and sets the corresponding Firestore field to a default value.
+     *
+     * @param type     The type of entity ("user" or "event").
+     * @param id       The ID of the entity whose image should be removed.
+     * @param callback Callback to handle the success or failure of the operation.
+     */
+    public void removeImage(String type, String id, Callback callback) {
+        String normalizedType = type.toLowerCase(Locale.ROOT);
+        boolean isUserRef;
+        CollectionReference activeRef;
+
+        if (normalizedType.equals("user")) {
+            isUserRef = true;
+            activeRef = usersRef;
+        } else if (normalizedType.equals("event")) {
+            isUserRef = false;
+            activeRef = eventsRef;
+        } else {
+            callback.onFailure(new Exception("Invalid type. Must be 'user' or 'event'."));
+            return;
+        }
+
+        // Fetch the document from Firestore
+        activeRef.document(id).get().addOnSuccessListener(documentSnapshot -> {
+            if (documentSnapshot.exists()) {
+                String imageUrl = documentSnapshot.getString(isUserRef ? "user_photo" : "poster_url");
+
+                // Check if the image URL is valid or already default
+                if (imageUrl == null || imageUrl.isEmpty() || imageUrl.equals("NoProfilePhoto") ||
+                        imageUrl.equals("https://example.com/default-poster.png")) {
+                    callback.onFailure(new Exception("No profile photo or poster to remove."));
+                    return;
+                }
+
+                // Delete the image from Firebase Storage
+                StorageReference photoRef = FirebaseStorage.getInstance().getReferenceFromUrl(imageUrl);
+                photoRef.delete().addOnSuccessListener(aVoid -> {
+                    // Update Firestore with the default value after deletion
+                    String defaultImage = isUserRef ? "NoProfilePhoto" : "https://example.com/default-poster.png";
+                    activeRef.document(id)
+                            .update(isUserRef ? "user_photo" : "poster_url", defaultImage)
+                            .addOnSuccessListener(unused -> callback.onSuccess(
+                                    (isUserRef ? "Profile photo " : "Event poster ") + "was removed successfully."))
+                            .addOnFailureListener(e -> {
+                                Log.e("DatabaseHelper", "Error updating Firestore: " + e.getMessage(), e);
+                                callback.onFailure(e);
+                            });
+                }).addOnFailureListener(e -> {
+                    Log.e("DatabaseHelper", "Error deleting image from Storage: " + e.getMessage(), e);
+                    callback.onFailure(e);
+                });
+            } else {
+                callback.onFailure(new Exception("Document not found."));
+            }
+        }).addOnFailureListener(e -> {
+            Log.e("DatabaseHelper", "Error fetching document: " + e.getMessage(), e);
+            callback.onFailure(e);
+        });
+    }
+
+    public void getUser(String userID, UserCallback callback) {
+        usersRef.document(userID).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if (task.isSuccessful()) {
@@ -1133,12 +1239,27 @@ public class DatabaseHelper {
         adminsRef.document(userId).get().addOnCompleteListener(task -> {
             if (task.isSuccessful() && task.getResult() != null && task.getResult().exists()) {
                 adminsRef.document(userId).delete()
-                        .addOnSuccessListener(aVoid -> Log.d("DatabaseHelper", "User " + userId + " removed from admins collection"))
+                        .addOnSuccessListener(aVoid ->
+                                Log.d("DatabaseHelper", "User " + userId + " removed from admins collection"))
                         .addOnFailureListener(e -> Log.e("DatabaseHelper", "Failed to remove user from admins collection", e));
             } else {
                 Log.d("DatabaseHelper", "User " + userId + " does not exist in admins collection or task failed.");
             }
         });
+
+        //Remove user profile photo from storage
+        removeImage("user", userId, new Callback() {
+            @Override
+            public void onSuccess(String message) {
+                Log.d("DatabaseHelper", "User " + userId + message);
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                Log.d("DatabaseHelper", Objects.requireNonNull(e.getMessage()));
+            }
+        });
+
 
         // Removing a user from the users collection
         usersRef.document(userId).get().addOnCompleteListener(task -> {
@@ -1254,12 +1375,6 @@ public class DatabaseHelper {
                 .addOnFailureListener(e -> {
                     callback.onUploadFailure(e);  // Pass the error back to the callback
                 });
-    }
-
-    // callback for upload functionality
-    public interface UploadCallback {
-        void onUploadSuccess(String downloadUrl);
-        void onUploadFailure(Exception e);
     }
 
     /**

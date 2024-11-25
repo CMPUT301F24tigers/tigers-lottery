@@ -15,6 +15,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.example.tigers_lottery.DatabaseHelper;
+import com.example.tigers_lottery.JoinedEvents.EntrantDashboardFragment;
 import com.example.tigers_lottery.R;
 import com.example.tigers_lottery.models.Event;
 
@@ -116,6 +117,8 @@ public class EntrantEventDetailsFragment extends Fragment {
                 eventTextViewDate.setText("Date: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(event.getEventDate().toDate()));
                 eventTextViewRegistrationDeadline.setText("Registration Deadline: : " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(event.getWaitlistDeadline().toDate()));
 
+                eventDetailsButton.setText("Join Waitlist");
+
                 if(event.getWaitlistLimit() > 0) {
                     eventTextViewWaitingList.setText("Waiting List: " + event.getWaitlistedEntrants().size() + "/" + event.getWaitlistLimit());
                 }else {
@@ -143,97 +146,92 @@ public class EntrantEventDetailsFragment extends Fragment {
                 eventDetailsButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        if(event.getWaitlistedEntrants().contains(deviceId)) {
+                        if (!event.getWaitlistedEntrants().contains(deviceId)) {
+                            // User is NOT on the waitlist, Join Waitlist functionality
                             AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                            builder.setTitle("Confirmation");
-                            builder.setMessage("Are you sure you want to leave waiting list?");
+                            builder.setTitle("Join Waitlist");
+                            builder.setMessage("Are you sure you want to join the waitlist for this event?");
 
-                            // Set the Proceed button
-                            builder.setPositiveButton("Proceed", (dialog, which) -> {
+                            // Confirm joining
+                            builder.setPositiveButton("Join", (dialog, which) -> {
+                                dbHelper.addEntrantWaitlist(event.getEventId(), deviceId, new DatabaseHelper.EventsCallback() {
+                                    @Override
+                                    public void onEventFetched(Event updatedEvent) {
+                                        // Successfully joined the waitlist, update UI
+                                        eventTextViewStatus.setText("Status: Waitlisted");
+                                        eventDetailsButton.setText("Leave Waitlist"); // Change button text dynamically
+
+                                        // Notify the user
+                                        new AlertDialog.Builder(getContext())
+                                                .setTitle("Success")
+                                                .setMessage("You have successfully joined the waitlist!")
+                                                .setPositiveButton("OK", null)
+                                                .create()
+                                                .show();
+                                    }
+
+                                    @Override
+                                    public void onEventsFetched(List<Event> events) {
+                                        // Not used here
+                                    }
+
+                                    @Override
+                                    public void onError(Exception e) {
+                                        // Handle errors
+                                        new AlertDialog.Builder(getContext())
+                                                .setTitle("Error")
+                                                .setMessage("Could not join waitlist: " + e.getMessage())
+                                                .setPositiveButton("OK", null)
+                                                .create()
+                                                .show();
+                                    }
+                                });
+                            });
+
+                            // Cancel action
+                            builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
+                            builder.create().show();
+
+                        } else {
+                            // User is already on the waitlist, Leave Waitlist functionality
+                            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                            builder.setTitle("Leave Waitlist");
+                            builder.setMessage("Are you sure you want to leave the waitlist for this event?");
+
+                            // Confirm leaving
+                            builder.setPositiveButton("Leave", (dialog, which) -> {
                                 dbHelper.entrantLeaveWaitingList(event.getEventId(), new DatabaseHelper.StatusCallback() {
                                     @Override
                                     public void onStatusUpdated() {
-                                        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-                                        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                                        // Successfully left the waitlist, update UI
+                                        eventTextViewStatus.setText("Status: Not Registered");
+                                        eventDetailsButton.setText("Join Waitlist"); // Change button text dynamically
 
-                                        Fragment transitionedFragment = new EntrantDashboardFragment();
-
-                                        fragmentTransaction.replace(R.id.main_activity_fragment_container, transitionedFragment);
-                                        fragmentTransaction.addToBackStack(null);
-                                        fragmentTransaction.commit();
+                                        // Notify the user
+                                        new AlertDialog.Builder(getContext())
+                                                .setTitle("Success")
+                                                .setMessage("You have successfully left the waitlist!")
+                                                .setPositiveButton("OK", null)
+                                                .create()
+                                                .show();
                                     }
 
                                     @Override
                                     public void onError(Exception e) {
-
+                                        // Handle errors
+                                        new AlertDialog.Builder(getContext())
+                                                .setTitle("Error")
+                                                .setMessage("Could not leave waitlist: " + e.getMessage())
+                                                .setPositiveButton("OK", null)
+                                                .create()
+                                                .show();
                                     }
                                 });
                             });
 
-                            // Set the Cancel button
-                            builder.setNegativeButton("Cancel", (dialog, which) -> {
-                                // Dismiss the dialog when the user cancels
-                                dialog.dismiss();
-                            });
-
-                            // Show the AlertDialog
-                            AlertDialog dialog = builder.create();
-                            dialog.show();
-
-                        }else if(event.getInvitedEntrants().contains(deviceId)) {
-                            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                            builder.setTitle("Accept/Decline Invitation");
-                            builder.setMessage("Do you want to accept the invitation");
-
-                            // Set the Proceed button
-                            builder.setPositiveButton("Yes", (dialog, which) -> {
-                                dbHelper.entrantAcceptDeclineInvitation(event.getEventId(), "accept", new DatabaseHelper.StatusCallback() {
-                                    @Override
-                                    public void onStatusUpdated() {
-                                        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-                                        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-
-                                        Fragment transitionedFragment = new EntrantEventDetailsFragment();
-                                        transitionedFragment.setArguments(bundle);
-
-                                        fragmentTransaction.replace(R.id.main_activity_fragment_container, transitionedFragment);
-                                        fragmentTransaction.addToBackStack(null);
-                                        fragmentTransaction.commit();
-                                    }
-
-                                    @Override
-                                    public void onError(Exception e) {
-
-                                    }
-                                });
-                            });
-
-                            // Set the Cancel button
-                            builder.setNegativeButton("No", (dialog, which) -> {
-                                dbHelper.entrantAcceptDeclineInvitation(event.getEventId(), "decline", new DatabaseHelper.StatusCallback() {
-                                    @Override
-                                    public void onStatusUpdated() {
-                                        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-                                        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-
-                                        Fragment transitionedFragment = new EntrantEventDetailsFragment();
-                                        transitionedFragment.setArguments(bundle);
-
-                                        fragmentTransaction.replace(R.id.main_activity_fragment_container, transitionedFragment);
-                                        fragmentTransaction.addToBackStack(null);
-                                        fragmentTransaction.commit();
-                                    }
-
-                                    @Override
-                                    public void onError(Exception e) {
-
-                                    }
-                                });
-                            });
-
-                            // Show the AlertDialog
-                            AlertDialog dialog = builder.create();
-                            dialog.show();
+                            // Cancel action
+                            builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
+                            builder.create().show();
                         }
                     }
                 });
