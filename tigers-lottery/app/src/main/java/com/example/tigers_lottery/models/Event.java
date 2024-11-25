@@ -99,6 +99,10 @@ public class Event implements Serializable {
     @PropertyName("QR_hash_data")
     private String QRCode;
 
+    @PropertyName("geolocation_required")
+    private boolean geolocationRequired = false; // Default to false
+
+
     // No-argument constructor
     public Event() {}
 
@@ -211,12 +215,18 @@ public class Event implements Serializable {
     @PropertyName("occupant_limit")
     public void setOccupantLimit(int occupantLimit) { this.occupantLimit = occupantLimit; }
 
-    // Getter and Setter for is_lottery_ran
     @PropertyName("is_lottery_ran")
     public boolean isLotteryRan() { return isLotteryRan; }
 
     @PropertyName("is_lottery_ran")
     public void setLotteryRan(boolean lotteryRan) { isLotteryRan = lotteryRan; }
+
+    @PropertyName("geolocation_required")
+    public boolean isGeolocationRequired() { return geolocationRequired; }
+
+    @PropertyName("geolocation_required")
+    public void setGeolocationRequired(boolean geolocationRequired) { this.geolocationRequired = geolocationRequired; }
+
 
     // Helper methods to format Timestamps
     public String getFormattedEventDate() {

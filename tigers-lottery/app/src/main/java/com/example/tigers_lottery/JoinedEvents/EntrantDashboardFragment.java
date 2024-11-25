@@ -1,5 +1,6 @@
 package com.example.tigers_lottery.JoinedEvents;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -24,7 +25,6 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.example.tigers_lottery.DatabaseHelper;
 import android.Manifest; // Add this
-
 import com.example.tigers_lottery.HostedEvents.OrganizerEventDetailsFragment;
 import com.example.tigers_lottery.R;
 import com.example.tigers_lottery.models.Event;
@@ -41,9 +41,37 @@ public class EntrantDashboardFragment extends Fragment {
 
     private static final int CAMERA_PERMISSION_REQUEST_CODE = 100;
 
+    private ActivityResultLauncher<Intent> qrCodeLauncher;
+
     public EntrantDashboardFragment() {
         // Required empty public constructor
     }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // Initialize ActivityResultLauncher for QR code scanning
+        qrCodeLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+            if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                IntentResult intentResult = IntentIntegrator.parseActivityResult(
+                        IntentIntegrator.REQUEST_CODE,
+                        result.getResultCode(),
+                        result.getData()
+                );
+                if (intentResult != null && intentResult.getContents() != null) {
+                    String eventId = intentResult.getContents();
+                    Toast.makeText(getContext(), "Scanned Event ID: " + eventId, Toast.LENGTH_SHORT).show();
+                    Log.d("QRScan", "Navigating to event details with eventId: " + eventId);
+                    navigateToEventDetails(eventId);
+                } else {
+                    Toast.makeText(getContext(), "Scan Cancelled", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -56,7 +84,6 @@ public class EntrantDashboardFragment extends Fragment {
         List<Event> entrantsEvents = new ArrayList<>();
 
         // Set up the Join Event button to launch the camera for QR code scanning
-
         joinEventButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -71,7 +98,6 @@ public class EntrantDashboardFragment extends Fragment {
                 }
             }
         });
-
 
         dbHelper.entrantFetchEvents(new DatabaseHelper.EventsCallback() {
             @Override
@@ -141,7 +167,7 @@ public class EntrantDashboardFragment extends Fragment {
      * Initiates the QR code scanner for joining events.
      */
     private void initiateQRScanner() {
-        IntentIntegrator integrator = new IntentIntegrator(getActivity());
+        IntentIntegrator integrator = IntentIntegrator.forSupportFragment(this); // Use forSupportFragment
         integrator.setDesiredBarcodeFormats(IntentIntegrator.QR_CODE);
         integrator.setPrompt("Scan a QR Code to Join an Event");
         integrator.setCameraId(0);
@@ -149,7 +175,7 @@ public class EntrantDashboardFragment extends Fragment {
         integrator.setBarcodeImageEnabled(true);
 
         Intent intent = integrator.createScanIntent();
-        qrCodeLauncher.launch(intent); // Launch the scanner with the new API
+        qrCodeLauncher.launch(intent); // Launch the scanner
     }
 
     private final ActivityResultLauncher<Intent> qrCodeLauncher =
@@ -173,6 +199,9 @@ public class EntrantDashboardFragment extends Fragment {
 
 
     private void navigateToEventDetails(String result) {
+        int eventId = Integer.parseInt(result);
+        Bundle bundle = new Bundle();
+        bundle.putInt("eventId", eventId);
 
         FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
 
@@ -215,3 +244,9 @@ public class EntrantDashboardFragment extends Fragment {
 
 }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        Log.d("EntrantDashboardFragment", "onPause called");
+    }
+}

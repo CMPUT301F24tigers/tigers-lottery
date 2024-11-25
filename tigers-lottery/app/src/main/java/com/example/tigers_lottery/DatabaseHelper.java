@@ -32,6 +32,7 @@ import com.google.firestore.admin.v1.Index;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
@@ -79,8 +80,7 @@ import java.util.UUID;
  * Image Upload:
  * - uploadImageToFirebase(Uri imageUri, String field): Uploads a user profile image to Firebase.
  * - uploadPosterImageToFirebase(Uri imageUri, UploadCallback callback): Uploads an event poster image to Firebase.
- * - getUserProfileImage(String userId, Callback callback) : get the user profile photo from firebase
- * - removeUserProfileImage(String userId, Callback callback) : removes a user profile photo from firebase
+ * - removeImage(String type, String userId, Callback callback) : removes a user profile photo from firebase
 
  * Admin Authentication:
  * - storeAdminAuthCode(String generatedCode, Callback callback): Stores an admin authentication code.
@@ -191,6 +191,72 @@ public class DatabaseHelper {
     public interface QRCodeValidationCallback {
         void onValidationComplete(boolean isValid);
     }
+
+    /**
+     * Callback interface for fetching entrant lists.
+     */
+    public interface EntrantsListsCallback {
+        void onEntrantsListsFetched(List<String> registered, List<String> waitlisted, List<String> invited, List<String> declined);
+        void onError(Exception e);
+    }
+
+    /**
+     * Fetch entrant lists (registered, waitlisted, invited, declined) for an event by its ID.
+     *
+     * @param eventId         The ID of the event.
+     * @param callback        Callback to return the entrant lists or handle errors.
+     */
+    public void fetchEventEntrants(int eventId, EntrantsListsCallback callback) {
+        db.collection("events")
+                .document(String.valueOf(eventId))
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        List<String> registeredEntrants = (List<String>) documentSnapshot.get("registeredEntrants");
+                        List<String> waitlistedEntrants = (List<String>) documentSnapshot.get("waitlistedEntrants");
+                        List<String> invitedEntrants = (List<String>) documentSnapshot.get("invitedEntrants");
+                        List<String> declinedEntrants = (List<String>) documentSnapshot.get("declinedEntrants");
+
+                        callback.onEntrantsListsFetched(
+                                registeredEntrants != null ? registeredEntrants : new ArrayList<>(),
+                                waitlistedEntrants != null ? waitlistedEntrants : new ArrayList<>(),
+                                invitedEntrants != null ? invitedEntrants : new ArrayList<>(),
+                                declinedEntrants != null ? declinedEntrants : new ArrayList<>()
+                        );
+                    } else {
+                        callback.onError(new Exception("Event not found"));
+                    }
+                })
+                .addOnFailureListener(callback::onError);
+    }
+
+    /**
+     * Fetch user details for a list of user IDs.(Another method has similar name, but only works for 1 user id)
+     * This is used in the map functionality
+     *
+     * @param userIds   List of user IDs to fetch.
+     * @param callback  Callback to return user details or handle errors.
+     */
+    public void fetchUsersByIds(List<String> userIds, UsersCallback callback) {
+        if (userIds.isEmpty()) {
+            callback.onUsersFetched(new ArrayList<>());
+            return;
+        }
+
+        db.collection("users")
+                .whereIn("user_id", userIds)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    List<User> users = new ArrayList<>();
+                    for (QueryDocumentSnapshot document : querySnapshot) {
+                        User user = document.toObject(User.class);
+                        users.add(user);
+                    }
+                    callback.onUsersFetched(users);
+                })
+                .addOnFailureListener(callback::onError);
+    }
+
 
     /**
      * Checks if a user with the given userId exists in the admins collection.
@@ -1169,63 +1235,63 @@ public class DatabaseHelper {
     }
 
     /**
-     * Fetches the profile image URL for a given user ID.
+     * Removes a user's profile image or an event poster from Firebase Storage
+     * and sets the corresponding Firestore field to a default value.
      *
-     * @param userId   The ID of the user whose profile image is to be fetched.
-     * @param callback A callback to handle success or failure of the operation.
-     */
-    public void getUserProfileImage(String userId, Callback callback) {
-        usersRef.document(userId).get()
-                .addOnSuccessListener(documentSnapshot -> {
-                    if (documentSnapshot.exists()) {
-                        String userPhoto = documentSnapshot.getString("user_photo");
-                        if (userPhoto != null && !userPhoto.isEmpty()) {
-                            callback.onSuccess(userPhoto);
-                        }
-                    } else {
-                        callback.onFailure(new Exception("User document not found."));
-                    }
-                })
-                .addOnFailureListener(callback::onFailure);
-    }
-
-    /**
-     * Removes a user's profile image from Firebase Storage and sets the profile photo link to an empty string in Firestore.
-     *
-     * @param userId   The ID of the user whose profile photo should be removed.
+     * @param type     The type of entity ("user" or "event").
+     * @param id       The ID of the entity whose image should be removed.
      * @param callback Callback to handle the success or failure of the operation.
      */
-    public void removeUserProfileImage(String userId, Callback callback) {
-        usersRef.document(userId).get().addOnSuccessListener(documentSnapshot -> {
+    public void removeImage(String type, String id, Callback callback) {
+        String normalizedType = type.toLowerCase(Locale.ROOT);
+        boolean isUserRef;
+        CollectionReference activeRef;
+
+        if (normalizedType.equals("user")) {
+            isUserRef = true;
+            activeRef = usersRef;
+        } else if (normalizedType.equals("event")) {
+            isUserRef = false;
+            activeRef = eventsRef;
+        } else {
+            callback.onFailure(new Exception("Invalid type. Must be 'user' or 'event'."));
+            return;
+        }
+
+        // Fetch the document from Firestore
+        activeRef.document(id).get().addOnSuccessListener(documentSnapshot -> {
             if (documentSnapshot.exists()) {
-                String imageUrl = documentSnapshot.getString("user_photo");
-                if (imageUrl == null || imageUrl.isEmpty() || imageUrl.equals("NoProfilePhoto")) {
-                    callback.onFailure(new Exception("No profile photo to remove."));
+                String imageUrl = documentSnapshot.getString(isUserRef ? "user_photo" : "poster_url");
+
+                // Check if the image URL is valid or already default
+                if (imageUrl == null || imageUrl.isEmpty() || imageUrl.equals("NoProfilePhoto") ||
+                        imageUrl.equals("https://example.com/default-poster.png")) {
+                    callback.onFailure(new Exception("No profile photo or poster to remove."));
                     return;
                 }
 
                 // Delete the image from Firebase Storage
                 StorageReference photoRef = FirebaseStorage.getInstance().getReferenceFromUrl(imageUrl);
-                photoRef.delete()
-                        .addOnSuccessListener(aVoid -> {
-                            // Update Firestore after successful deletion
-                            usersRef.document(userId)
-                                    .update("user_photo", "NoProfilePhoto")
-                                    .addOnSuccessListener(unused -> callback.onSuccess("Profile image removed successfully"))
-                                    .addOnFailureListener(e -> {
-                                        Log.e("DatabaseHelper", "Error updating Firestore: " + e.getMessage(), e);
-                                        callback.onFailure(e);
-                                    });
-                        })
-                        .addOnFailureListener(e -> {
-                            Log.e("DatabaseHelper", "Error deleting image from Storage: " + e.getMessage(), e);
-                            callback.onFailure(e);
-                        });
+                photoRef.delete().addOnSuccessListener(aVoid -> {
+                    // Update Firestore with the default value after deletion
+                    String defaultImage = isUserRef ? "NoProfilePhoto" : "https://example.com/default-poster.png";
+                    activeRef.document(id)
+                            .update(isUserRef ? "user_photo" : "poster_url", defaultImage)
+                            .addOnSuccessListener(unused -> callback.onSuccess(
+                                    (isUserRef ? "Profile photo " : "Event poster ") + "was removed successfully."))
+                            .addOnFailureListener(e -> {
+                                Log.e("DatabaseHelper", "Error updating Firestore: " + e.getMessage(), e);
+                                callback.onFailure(e);
+                            });
+                }).addOnFailureListener(e -> {
+                    Log.e("DatabaseHelper", "Error deleting image from Storage: " + e.getMessage(), e);
+                    callback.onFailure(e);
+                });
             } else {
-                callback.onFailure(new Exception("User document not found."));
+                callback.onFailure(new Exception("Document not found."));
             }
         }).addOnFailureListener(e -> {
-            Log.e("DatabaseHelper", "Error fetching user document: " + e.getMessage(), e);
+            Log.e("DatabaseHelper", "Error fetching document: " + e.getMessage(), e);
             callback.onFailure(e);
         });
     }
@@ -1269,7 +1335,7 @@ public class DatabaseHelper {
         });
 
         //Remove user profile photo from storage
-        removeUserProfileImage(userId, new Callback() {
+        removeImage("user", userId, new Callback() {
             @Override
             public void onSuccess(String message) {
                 Log.d("DatabaseHelper", "User " + userId + message);

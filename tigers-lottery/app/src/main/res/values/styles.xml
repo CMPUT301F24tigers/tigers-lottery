@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="BottomNavActiveText">
+        <item name="android:fontFamily">@font/host_grotesk</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="BottomNavInactiveText">
+        <item name="android:fontFamily">@font/host_grotesk</item>
+        <item name="android:textSize">15sp</item>
+    </style>
+
+    <style name="BottomNavigationViewTextStyle">
+        <item name="android:fontFamily">@font/host_grotesk</item>
+    </style>
+
+    <style name="BottomNavActiveIndicatorStyle">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+    </style>
+</resources>
