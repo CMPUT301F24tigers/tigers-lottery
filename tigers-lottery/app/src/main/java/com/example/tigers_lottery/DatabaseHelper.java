@@ -186,6 +186,72 @@ public class DatabaseHelper {
     }
 
     /**
+     * Callback interface for fetching entrant lists.
+     */
+    public interface EntrantsListsCallback {
+        void onEntrantsListsFetched(List<String> registered, List<String> waitlisted, List<String> invited, List<String> declined);
+        void onError(Exception e);
+    }
+
+    /**
+     * Fetch entrant lists (registered, waitlisted, invited, declined) for an event by its ID.
+     *
+     * @param eventId         The ID of the event.
+     * @param callback        Callback to return the entrant lists or handle errors.
+     */
+    public void fetchEventEntrants(int eventId, EntrantsListsCallback callback) {
+        db.collection("events")
+                .document(String.valueOf(eventId))
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        List<String> registeredEntrants = (List<String>) documentSnapshot.get("registeredEntrants");
+                        List<String> waitlistedEntrants = (List<String>) documentSnapshot.get("waitlistedEntrants");
+                        List<String> invitedEntrants = (List<String>) documentSnapshot.get("invitedEntrants");
+                        List<String> declinedEntrants = (List<String>) documentSnapshot.get("declinedEntrants");
+
+                        callback.onEntrantsListsFetched(
+                                registeredEntrants != null ? registeredEntrants : new ArrayList<>(),
+                                waitlistedEntrants != null ? waitlistedEntrants : new ArrayList<>(),
+                                invitedEntrants != null ? invitedEntrants : new ArrayList<>(),
+                                declinedEntrants != null ? declinedEntrants : new ArrayList<>()
+                        );
+                    } else {
+                        callback.onError(new Exception("Event not found"));
+                    }
+                })
+                .addOnFailureListener(callback::onError);
+    }
+
+    /**
+     * Fetch user details for a list of user IDs.(Another method has similar name, but only works for 1 user id)
+     * This is used in the map functionality
+     *
+     * @param userIds   List of user IDs to fetch.
+     * @param callback  Callback to return user details or handle errors.
+     */
+    public void fetchUsersByIds(List<String> userIds, UsersCallback callback) {
+        if (userIds.isEmpty()) {
+            callback.onUsersFetched(new ArrayList<>());
+            return;
+        }
+
+        db.collection("users")
+                .whereIn("user_id", userIds)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    List<User> users = new ArrayList<>();
+                    for (QueryDocumentSnapshot document : querySnapshot) {
+                        User user = document.toObject(User.class);
+                        users.add(user);
+                    }
+                    callback.onUsersFetched(users);
+                })
+                .addOnFailureListener(callback::onError);
+    }
+
+
+    /**
      * Checks if a user with the given userId exists in the admins collection.
      *
      * @param userId The ID of the user to check.

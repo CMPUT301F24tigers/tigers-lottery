@@ -40,11 +40,12 @@ public class OrganizerEventDetailsFragment extends Fragment {
     private Event event;
     private boolean isHandlingDecline = false;
     private int lastKnownDeclinedEntrantsSize = 0;
+    private boolean isInitialDeclineSync = true;
 
     // UI Components
     private TextView eventTitle, eventDescription, eventLocation, waitlistOpenDate, waitlistCloseDate, eventDate, waitlistLimit, entrantLimit;
     private ImageView eventPoster;
-    private Button viewRegisteredEntrants, viewWaitlistedEntrants, viewInvitedEntrants, viewDeclinedEntrants, runLotteryButton, clearListsButton;
+    private Button viewRegisteredEntrants, viewWaitlistedEntrants, viewInvitedEntrants, viewDeclinedEntrants, runLotteryButton, clearListsButton, viewMapButton;
 
     /**
      * Required empty public constructor.
@@ -120,6 +121,7 @@ public class OrganizerEventDetailsFragment extends Fragment {
         runLotteryButton = view.findViewById(R.id.runLotteryButton);
         eventPoster = view.findViewById(R.id.eventPoster);
         clearListsButton = view.findViewById(R.id.clearListsButton);
+        viewMapButton = view.findViewById(R.id.viewMapButton);
 
         // Fetch and display event details
         loadEventDetails();
@@ -271,6 +273,7 @@ public class OrganizerEventDetailsFragment extends Fragment {
         viewWaitlistedEntrants.setOnClickListener(v -> openEntrantFragment(new OrganizerWaitingListFragment()));
         viewInvitedEntrants.setOnClickListener(v -> openEntrantFragment(new OrganizerInvitedEntrantsFragment()));
         viewDeclinedEntrants.setOnClickListener(v -> openEntrantFragment(new OrganizerDeclinedEntrantsFragment()));
+        viewMapButton.setOnClickListener(v -> openMapFragment());
     }
 
     /**
@@ -289,11 +292,17 @@ public class OrganizerEventDetailsFragment extends Fragment {
         Log.d("LotterySetup", "One day before event: " + oneDayBeforeEvent);
         Log.d("LotterySetup", "Is lottery already run? " + event.isLotteryRan());
 
+        // Log the waitlist deadline comparison
+        Log.d("LotteryDebug", "Waitlist Deadline: " + event.getWaitlistDeadline());
+        Log.d("LotteryDebug", "Is current time after waitlist deadline? " + (currentTimestamp.compareTo(event.getWaitlistDeadline()) >= 0));
+
+
         // Run the lottery automatically if we're exactly 1 day before the event and lottery hasn't run
         if (currentTimestamp.compareTo(oneDayBeforeEvent) >= 0 &&
                 currentTimestamp.compareTo(event.getEventDate()) < 0 &&
                 !event.isLotteryRan()) {
 
+            Log.d("LotteryDebug", "Automatic lottery is being triggered!");
             // Run the lottery automatically
             runLottery();
 
@@ -303,10 +312,12 @@ public class OrganizerEventDetailsFragment extends Fragment {
 
         } else if (event.getWaitlistDeadline().compareTo(currentTimestamp) <= 0 && !event.isLotteryRan()) {
             // Enable the button if it's past the waitlist deadline and before the event date
+            Log.d("LotteryDebug", "Lottery button enabled.");
             runLotteryButton.setEnabled(true);
             runLotteryButton.setOnClickListener(v -> runLottery());
         } else {
             // Disable button and remove listener if conditions don't allow the lottery to be run
+            Log.d("LotteryDebug", "Lottery button disabled.");
             runLotteryButton.setEnabled(false);
             runLotteryButton.setOnClickListener(null);
         }
@@ -319,7 +330,12 @@ public class OrganizerEventDetailsFragment extends Fragment {
 
 
     private void runLottery() {
+        Log.d("LotteryDebug", "runLottery called.");
+        Log.d("LotteryDebug", "Current state of isLotteryRan: " + event.isLotteryRan());
+
+
         if (event.isLotteryRan()) {
+            Log.d("LotteryDebug", "Lottery already run, exiting method.");
             Toast.makeText(getContext(), "Lottery has already been run for this event.", Toast.LENGTH_SHORT).show();
             return; // Exit if the lottery has already been run
         }
@@ -331,8 +347,11 @@ public class OrganizerEventDetailsFragment extends Fragment {
              */
             @Override
             public void onEntrantsFetched(List<String> waitlistedEntrants) {
+                Log.d("LotteryDebug", "Fetched waitlisted entrants: " + waitlistedEntrants);
                 int occupantLimit = event.getOccupantLimit();
                 List<String> invitedEntrants = dbHelper.selectRandomEntrants(waitlistedEntrants, occupantLimit);
+                Log.d("LotteryDebug", "Selected invited entrants: " + invitedEntrants);
+
 
                 // Update Firestore with invited entrants and mark lottery as run
                 dbHelper.updateInvitedEntrantsAndSetLotteryRan(event.getEventId(), invitedEntrants, new DatabaseHelper.EventsCallback() {
@@ -342,6 +361,7 @@ public class OrganizerEventDetailsFragment extends Fragment {
                      */
                     @Override
                     public void onEventsFetched(List<Event> events) {
+                        Log.d("LotteryDebug", "Lottery successfully updated in Firestore.");
                         Toast.makeText(getContext(), "Lottery run successfully!", Toast.LENGTH_SHORT).show();
                         runLotteryButton.setEnabled(false); // Disable button after running
                         event.setLotteryRan(true); // Mark the event's lottery as run
@@ -386,7 +406,18 @@ public class OrganizerEventDetailsFragment extends Fragment {
         dbHelper.addDeclineListener(eventId, new DatabaseHelper.DeclineCallback() {
             @Override
             public void onDeclineDetected(List<String> declinedEntrants) {
-                // Only trigger decline handling if the declined entrants size has increased
+                // Skip handling during the initial listener sync
+                if (isInitialDeclineSync) {
+                    Log.d("DeclineDebug", "Initial sync detected. Skipping decline handling.");
+                    isInitialDeclineSync = false; // Set flag to false after the first sync
+                    lastKnownDeclinedEntrantsSize = declinedEntrants.size(); // Update known size
+                    return;
+                }
+
+                Log.d("DeclineDebug", "Decline detected. Declined entrants: " + declinedEntrants);
+                Log.d("DeclineDebug", "Previous size: " + lastKnownDeclinedEntrantsSize + ", Current size: " + declinedEntrants.size());
+                Log.d("DeclineDebug", "isHandlingDecline flag: " + isHandlingDecline);
+
                 if (!isHandlingDecline && declinedEntrants.size() > lastKnownDeclinedEntrantsSize) {
                     isHandlingDecline = true;
                     lastKnownDeclinedEntrantsSize = declinedEntrants.size(); // Update the known size
@@ -396,7 +427,7 @@ public class OrganizerEventDetailsFragment extends Fragment {
 
             @Override
             public void onError(Exception e) {
-                Log.e("DeclineListener", "Error in handling declines: ", e);
+                Log.e("DeclineDebug", "Error in decline listener: ", e);
             }
         });
     }
@@ -428,11 +459,16 @@ public class OrganizerEventDetailsFragment extends Fragment {
 
 
     private void handleDeclineLogic(Event event) {
+        Log.d("DeclineDebug", "Handling decline for event: " + event.getEventName());
+        Log.d("DeclineDebug", "Current invited entrants: " + event.getInvitedEntrants());
+        Log.d("DeclineDebug", "Current waitlisted entrants: " + event.getWaitlistedEntrants());
+        Log.d("DeclineDebug", "Occupant limit: " + event.getOccupantLimit());
         if (event.getInvitedEntrants().size() < event.getOccupantLimit()) {
             List<String> waitlistedEntrants = event.getWaitlistedEntrants();
 
             if (!waitlistedEntrants.isEmpty()) {
                 String newInvitee = selectRandomEntrant(waitlistedEntrants);
+                Log.d("DeclineDebug", "Selected new invitee: " + newInvitee);
                 event.getInvitedEntrants().add(newInvitee);
                 waitlistedEntrants.remove(newInvitee);
 
@@ -440,7 +476,7 @@ public class OrganizerEventDetailsFragment extends Fragment {
                 dbHelper.updateEntrantsAfterDecline(eventId, event.getInvitedEntrants(), waitlistedEntrants, new DatabaseHelper.EventsCallback() {
                     @Override
                     public void onEventsFetched(List<Event> events) {
-                        Log.d("EventUpdate", "Entrants updated after handling decline.");
+                        Log.d("DeclineDebug", "Entrants updated after handling decline.");
                         isHandlingDecline = false; // Reset the flag once the update is complete
                     }
 
@@ -456,9 +492,11 @@ public class OrganizerEventDetailsFragment extends Fragment {
                     }
                 });
             } else {
+                Log.d("DeclineDebug", "No waitlisted entrants to invite.");
                 isHandlingDecline = false; // No more waitlisted entrants to add, reset the flag
             }
         } else {
+            Log.d("DeclineDebug", "Occupant limit reached, no action needed.");
             isHandlingDecline = false; // Occupant limit is met, reset the flag
         }
     }
@@ -490,5 +528,14 @@ public class OrganizerEventDetailsFragment extends Fragment {
                 .addToBackStack(null)
                 .commit();
     }
+
+    private void openMapFragment() {
+        OrganizerMapFragment mapFragment = OrganizerMapFragment.newInstance(eventId);
+        requireActivity().getSupportFragmentManager().beginTransaction()
+                .replace(R.id.main_activity_fragment_container, mapFragment)
+                .addToBackStack(null)
+                .commit();
+    }
+
 
 }

@@ -134,6 +134,13 @@
             android:layout_marginBottom="8dp" />
 
         <Button
+            android:id="@+id/viewMapButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="View Map"
+            android:layout_marginBottom="8dp" />
+
+        <Button
             android:id="@+id/viewRegisteredEntrants"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
