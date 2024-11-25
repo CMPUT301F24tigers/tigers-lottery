@@ -256,12 +256,9 @@ public class OrganizerCreateEventFragment extends Fragment {
         event.setWaitlistLimitFlag(assignWaitlistLimit);
         event.setWaitlistLimit(assignWaitlistLimit ? waitlistLimit : 0);
         event.setOccupantLimit(occupantLimit);
-        /*
-        QRCodeGenerator qrCodeGenerator = new QRCodeGenerator();
-        Bitmap QRCode = qrCodeGenerator.generateQRCode(String.valueOf(event.getEventId()));
 
 
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        /*ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         QRCode.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
         byte[] byteArray = outputStream.toByteArray();
 

@@ -215,8 +215,8 @@ public class OrganizerEventDetailsFragment extends Fragment {
         QRCodeGenerator qrCodeGenerator = new QRCodeGenerator();
 
  */
-        QRCodeGenerator qrCodeGenerator = new QRCodeGenerator();
-        Bitmap QRCode = qrCodeGenerator.generateQRCode(String.valueOf(event.getEventId()));
+        QRCodeGenerator qrCodeGenerator = new QRCodeGenerator(event);
+        Bitmap QRCode = qrCodeGenerator.generateQRCodeFromHashData();
         qrImage.setImageBitmap(QRCode);
 
         /*

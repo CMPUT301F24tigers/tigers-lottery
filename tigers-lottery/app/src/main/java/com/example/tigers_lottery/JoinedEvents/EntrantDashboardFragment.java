@@ -133,7 +133,6 @@ public class EntrantDashboardFragment extends Fragment {
             }
         });
 
-        
 
         return view;
     }
@@ -152,39 +151,6 @@ public class EntrantDashboardFragment extends Fragment {
         Intent intent = integrator.createScanIntent();
         qrCodeLauncher.launch(intent); // Launch the scanner with the new API
     }
-
-
-
-    /*
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, android.content.Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
-        if (result != null) {
-            if (result.getContents() == null) {
-                Toast.makeText(getContext(), "Scan Cancelled", Toast.LENGTH_SHORT).show();
-            } else {
-                String eventId = result.getContents(); // Extract QR code data
-                Toast.makeText(getContext(), "Scanned Event ID: " + eventId, Toast.LENGTH_SHORT).show();
-
-                // Navigate to Event Details Fragment
-                Bundle bundle = new Bundle();
-                bundle.putString("eventId", eventId);
-
-                FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-                FragmentTransaction transaction = fragmentManager.beginTransaction();
-                EntrantEventDetailsFragment fragment = new EntrantEventDetailsFragment();
-                fragment.setArguments(bundle);
-                transaction.replace(R.id.main_activity_fragment_container, fragment);
-                transaction.addToBackStack(null);
-                transaction.commit();
-            }
-        }
-    }
-
-
-     */
 
     private final ActivityResultLauncher<Intent> qrCodeLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
@@ -208,26 +174,44 @@ public class EntrantDashboardFragment extends Fragment {
 
     private void navigateToEventDetails(String result) {
 
-        int eventId = Integer.parseInt(result);
-        Bundle bundle = new Bundle();
-        bundle.putInt("eventId", eventId);
-
         FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
 
-        Fragment currentFragment = fragmentManager.findFragmentById(R.id.main_activity_fragment_container);
-        if (currentFragment instanceof EntrantEventDetailsFragment) {
-            return;
-        }
+        dbHelper.isQrCodeValid(result, isValid -> {
+            if (isValid) {
+                // If the QR code is valid, navigate to the event details page
+                int eventId = Integer.parseInt(result.substring(0, 5));
+                Bundle bundle = new Bundle();
+                bundle.putInt("eventId", eventId);
 
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-        Fragment fragment = new EntrantEventDetailsFragment();
-        fragment.setArguments(bundle);
-        transaction.replace(R.id.main_activity_fragment_container, fragment);
-        transaction.addToBackStack(null);
-        transaction.commit();
+                Fragment currentFragment = fragmentManager.findFragmentById(R.id.main_activity_fragment_container);
+                if (currentFragment instanceof EntrantEventDetailsFragment) {
+                    return; // If already on the details page, do nothing
+                }
 
-        }
+                FragmentTransaction transaction = fragmentManager.beginTransaction();
+                Fragment fragment = new EntrantEventDetailsFragment();
+                fragment.setArguments(bundle);
+                transaction.replace(R.id.main_activity_fragment_container, fragment);
+                transaction.addToBackStack(null);
+                transaction.commit();
+            } else {
+                // If the QR code is invalid, show a toast and reload the current fragment
+                Toast.makeText(getActivity(), "Invalid QR Code to Join an Event", Toast.LENGTH_SHORT).show();
+
+                FragmentTransaction transaction = fragmentManager.beginTransaction();
+                Fragment currentFragment = fragmentManager.findFragmentById(R.id.main_activity_fragment_container);
+
+                // Reload the same fragment
+                if (currentFragment instanceof EntrantDashboardFragment) {
+                    transaction.detach(currentFragment);
+                    transaction.attach(currentFragment);
+                } else {
+                    transaction.replace(R.id.main_activity_fragment_container, new EntrantDashboardFragment());
+                }
+                transaction.commit();
+            }
+        });
     }
 
-
+}
 

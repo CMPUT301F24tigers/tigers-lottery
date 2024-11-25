@@ -108,9 +108,8 @@ public class OrganizerQRCodeFragment extends Fragment {
         });
     }
     private void setUpQRCode(){
-        String eventId = String.valueOf(event.getEventId());
-        QRCodeGenerator qrCodeGenerator = new QRCodeGenerator();
-        Bitmap QRCode = qrCodeGenerator.generateQRCode(eventId);
+        QRCodeGenerator qrCodeGenerator = new QRCodeGenerator(event);
+        Bitmap QRCode = qrCodeGenerator.generateQRCodeFromHashData();
         QRImage.setImageBitmap(QRCode);
 
     }

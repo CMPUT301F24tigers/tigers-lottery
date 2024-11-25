@@ -95,10 +95,10 @@ public class Event implements Serializable {
 
     @PropertyName("is_lottery_ran")
     private boolean isLotteryRan = false;
-/*
-    @PropertyName("QRCode")
-    private Map<Integer, Byte> QRCode;
-*/
+
+    @PropertyName("QR_hash_data")
+    private String QRCode;
+
     // No-argument constructor
     public Event() {}
 
@@ -168,14 +168,12 @@ public class Event implements Serializable {
 
     @PropertyName("location")
     public void setLocation(String location) { this.location = location; }
-/*
-    @PropertyName("bitmap")
-    public void setQRCode(Map <Integer, Byte> QRCode) {this.QRCode = QRCode;}
 
-    @PropertyName("bitmap")
-    public Map<Integer, Byte> getQRCode() {return QRCode; }
+    @PropertyName("QR_hash_data")
+    public void setQRCode(String QRCode) {this.QRCode = QRCode;}
 
- */
+    @PropertyName("QR_hash_data")
+    public String getQRCode() {return QRCode; }
 
     @PropertyName("description")
     public String getDescription() { return description; }

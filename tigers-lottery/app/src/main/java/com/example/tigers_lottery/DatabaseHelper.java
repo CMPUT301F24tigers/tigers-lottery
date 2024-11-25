@@ -1,6 +1,7 @@
 package com.example.tigers_lottery;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.util.Log;
 
@@ -10,6 +11,7 @@ import androidx.annotation.Nullable;
 import com.example.tigers_lottery.models.Event;
 import com.example.tigers_lottery.models.User;
 import com.example.tigers_lottery.utils.DeviceIDHelper;
+import com.example.tigers_lottery.utils.QRCodeGenerator;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -64,6 +66,7 @@ import java.util.UUID;
  * - updateEvent(Event event, EventsCallback callback): Updates event details in the database.
  * - fetchAllEvents(EventsCallback callback): Fetches all events from the database.
  * - getEventCount(CountCallback callback): Retrieves the total number of events.
+ * - isQrCodeValid (String hashedData): This method validates and ensure that the data read from the QR code matches a valid event
 
  * Entrants Management:
  * - fetchRegisteredEntrants(int eventId, EntrantsCallback callback): Fetches registered entrants for an event.
@@ -183,6 +186,10 @@ public class DatabaseHelper {
     public interface UploadCallback {
         void onUploadSuccess(String downloadUrl);
         void onUploadFailure(Exception e);
+    }
+
+    public interface QRCodeValidationCallback {
+        void onValidationComplete(boolean isValid);
     }
 
     /**
@@ -359,6 +366,20 @@ public class DatabaseHelper {
             event.setEventId(Integer.parseInt(uniqueEventId));
         }
 
+        QRCodeGenerator qrCodeGenerator = new QRCodeGenerator(event);
+        qrCodeGenerator.setHashData();
+        Bitmap QRCode = qrCodeGenerator.generateQRCode();
+
+        // Retrieve and log the hash data
+        String hashData = qrCodeGenerator.getHashData();
+        Log.d("QRCodeExample", "Hash Data: " + hashData);
+
+        // Decode the hash data back to the event ID
+        int decodedEventId = qrCodeGenerator.decodeHash(hashData);
+        Log.d("QRCodeExample", "Decoded Event ID: " + decodedEventId);
+
+        event.setQRCode(qrCodeGenerator.getHashData());
+
         // Try adding the event with the event_id as the document ID
         eventsRef.document(uniqueEventId)
                 .set(event)
@@ -422,6 +443,72 @@ public class DatabaseHelper {
                     }
                 })
                 .addOnFailureListener(e -> Log.e(TAG, "Failed to fetch organizer document", e));
+    }
+
+    /**
+     * This method validates and ensure that the data read from the QR code matches a valid event
+     *
+     * @param hashedData - hashed data read from the QR code
+     * @return boolean - if valid method will return true or vice versa
+     */
+    public void isQrCodeValid(String hashedData, QRCodeValidationCallback callback) {
+        if (hashedData == null || hashedData.isEmpty()) {
+            Log.d("QRCodeValidation", "Failed: Hashed data is null or empty.");
+            callback.onValidationComplete(false);
+            return;
+        }
+
+        int colonIndex = hashedData.indexOf(':');
+        if (colonIndex == -1) {
+            Log.d("QRCodeValidation", "Failed: No colon found in the hashed data.");
+            callback.onValidationComplete(false);
+            return;
+        }
+
+        String eventIdPart = hashedData.substring(0, colonIndex);
+        String timestampPart = hashedData.substring(colonIndex + 1);
+
+        if (eventIdPart.length() != 5 || !eventIdPart.matches("\\d+")) {
+            Log.d("QRCodeValidation", "Failed: Event ID is not 5 digits or is not numeric. Event ID: " + eventIdPart);
+            callback.onValidationComplete(false);
+            return;
+        }
+
+        if (timestampPart.length() != 13 || !timestampPart.matches("\\d+")) {
+            Log.d("QRCodeValidation", "Failed: Timestamp is not 13 digits or is not numeric. Timestamp: " + timestampPart);
+            callback.onValidationComplete(false);
+            return;
+        }
+
+        if (hashedData.length() != 19) {
+            Log.d("QRCodeValidation", "Failed: Hashed data length is not 19. Length: " + hashedData.length());
+            callback.onValidationComplete(false);
+            return;
+        }
+
+        fetchEventById(Integer.parseInt(eventIdPart), new EventsCallback() {
+            @Override
+            public void onEventsFetched(List<Event> events) {
+                // Do nothing
+            }
+
+            @Override
+            public void onEventFetched(Event event) {
+                if (event != null && Objects.equals(event.getQRCode(), hashedData)) {
+                    Log.d("QRCodeValidation", "Success: Event found and QR code matches.");
+                    callback.onValidationComplete(true);
+                } else {
+                    Log.d("QRCodeValidation", "Failed: Event found but QR code does not match.");
+                    callback.onValidationComplete(false);
+                }
+            }
+
+            @Override
+            public void onError(Exception e) {
+                Log.d("QRCodeValidation", "Failed: Error fetching event. Exception: " + e.getMessage());
+                callback.onValidationComplete(false);
+            }
+        });
     }
 
     /**
