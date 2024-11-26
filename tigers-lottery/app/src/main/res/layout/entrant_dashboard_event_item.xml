@@ -45,7 +45,8 @@
             android:id="@+id/eventItemPhoto"
             android:layout_width="70dp"
             android:layout_height="70dp"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="2dp"
+            android:layout_marginEnd="4dp"
             android:background="@drawable/rounded_image"
             android:clipToOutline="true"
             android:scaleType="centerCrop"
@@ -61,17 +62,17 @@
         <TextView
             android:id="@+id/eventItemName"
             android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:text="Event 1"
-        android:textColor="@color/white"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@+id/eventItemLocation"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toEndOf="@id/eventItemPhoto"
-        app:layout_constraintTop_toTopOf="parent" />
+            android:layout_height="wrap_content"
+            android:text="Event 1"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginStart="8dp"
+            android:layout_marginBottom="8dp"
+            app:layout_constraintBottom_toTopOf="@id/eventItemLocation"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/eventItemPhoto"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/eventItemLocation"
@@ -80,9 +81,10 @@
             android:text="Location: UofA"
             android:textColor="@color/white"
             android:textSize="14sp"
-            app:layout_constraintBottom_toTopOf="@+id/eventItemTime"
+            android:layout_marginBottom="16dp"
+            app:layout_constraintBottom_toTopOf="@id/eventItemTime"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toStartOf="@id/eventItemName"
             app:layout_constraintTop_toBottomOf="@id/eventItemName" />
 
@@ -93,11 +95,10 @@
             android:text="Date: October 19, 2024"
             android:textColor="@color/white"
             android:textSize="14sp"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/eventItemStatus"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="@id/eventItemLocation"
-            app:layout_constraintTop_toBottomOf="@+id/eventItemLocation" />
+            app:layout_constraintTop_toBottomOf="@id/eventItemLocation" />
 
         <TextView
             android:id="@+id/eventItemStatus"
@@ -105,12 +106,12 @@
             android:layout_height="wrap_content"
             android:text="event_status"
             android:textColor="@color/white"
+            android:textSize="14sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toEndOf="@+id/eventItemPhoto"
-            app:layout_constraintStart_toStartOf="@id/eventItemTime"
-            app:layout_constraintTop_toBottomOf="@+id/eventItemTime" />
+            app:layout_constraintStart_toStartOf="@id/eventItemName"
+            app:layout_constraintTop_toBottomOf="@id/eventItemTime" />
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>

@@ -8,8 +8,8 @@
 
     <ScrollView
         android:id="@+id/scrollViewEntrants"
-        android:layout_width="421dp"
-        android:layout_height="555dp"
+        android:layout_width="384dp"
+        android:layout_height="541dp"
         android:layout_marginTop="64dp"
         app:layout_constraintBottom_toTopOf="@id/join_event_button"
         app:layout_constraintEnd_toEndOf="@id/join_event_button"
