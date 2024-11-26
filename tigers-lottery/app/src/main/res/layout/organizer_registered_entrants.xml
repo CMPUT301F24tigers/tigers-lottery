@@ -47,6 +47,6 @@
         android:layout_margin="16dp"
         android:src="@drawable/ic_send"
         android:contentDescription="Send Notifications"
-        android:tint="@/white"
+        android:tint="@color/white"
         android:backgroundTint="@color/darker_teal" />
 </RelativeLayout>
