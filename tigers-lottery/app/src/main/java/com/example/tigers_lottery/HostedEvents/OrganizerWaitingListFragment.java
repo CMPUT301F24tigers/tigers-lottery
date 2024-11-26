@@ -14,7 +14,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.tigers_lottery.DatabaseHelper;
 import com.example.tigers_lottery.HostedEvents.Adapters.EntrantAdapter;
+import com.example.tigers_lottery.Notifications.SendNotificationDialog;
 import com.example.tigers_lottery.R;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.List;
 
@@ -50,11 +52,18 @@ public class OrganizerWaitingListFragment extends Fragment {
         View view = inflater.inflate(R.layout.organizer_waitinglist_entrants, container, false);
         recyclerView = view.findViewById(R.id.waitlistedEntrantsRecyclerView);
         noEntrantsMessage = view.findViewById(R.id.noEntrantsMessage);
+        FloatingActionButton fabSendNotifications = view.findViewById(R.id.fabSendNotifications);
 
         eventId = getArguments() != null ? getArguments().getInt("event_id") : -1;
         dbHelper = new DatabaseHelper(requireContext());
 
         fetchWaitlistedEntrants();
+
+        // Set up FAB to open the notification dialog
+        fabSendNotifications.setOnClickListener(v -> {
+            SendNotificationDialog notificationDialog = new SendNotificationDialog(requireContext(), eventId, "waitlisted_entrants");
+            notificationDialog.showDialog();
+        });
 
         return view;
     }

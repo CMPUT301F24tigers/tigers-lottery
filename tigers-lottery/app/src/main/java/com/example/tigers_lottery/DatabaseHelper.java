@@ -251,17 +251,18 @@ public class DatabaseHelper {
                 .addOnFailureListener(e -> Log.e(TAG, "Failed to update notification read status", e));
     }
 
-    /** The organizer should be able to send a notification to all selected entrants/registered entrants. Several of the notfication fields are hardcoded for this type of notification
-     *
-     *
+
+    /** Send a batch of notifications to users in a given list
      *
      * @param eventId
+     * @param listType
      * @param message
      * @param priority
      * @param callback
      */
-    public void sendNotificationsToRegisteredEntrants(
-            int eventId, // Now expects an integer eventId
+    public void sendNotificationsToEntrants(
+            int eventId,
+            String listType, // registered_entrants or waitlisted_entrants, etc.
             String message,
             String priority,
             final NotificationCallback callback) {
@@ -275,8 +276,25 @@ public class DatabaseHelper {
 
             // Extract event data
             Event event = querySnapshot.getDocuments().get(0).toObject(Event.class);
-            if (event == null || event.getRegisteredEntrants() == null || event.getRegisteredEntrants().isEmpty()) {
-                callback.onFailure("No registered entrants found for the event.");
+            if (event == null) {
+                callback.onFailure("Event data is null.");
+                return;
+            }
+
+            // Determine the list of entrants
+            List<String> entrants;
+            if ("registered_entrants".equals(listType)) {
+                entrants = event.getRegisteredEntrants();
+            } else if ("waitlisted_entrants".equals(listType)) {
+                entrants = event.getWaitlistedEntrants();
+            } else {
+                callback.onFailure("Invalid list type: " + listType);
+                return;
+            }
+
+            // Validate entrants list
+            if (entrants == null || entrants.isEmpty()) {
+                callback.onFailure("No entrants found in the " + listType + " list.");
                 return;
             }
 
@@ -284,9 +302,8 @@ public class DatabaseHelper {
             String eventName = event.getEventName();
             String organizerId = event.getOrganizerId();
 
-            // Fetch all user data for registered entrants
-            List<String> registeredEntrants = event.getRegisteredEntrants();
-            usersRef.whereIn("user_id", registeredEntrants).get().addOnSuccessListener(querySnapshotUsers -> {
+            // Fetch all user data for entrants
+            usersRef.whereIn("user_id", entrants).get().addOnSuccessListener(querySnapshotUsers -> {
                 List<Notification> notificationsToSend = new ArrayList<>();
 
                 for (QueryDocumentSnapshot userDoc : querySnapshotUsers) {
@@ -338,13 +355,14 @@ public class DatabaseHelper {
                 }
 
             }).addOnFailureListener(e -> {
-                callback.onFailure("Failed to fetch registered users: " + e.getMessage());
+                callback.onFailure("Failed to fetch users in " + listType + " list: " + e.getMessage());
             });
 
         }).addOnFailureListener(e -> {
             callback.onFailure("Failed to fetch event: " + e.getMessage());
         });
     }
+
 
     private int generateUniqueNotificationId() {
         Random random = new Random();

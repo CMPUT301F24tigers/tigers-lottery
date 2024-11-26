@@ -17,10 +17,12 @@ public class SendNotificationDialog {
 
     private final Context context;
     private final int eventId;
+    private final String listType;
 
-    public SendNotificationDialog(Context context, int eventId) {
+    public SendNotificationDialog(Context context, int eventId, String listType) {
         this.context = context;
         this.eventId = eventId;
+        this.listType = listType;
     }
 
     public void showDialog() {
@@ -66,7 +68,7 @@ public class SendNotificationDialog {
 
             // Call backend method to send notifications
             DatabaseHelper dbHelper = new DatabaseHelper(context);
-            dbHelper.sendNotificationsToRegisteredEntrants(eventId, message, priority, new DatabaseHelper.NotificationCallback() {
+            dbHelper.sendNotificationsToEntrants(eventId, listType, message, priority, new DatabaseHelper.NotificationCallback() {
                 @Override
                 public void onSuccess(String responseMessage) {
                     Toast.makeText(context, "Notification sent successfully!", Toast.LENGTH_SHORT).show();

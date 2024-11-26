@@ -61,7 +61,7 @@ public class OrganizerRegisteredEntrantsFragment extends Fragment {
 
         // Open the Send Notification Dialog on FAB click
         fabSendNotifications.setOnClickListener(v -> {
-            SendNotificationDialog notificationDialog = new SendNotificationDialog(requireContext(), eventId);
+            SendNotificationDialog notificationDialog = new SendNotificationDialog(requireContext(), eventId, "registered_entrants");
             notificationDialog.showDialog();
         });
 
