@@ -41,20 +41,6 @@
 
         </androidx.cardview.widget.CardView>
 
-        <FrameLayout
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:background="#D3D3D3"
-            android:layout_marginBottom="16dp">
-
-            <ImageView
-                android:id="@+id/qrCodeImage"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:scaleType="fitCenter" />
-
-        </FrameLayout>
-
 
         <!-- Event Description in a box -->
         <androidx.cardview.widget.CardView
@@ -133,6 +119,8 @@
             android:layout_marginBottom="16dp" />
 
         <!-- Buttons to View Entrant Lists as well as lottery button-->
+
+
         <Button
             android:id="@+id/runLotteryButton"
             android:layout_width="match_parent"
@@ -146,6 +134,13 @@
             android:layout_height="wrap_content"
             android:text="Clear Lists"
             android:layout_marginBottom="8dp" />
+
+        <Button
+            android:id="@+id/viewQRCodeButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="View QR Code"
+            android:layout_marginBottom="8dp"/>
 
         <Button
             android:id="@+id/viewMapButton"
