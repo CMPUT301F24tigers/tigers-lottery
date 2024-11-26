@@ -6,6 +6,7 @@ import android.os.Bundle;
 import com.example.tigers_lottery.Admin.AdminDashboardFragment;
 import com.example.tigers_lottery.HostedEvents.OrganizerDashboardFragment;
 import com.example.tigers_lottery.JoinedEvents.EntrantDashboardFragment;
+import com.example.tigers_lottery.Notifications.NotificationDashboardFragment;
 import com.example.tigers_lottery.utils.DeviceIDHelper;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
@@ -48,6 +49,8 @@ public class MainActivity extends AppCompatActivity {
 
         String deviceId = DeviceIDHelper.getDeviceId(this);
         editProfile = findViewById(R.id.profileButton);
+        ImageButton notificationButton = findViewById(R.id.notificationButton);
+
         DatabaseHelper dbHelper = new DatabaseHelper(getApplicationContext());
 
         // BottomNavigationView setup
@@ -119,6 +122,16 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(profileDetailsActivity);
             }
         });
+
+        // Set listener for notifications button to navigate to NotificationDashboardFragment
+        notificationButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                loadFragment(new NotificationDashboardFragment());
+            }
+        });
+
+
     }
 
     /**
@@ -132,10 +145,12 @@ public class MainActivity extends AppCompatActivity {
             getSupportFragmentManager()
                     .beginTransaction()
                     .replace(R.id.main_activity_fragment_container, fragment)
+                    .addToBackStack(null) // Add this line to manage the back stack
                     .commit();
             return true;
         }
         return false;
     }
+
 
 }

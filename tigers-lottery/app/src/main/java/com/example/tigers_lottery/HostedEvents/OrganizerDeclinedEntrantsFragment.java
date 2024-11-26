@@ -14,7 +14,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.tigers_lottery.DatabaseHelper;
 import com.example.tigers_lottery.HostedEvents.Adapters.EntrantAdapter;
+import com.example.tigers_lottery.Notifications.SendNotificationDialog;
 import com.example.tigers_lottery.R;
+import com.example.tigers_lottery.models.User;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.List;
 
@@ -51,11 +54,18 @@ public class OrganizerDeclinedEntrantsFragment extends Fragment {
         View view = inflater.inflate(R.layout.organizer_declined_entrants, container, false);
         recyclerView = view.findViewById(R.id.declinedEntrantsRecyclerView);
         noEntrantsMessage = view.findViewById(R.id.noEntrantsMessage);
+        FloatingActionButton fabSendNotifications = view.findViewById(R.id.fabSendNotifications);
 
         eventId = getArguments() != null ? getArguments().getInt("event_id") : -1;
         dbHelper = new DatabaseHelper(requireContext());
 
         fetchDeclinedEntrants();
+
+        // Set up FAB to open the notification dialog
+        fabSendNotifications.setOnClickListener(v -> {
+            SendNotificationDialog notificationDialog = new SendNotificationDialog(requireContext(), eventId, "invited_entrants");
+            notificationDialog.showDialog();
+        });
 
         return view;
     }
@@ -68,33 +78,48 @@ public class OrganizerDeclinedEntrantsFragment extends Fragment {
     private void fetchDeclinedEntrants() {
         dbHelper.fetchDeclinedEntrants(eventId, new DatabaseHelper.EntrantsCallback() {
             @Override
-            public void onEntrantsFetched(List<String> entrants) {
-                if (entrants.isEmpty()) {
+            public void onEntrantsFetched(List<String> entrantIds) {
+                if (entrantIds.isEmpty()) {
                     noEntrantsMessage.setVisibility(View.VISIBLE);
                     recyclerView.setVisibility(View.GONE);
                 } else {
-                    noEntrantsMessage.setVisibility(View.GONE);
-                    recyclerView.setVisibility(View.VISIBLE);
-                    setupRecyclerView(entrants);
+                    // Fetch user details for all entrant IDs
+                    dbHelper.fetchUsersByIds(entrantIds, new DatabaseHelper.UsersCallback() {
+                        @Override
+                        public void onUsersFetched(List<User> users) {
+                            noEntrantsMessage.setVisibility(View.GONE);
+                            recyclerView.setVisibility(View.VISIBLE);
+                            setupRecyclerView(users);
+                        }
+
+                        @Override
+                        public void onUserFetched(User user) {
+                        }
+
+                        @Override
+                        public void onError(Exception e) {
+                            noEntrantsMessage.setVisibility(View.VISIBLE);
+                            recyclerView.setVisibility(View.GONE);
+                            // Handle error (e.g., show Toast message)
+                        }
+                    });
                 }
             }
 
-            /**
-             * Handles error when fetching the declined entrants
-             * @param e exception catcher.
-             */
             @Override
             public void onError(Exception e) {
+                noEntrantsMessage.setVisibility(View.VISIBLE);
+                recyclerView.setVisibility(View.GONE);
             }
         });
     }
 
     /**
-     * Sets up the recyclerView for the cancelled entrants.
-     * @param entrants list of cancelled entrants.
+     * Sets up the recyclerView for the waiting list entrants.
+     * @param users list of waiting list entrants.
      */
-    private void setupRecyclerView(List<String> entrants) {
+    private void setupRecyclerView(List<User> users) {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        recyclerView.setAdapter(new EntrantAdapter(entrants));
+        recyclerView.setAdapter(new EntrantAdapter(users));
     }
 }
