@@ -215,12 +215,13 @@
         android:text="Save Changes"
         android:textColor="@color/white"
         app:iconTint="@color/white"
+        android:backgroundTint="@color/darker_teal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.934"
-        app:rippleColor="#451515" />
+        app:rippleColor="@color/accent_1_teal" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

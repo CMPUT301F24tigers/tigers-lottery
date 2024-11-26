@@ -90,6 +90,9 @@ public class CreateEntrantProfileActivity extends AppCompatActivity {
         mobileEditText = findViewById(R.id.editUserTextMobile);
         editProfilePhotoButton = findViewById(R.id.sign_up_add_profile_button);
 
+        getWindow().setStatusBarColor(0xFF2A334C);
+
+
         saveInfoButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

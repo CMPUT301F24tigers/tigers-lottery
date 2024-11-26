@@ -82,8 +82,8 @@ public class AdminEventsFragment extends Fragment implements OnActionListener {
                     dbHelper.fetchUserById(event.getOrganizerId(), new DatabaseHelper.UsersCallback() {
                         @Override
                         public void onUserFetched(User user) {
-                            String organizerName = (user != null)
-                                    ? "by " + user.getFirstName() + " " + user.getLastName()
+                            String organizerName = (user != null && !(user.getFacilityName().isEmpty()))
+                                    ? "by " + user.getFacilityName()
                                     : "Organizer Not Found";
 
                             globalOrganizerName = organizerName;

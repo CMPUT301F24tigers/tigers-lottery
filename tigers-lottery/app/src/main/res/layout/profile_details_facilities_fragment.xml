@@ -13,6 +13,7 @@
         android:text="Facility Profile"
         android:textSize="25sp"
         android:textStyle="bold"
+        android:textColor="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.047"
@@ -37,6 +38,7 @@
         android:layout_height="103dp"
         android:text="facility name"
         android:textAlignment="center"
+        android:textColor="@color/white"
         android:textSize="25sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -71,6 +73,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="16sp"
+            android:textColor="@color/white"
             android:text="facility email" />
 
         <TextView
@@ -88,6 +91,7 @@
             android:id="@+id/facilityMobile"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textColor="@color/white"
             android:textSize="16sp"
             android:text="facility mobile" />
 
@@ -106,6 +110,7 @@
             android:id="@+id/facilityLocation"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textColor="@color/white"
             android:textSize="16sp"
             android:text="facility location" />
     </LinearLayout>
@@ -118,6 +123,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+        android:backgroundTint="@color/darker_teal"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.84000003" />
 

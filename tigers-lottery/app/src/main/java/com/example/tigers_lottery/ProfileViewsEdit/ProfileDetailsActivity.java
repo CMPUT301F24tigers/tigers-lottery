@@ -43,6 +43,8 @@ public class ProfileDetailsActivity extends AppCompatActivity {
 
         BottomNavigationView bottomNavProfileDetails = findViewById(R.id.nav_profile_details_view);
 
+        getWindow().setStatusBarColor(0xFF2A334C);
+
         // Set up listener to handle reselection of items in the bottom navigation view
         bottomNavProfileDetails.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
             @Override
