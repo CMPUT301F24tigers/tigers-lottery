@@ -18,6 +18,7 @@ import com.example.tigers_lottery.Admin.DashboardFragments.ListItems.OnActionLis
 import com.example.tigers_lottery.DatabaseHelper;
 import com.example.tigers_lottery.R;
 import com.example.tigers_lottery.models.User;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -39,6 +40,7 @@ public class AdminEntrantsProfilesFragment extends Fragment implements OnActionL
      * @param savedInstanceState If non-null, this fragment is being re-created from a previous saved state.
      * @return The View for the fragment's UI.
      */
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.admin_list_fragment, container, false);
@@ -67,13 +69,22 @@ public class AdminEntrantsProfilesFragment extends Fragment implements OnActionL
                 itemList.clear();
                 for (User user : users) {
                     if (!Objects.equals(user.getUserId(), dbHelper.getCurrentUserId())) {
+                        String userPhoto = user.getUserPhoto();
+
+                        // Use placeholder if photo is null or empty
+                        if (userPhoto == null || userPhoto.isEmpty()) {
+                            userPhoto = "placeholder_user_image";
+                        }
+
+                        // Add the user to the list and set isEvent to false
                         itemList.add(new AdminListItemModel(
                                 user.getUserId(),
                                 user.getFirstName() + " " + user.getLastName(),
                                 user.getEmailAddress(),
+                                userPhoto,
                                 "Remove User",
-                                "View User Profile"
-                        ));
+                                "View User Profile",
+                                false));
                     }
                 }
                 userAdapter.notifyDataSetChanged();
@@ -132,6 +143,7 @@ public class AdminEntrantsProfilesFragment extends Fragment implements OnActionL
                 .addToBackStack(null)
                 .commit();
     }
+
 
     /**
      * Creates a new instance of the AdminEntrantsProfilesFragment.

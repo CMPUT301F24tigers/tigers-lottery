@@ -123,6 +123,7 @@ public class OrganizerQRCodeFragment extends Fragment {
             Bitmap QRCode = qrCodeGenerator.generateQRCodeFromHashData();
             QRImage.setVisibility(View.VISIBLE);
             QRImage.setImageBitmap(QRCode);
+
             description.setTextColor(0xFFFFFFFF);
             description.setText("Users may use this QR Code to join the waitlist for your event." +
                     " You may use the 'Regenerate QR Code' button to be given a new QR Code." +
