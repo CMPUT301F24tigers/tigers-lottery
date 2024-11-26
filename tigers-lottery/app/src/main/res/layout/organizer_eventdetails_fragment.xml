@@ -133,46 +133,59 @@
         <!-- Buttons to View Entrant Lists as well as lottery button-->
 
 
+        <androidx.gridlayout.widget.GridLayout
+            android:id="@+id/grid_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:columnCount="2"
+            android:layout_marginBottom="8dp"
+            app:orientation="horizontal">
+
         <Button
             android:id="@+id/runLotteryButton"
-            android:layout_width="match_parent"
-            android:backgroundTint="@color/darker_teal"
-            android:textColor="@color/white"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:backgroundTint="@color/darker_teal"
             android:text="Run Lottery"
-            android:layout_marginBottom="8dp" />
+            app:layout_columnWeight="1"
+            app:layout_rowWeight="1" />
 
         <Button
             android:id="@+id/clearListsButton"
-            android:layout_width="match_parent"
-            android:backgroundTint="@color/darker_teal"
-            android:textColor="@color/white"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:backgroundTint="@color/darker_teal"
             android:text="Clear Lists"
-            android:layout_marginBottom="8dp" />
+            app:layout_columnWeight="1"
+            app:layout_rowWeight="1" />
 
+        <!-- Button for View QR -->
         <Button
             android:id="@+id/viewQRCodeButton"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:backgroundTint="@color/darker_teal"
             android:text="View QR Code"
-            android:layout_marginBottom="8dp"/>
+            android:backgroundTint="@color/darker_teal"
+            app:layout_columnWeight="1"
+            app:layout_rowWeight="1" />
 
+        <!-- Button for View Map -->
         <Button
             android:id="@+id/viewMapButton"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:backgroundTint="@color/darker_teal"
             android:text="View Map"
-            android:layout_marginBottom="8dp" />
+            android:backgroundTint="@color/darker_teal"
+            app:layout_columnWeight="1"
+            app:layout_rowWeight="1" />
 
+    </androidx.gridlayout.widget.GridLayout>
         <Button
             android:id="@+id/viewRegisteredEntrants"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:backgroundTint="@color/accent_1_teal"
-            android:text="View Registered Entrants"
+            android:text="View Waitlisted Entrants"
             android:layout_marginBottom="8dp" />
 
         <Button

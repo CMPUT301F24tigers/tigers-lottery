@@ -33,17 +33,18 @@
 
     <TextView
         android:id="@+id/facilityName"
-        android:layout_width="305dp"
-        android:layout_height="34dp"
+        android:layout_width="330dp"
+        android:layout_height="103dp"
         android:text="facility name"
         android:textAlignment="center"
         android:textSize="25sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.493"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.29000002" />
+        app:layout_constraintVertical_bias="0.321" />
 
     <LinearLayout
         android:layout_width="317dp"
@@ -63,7 +64,7 @@
             android:text="Email"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:textColor="@color/accent_2_light_blue" />
+            android:textColor="@color/accent_3_light_purple" />
 
         <TextView
             android:id="@+id/facilityEmail"
@@ -81,7 +82,7 @@
             android:textSize="16sp"
             android:textStyle="bold"
             android:text="Mobile Number"
-            android:textColor="@color/accent_2_light_blue" />
+            android:textColor="@color/accent_3_light_purple" />
 
         <TextView
             android:id="@+id/facilityMobile"
@@ -99,7 +100,7 @@
             android:text="Location"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:textColor="@color/accent_2_light_blue" />
+            android:textColor="@color/accent_3_light_purple" />
 
         <TextView
             android:id="@+id/facilityLocation"

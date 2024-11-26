@@ -12,6 +12,7 @@
         android:layout_height="wrap_content"
         android:text="Profile"
         android:textSize="25sp"
+        android:textColor="@color/white"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -35,6 +36,7 @@
         android:id="@+id/userName"
         android:layout_width="324dp"
         android:layout_height="34dp"
+        android:textColor="@color/white"
         android:text="user name"
         android:textAlignment="center"
         android:textSize="25sp"
@@ -64,7 +66,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="3sp"
             android:text="Email"
-            android:textColor="@color/accent_2_light_blue"
+            android:textColor="@color/accent_3_light_purple"
             android:textSize="16sp"
             android:textStyle="bold" />
 
@@ -72,6 +74,7 @@
             android:id="@+id/userEmail"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textColor="@color/white"
             android:text="user email"
             android:textSize="16sp" />
 
@@ -82,13 +85,14 @@
             android:layout_marginTop="10dp"
             android:layout_marginBottom="3sp"
             android:text="Date of Birth"
-            android:textColor="@color/accent_2_light_blue"
+            android:textColor="@color/accent_3_light_purple"
             android:textSize="16sp"
             android:textStyle="bold" />
 
         <TextView
             android:id="@+id/userBirthday"
             android:layout_width="match_parent"
+            android:textColor="@color/white"
             android:layout_height="wrap_content"
             android:text="user birthday"
             android:textSize="16sp" />
@@ -100,13 +104,14 @@
             android:layout_marginTop="10dp"
             android:layout_marginBottom="3sp"
             android:text="Mobile Number"
-            android:textColor="@color/accent_2_light_blue"
+            android:textColor="@color/accent_3_light_purple"
             android:textSize="16sp"
             android:textStyle="bold" />
 
         <TextView
             android:id="@+id/userMobile"
             android:layout_width="match_parent"
+            android:textColor="@color/white"
             android:layout_height="wrap_content"
             android:text="user mobile"
             android:textSize="16sp" />
@@ -118,6 +123,7 @@
             android:layout_marginTop="65dp"
             android:background="#00FFFFFF"
             android:text="Are you an Admin ?"
+            android:visibility="invisible"
             android:textColor="#6750A4"
             app:strokeColor="#AA00FF" />
 
@@ -132,7 +138,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-
+        android:backgroundTint="@color/darker_teal"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.84000003"
         app:layout_goneMarginBottom="12dp" />

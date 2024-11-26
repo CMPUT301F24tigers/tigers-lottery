@@ -4,8 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/primary_background_pages">
-
+    android:background="#2A334C">
 
     <TextView
         android:id="@+id/textView2"
@@ -73,19 +72,18 @@
             app:cardCornerRadius="16dp"
             app:cardElevation="4dp">
 
-
-        <EditText
-            android:id="@+id/editTextUserProfileFirstName"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:autofillHints=""
-            android:hint="user_first_name"
-            android:inputType="textEmailAddress"
-            android:background="@null"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"/>
+            <EditText
+                android:id="@+id/editTextUserProfileFirstName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:autofillHints=""
+                android:hint="user_first_name"
+                android:inputType="textEmailAddress"
+                android:background="@null"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"/>
 
         </com.google.android.material.card.MaterialCardView>
 
@@ -103,18 +101,18 @@
             app:cardCornerRadius="16dp"
             app:cardElevation="4dp">
 
-        <EditText
-            android:id="@+id/editTextUserProfileLastName"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:autofillHints=""
-            android:hint="user last_name"
-            android:inputType="textEmailAddress"
-            android:background="@null"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"/>
+            <EditText
+                android:id="@+id/editTextUserProfileLastName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:autofillHints=""
+                android:hint="user last_name"
+                android:inputType="textEmailAddress"
+                android:background="@null"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"/>
 
         </com.google.android.material.card.MaterialCardView>
 
@@ -132,19 +130,18 @@
             app:cardCornerRadius="16dp"
             app:cardElevation="4dp">
 
-
-        <EditText
-            android:id="@+id/editTextUserProfileEmail"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:autofillHints=""
-            android:hint="user email"
-            android:inputType="textEmailAddress"
-            android:background="@null"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"/>
+            <EditText
+                android:id="@+id/editTextUserProfileEmail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:autofillHints=""
+                android:hint="user email"
+                android:inputType="textEmailAddress"
+                android:background="@null"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"/>
 
         </com.google.android.material.card.MaterialCardView>
 
@@ -154,7 +151,6 @@
             android:layout_marginTop="10dp"
             android:layout_marginBottom="3sp"
             android:text="Date of Birth"
-
             android:textColor="@color/white" />
 
         <com.google.android.material.card.MaterialCardView
@@ -164,20 +160,20 @@
             app:cardCornerRadius="16dp"
             app:cardElevation="4dp">
 
-        <EditText
-            android:id="@+id/editTextUserProfileDOB"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:autofillHints=""
-            android:clickable="true"
-            android:focusable="false"
-            android:hint="user birthday"
-            android:inputType="none"
-            android:background="@null"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"/>
+            <EditText
+                android:id="@+id/editTextUserProfileDOB"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:autofillHints=""
+                android:clickable="true"
+                android:focusable="false"
+                android:hint="user birthday"
+                android:inputType="none"
+                android:background="@null"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"/>
 
         </com.google.android.material.card.MaterialCardView>
 
@@ -196,19 +192,18 @@
             app:cardCornerRadius="16dp"
             app:cardElevation="4dp">
 
-
-        <EditText
-            android:id="@+id/editTextUserProfileMobile"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:autofillHints=""
-            android:hint="user mobile"
-            android:inputType="phone"
-            android:background="@null"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"/>
+            <EditText
+                android:id="@+id/editTextUserProfileMobile"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:autofillHints=""
+                android:hint="user mobile"
+                android:inputType="phone"
+                android:background="@null"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"/>
         </com.google.android.material.card.MaterialCardView>
 
     </LinearLayout>
@@ -219,7 +214,7 @@
         android:layout_height="wrap_content"
         android:text="Save Changes"
         android:textColor="@color/white"
-        app:iconTint="@color/gray"
+        app:iconTint="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

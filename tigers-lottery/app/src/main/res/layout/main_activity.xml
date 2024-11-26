@@ -42,7 +42,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:background="#FFFFFF"
+        android:background="@color/secondary_background_cards"
         tools:layout_editor_absoluteX="225dp"
         tools:layout_editor_absoluteY="238dp" />
 

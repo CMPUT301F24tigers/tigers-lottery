@@ -4,9 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-
-    android:background="@color/primary_background_pages">
-
+    android:background="#2A334C">
 
     <TextView
         android:id="@+id/textView2"
@@ -73,18 +71,17 @@
             app:cardCornerRadius="16dp"
             app:cardElevation="4dp">
 
-
-        <EditText
-            android:id="@+id/editTextName"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="facility name"
-            android:inputType="textEmailAddress"
-            android:background="@null"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"/>
+            <EditText
+                android:id="@+id/editTextName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="facility name"
+                android:inputType="textEmailAddress"
+                android:background="@null"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"/>
 
         </com.google.android.material.card.MaterialCardView>
 
@@ -102,19 +99,17 @@
             app:cardCornerRadius="16dp"
             app:cardElevation="4dp">
 
-
-
-        <EditText
-            android:id="@+id/editTextEmail"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="facility email"
-            android:inputType="textEmailAddress"
-            android:background="@null"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"/>
+            <EditText
+                android:id="@+id/editTextEmail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="facility email"
+                android:inputType="textEmailAddress"
+                android:background="@null"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"/>
 
         </com.google.android.material.card.MaterialCardView>
 
@@ -125,7 +120,6 @@
             android:layout_marginTop="10dp"
             android:layout_marginBottom="3sp"
             android:text="Mobile Number"
-
             android:textColor="@color/white" />
 
         <com.google.android.material.card.MaterialCardView
@@ -135,17 +129,17 @@
             app:cardCornerRadius="16dp"
             app:cardElevation="4dp">
 
-        <EditText
-            android:id="@+id/editTextMobile"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="facility mobile"
-            android:inputType="phone"
-            android:background="@null"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"/>
+            <EditText
+                android:id="@+id/editTextMobile"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="facility mobile"
+                android:inputType="phone"
+                android:background="@null"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"/>
 
         </com.google.android.material.card.MaterialCardView>
 
@@ -155,9 +149,7 @@
             android:layout_marginTop="10dp"
             android:layout_marginBottom="3sp"
             android:text="Location"
-
             android:textColor="@color/white" />
-
 
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
@@ -165,17 +157,17 @@
             android:layout_marginTop="8dp"
             app:cardCornerRadius="16dp"
             app:cardElevation="4dp">
-        <EditText
-            android:id="@+id/editTextLocation"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="facility location"
-            android:inputType="text"
-            android:background="@null"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"/>
+            <EditText
+                android:id="@+id/editTextLocation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="facility location"
+                android:inputType="text"
+                android:background="@null"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"/>
         </com.google.android.material.card.MaterialCardView>
 
     </LinearLayout>

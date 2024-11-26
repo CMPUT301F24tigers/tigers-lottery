@@ -39,6 +39,7 @@ dependencies {
 
     implementation("com.github.bumptech.glide:glide:4.15.0")
     implementation("com.google.android.gms:play-services-maps:18.1.0")
+    implementation(libs.gridlayout)
     annotationProcessor("com.github.bumptech.glide:compiler:4.15.0")
     implementation ("commons-validator:commons-validator:1.9.0")
     implementation(libs.appcompat)
