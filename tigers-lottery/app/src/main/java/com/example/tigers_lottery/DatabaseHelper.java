@@ -453,6 +453,19 @@ public class DatabaseHelper {
                 .addOnFailureListener(e -> callback.onFailure("Failed to send notification: " + e.getMessage()));
     }
 
+    /**
+     * Deletes a notification from the Firestore database.
+     *
+     * @param notificationId The ID of the notification to delete.
+     * @param callback       Callback for success or failure.
+     */
+    public void deleteNotification(int notificationId, NotificationCallback callback) {
+        notificationsRef.document(String.valueOf(notificationId))
+                .delete()
+                .addOnSuccessListener(aVoid -> callback.onSuccess("Notification deleted successfully."))
+                .addOnFailureListener(e -> callback.onFailure("Failed to delete notification: " + e.getMessage()));
+    }
+
 
     /**
      * Fetch entrant lists (registered, waitlisted, invited, declined) for an event by its ID.

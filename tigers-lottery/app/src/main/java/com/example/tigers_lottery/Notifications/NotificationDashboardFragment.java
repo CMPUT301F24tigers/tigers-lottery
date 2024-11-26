@@ -5,6 +5,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -15,6 +16,7 @@ import com.example.tigers_lottery.DatabaseHelper;
 import com.example.tigers_lottery.Notifications.Adapters.NotificationAdapter;
 import com.example.tigers_lottery.R;
 import com.example.tigers_lottery.models.Notification;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,6 +48,9 @@ public class NotificationDashboardFragment extends Fragment {
 
         loadNotifications();
 
+        // Attach swipe-to-delete functionality
+        setupSwipeToDelete();
+
         return view;
     }
 
@@ -68,5 +73,58 @@ public class NotificationDashboardFragment extends Fragment {
                 Log.e(TAG, "Error loading notifications", e);
             }
         });
+    }
+
+    /**
+     * Sets up swipe-to-delete functionality for notifications.
+     */
+    private void setupSwipeToDelete() {
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                return false; // No move operations needed
+            }
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                int position = viewHolder.getAdapterPosition();
+                Notification notification = notificationList.get(position);
+
+                // Temporarily remove the notification from the list
+                notificationList.remove(position);
+                notificationAdapter.notifyItemRemoved(position);
+
+                // Show Snackbar for undo
+                Snackbar.make(notificationsRecyclerView, "Notification deleted", Snackbar.LENGTH_LONG)
+                        .setAction("Undo", v -> {
+                            // Restore the notification to the list
+                            notificationList.add(position, notification);
+                            notificationAdapter.notifyItemInserted(position);
+                        })
+                        .addCallback(new Snackbar.Callback() {
+                            @Override
+                            public void onDismissed(Snackbar transientBottomBar, int event) {
+                                if (event != DISMISS_EVENT_ACTION) {
+                                    // Finalize deletion from Firestore if not undone
+                                    dbHelper.deleteNotification(notification.getNotificationId(), new DatabaseHelper.NotificationCallback() {
+                                        @Override
+                                        public void onSuccess(String responseMessage) {
+                                            Log.d(TAG, "Notification permanently deleted: " + responseMessage);
+                                        }
+
+                                        @Override
+                                        public void onFailure(String errorMessage) {
+                                            Log.e(TAG, "Failed to delete notification: " + errorMessage);
+                                        }
+                                    });
+                                }
+                            }
+                        })
+                        .show();
+            }
+
+        });
+
+        itemTouchHelper.attachToRecyclerView(notificationsRecyclerView);
     }
 }
