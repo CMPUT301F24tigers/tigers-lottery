@@ -16,6 +16,7 @@ import com.example.tigers_lottery.DatabaseHelper;
 import com.example.tigers_lottery.HostedEvents.Adapters.EntrantAdapter;
 import com.example.tigers_lottery.Notifications.SendNotificationDialog;
 import com.example.tigers_lottery.R;
+import com.example.tigers_lottery.models.User;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.List;
@@ -72,40 +73,51 @@ public class OrganizerWaitingListFragment extends Fragment {
      * Calls on the database to find the waitlisted entrants list for the event
      * if the list is empty, a message is displayed.
      */
-
     private void fetchWaitlistedEntrants() {
         dbHelper.fetchWaitlistedEntrants(eventId, new DatabaseHelper.EntrantsCallback() {
             @Override
-            public void onEntrantsFetched(List<String> entrants) {
-                if (entrants.isEmpty()) {
+            public void onEntrantsFetched(List<String> entrantIds) {
+                if (entrantIds.isEmpty()) {
                     noEntrantsMessage.setVisibility(View.VISIBLE);
                     recyclerView.setVisibility(View.GONE);
                 } else {
-                    noEntrantsMessage.setVisibility(View.GONE);
-                    recyclerView.setVisibility(View.VISIBLE);
-                    setupRecyclerView(entrants);
+                    // Fetch user details for all entrant IDs
+                    dbHelper.fetchUsersByIds(entrantIds, new DatabaseHelper.UsersCallback() {
+                        @Override
+                        public void onUsersFetched(List<User> users) {
+                            noEntrantsMessage.setVisibility(View.GONE);
+                            recyclerView.setVisibility(View.VISIBLE);
+                            setupRecyclerView(users);
+                        }
+
+                        @Override
+                        public void onUserFetched(User user) {
+                        }
+
+                        @Override
+                        public void onError(Exception e) {
+                            noEntrantsMessage.setVisibility(View.VISIBLE);
+                            recyclerView.setVisibility(View.GONE);
+                            // Handle error (e.g., show Toast message)
+                        }
+                    });
                 }
             }
 
-            /**
-             * Handles error when fetching the waiting list entrants
-             * @param e exception catcher.
-             */
-
             @Override
             public void onError(Exception e) {
-                // Handle error (e.g., show Toast message)
+                noEntrantsMessage.setVisibility(View.VISIBLE);
+                recyclerView.setVisibility(View.GONE);
             }
         });
     }
 
     /**
      * Sets up the recyclerView for the waiting list entrants.
-     * @param entrants list of waiting list entrants.
+     * @param users list of waiting list entrants.
      */
-
-    private void setupRecyclerView(List<String> entrants) {
+    private void setupRecyclerView(List<User> users) {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        recyclerView.setAdapter(new EntrantAdapter(entrants));
+        recyclerView.setAdapter(new EntrantAdapter(users));
     }
 }
