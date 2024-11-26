@@ -10,12 +10,14 @@ import androidx.annotation.Nullable;
 
 import com.example.tigers_lottery.models.Event;
 import com.example.tigers_lottery.models.User;
+import com.example.tigers_lottery.models.Notification;
 import com.example.tigers_lottery.utils.DeviceIDHelper;
 import com.example.tigers_lottery.utils.QRCodeGenerator;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -109,6 +111,7 @@ public class DatabaseHelper {
     private CollectionReference usersRef;
     private CollectionReference adminsRef;
     private CollectionReference adminAuthCodesRef;
+    private CollectionReference notificationsRef;
 
     private String currentUserId;
     private StorageReference storageReference;
@@ -125,6 +128,7 @@ public class DatabaseHelper {
         adminsRef = db.collection("admins"); //Reference to the "admin: collection
         adminAuthCodesRef = db.collection("admin_auth_codes"); //Reference to the "admin_auth_codes" collection
         storageReference = FirebaseStorage.getInstance().getReference("profile_images");
+        notificationsRef = db.collection("notifications"); // Reference to notifications collection
 
         // Retrieve and store the Device ID as the currentUserId
         currentUserId = DeviceIDHelper.getDeviceId(context);
@@ -193,12 +197,282 @@ public class DatabaseHelper {
     }
 
     /**
+     * Callback interface for handling notifications fetching results.
+     */
+    public interface NotificationsCallback {
+        void onNotificationsFetched(List<Notification> notifications);
+        void onError(Exception e);
+    }
+
+    /**
      * Callback interface for fetching entrant lists.
      */
     public interface EntrantsListsCallback {
         void onEntrantsListsFetched(List<String> registered, List<String> waitlisted, List<String> invited, List<String> declined);
         void onError(Exception e);
     }
+
+    public interface NotificationCallback {
+        void onSuccess(String message);
+        void onFailure(String errorMessage);
+    }
+
+
+    /**
+     * Fetches notifications for the current user based on their user_id.
+     *
+     * @param userId  The ID of the logged-in user.
+     * @param callback The callback to handle the list of notifications or error.
+     */
+    public void fetchNotificationsForUser(String userId, final NotificationsCallback callback) {
+        notificationsRef.whereEqualTo("user_id", userId)
+                .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException e) {
+                        if (e != null) {
+                            Log.w(TAG, "Error fetching notifications.", e);
+                            callback.onError(e);
+                            return;
+                        }
+
+                        List<Notification> notifications = new ArrayList<>();
+                        if (value != null) {
+                            for (QueryDocumentSnapshot doc : value) {
+                                Notification notification = doc.toObject(Notification.class);
+                                notifications.add(notification);
+                            }
+                        }
+                        callback.onNotificationsFetched(notifications); // Pass fetched notifications to callback
+                    }
+                });
+    }
+
+    /** Update the read status for a selected notification
+     *
+     * @param notification
+     */
+    public void updateNotificationReadStatus(Notification notification) {
+        notificationsRef.document(String.valueOf(notification.getNotificationId()))
+                .update("read_status", true)
+                .addOnSuccessListener(aVoid -> Log.d(TAG, "Notification marked as read"))
+                .addOnFailureListener(e -> Log.e(TAG, "Failed to update notification read status", e));
+    }
+
+
+    /** Send a batch of notifications to users in a given list
+     *
+     * @param eventId
+     * @param listType
+     * @param message
+     * @param priority
+     * @param callback
+     */
+    public void sendNotificationsToEntrants(
+            int eventId,
+            String listType, // registered_entrants or waitlisted_entrants, etc.
+            String message,
+            String priority,
+            final NotificationCallback callback) {
+
+        // Fetch the event by eventId
+        eventsRef.whereEqualTo("event_id", eventId).get().addOnSuccessListener(querySnapshot -> {
+            if (querySnapshot.isEmpty()) {
+                callback.onFailure("Event not found with ID: " + eventId);
+                return;
+            }
+
+            // Extract event data
+            Event event = querySnapshot.getDocuments().get(0).toObject(Event.class);
+            if (event == null) {
+                callback.onFailure("Event data is null.");
+                return;
+            }
+
+            // Determine the list of entrants
+            List<String> entrants;
+            switch (listType) {
+                case "registered_entrants":
+                    entrants = event.getRegisteredEntrants();
+                    break;
+                case "waitlisted_entrants":
+                    entrants = event.getWaitlistedEntrants();
+                    break;
+                case "invited_entrants":
+                    entrants = event.getInvitedEntrants();
+                    break;
+                case "declined_entrants":
+                    entrants = event.getDeclinedEntrants();
+                    break;
+                default:
+                    callback.onFailure("Invalid list type: " + listType);
+                    return;
+            }
+
+            // Validate entrants list
+            if (entrants == null || entrants.isEmpty()) {
+                callback.onFailure("No entrants found in the " + listType + " list.");
+                return;
+            }
+
+            // Metadata to include the event name
+            String eventName = event.getEventName();
+            String organizerId = event.getOrganizerId();
+
+            // Fetch all user data for entrants
+            usersRef.whereIn("user_id", entrants).get().addOnSuccessListener(querySnapshotUsers -> {
+                List<Notification> notificationsToSend = new ArrayList<>();
+
+                for (QueryDocumentSnapshot userDoc : querySnapshotUsers) {
+                    // Check if the user has notifications enabled
+                    Boolean notificationFlag = userDoc.getBoolean("notification_flag");
+                    if (notificationFlag == null || !notificationFlag) {
+                        continue; // Skip users who have notifications disabled
+                    }
+
+                    // Generate a unique 6-digit notification ID
+                    int notificationId = generateUniqueNotificationId();
+
+                    // Build the notification
+                    Notification notification = new Notification();
+                    notification.setNotificationId(notificationId);
+                    notification.setUserId(userDoc.getString("user_id"));
+                    notification.setEventId(eventId); // Use the integer eventId
+                    notification.setSenderId(organizerId);
+                    notification.setType("Event Update"); // Fixed type
+                    notification.setCategory("events"); // Fixed category
+                    notification.setPriority(priority); // Priority from organizer input
+                    notification.setMessage(message); // Message from organizer input
+                    notification.setTimestamp(Timestamp.now());
+                    notification.setScheduledTime(Timestamp.now()); // Immediate delivery
+                    notification.setMetadata(new HashMap<>() {{
+                        put("event_name", eventName); // Include event name in metadata
+                    }});
+
+                    // Add the notification to the list
+                    notificationsToSend.add(notification);
+                }
+
+                if (notificationsToSend.isEmpty()) {
+                    callback.onFailure("No eligible users found to send notifications.");
+                    return;
+                }
+
+                // Write notifications to Firestore
+                for (Notification notification : notificationsToSend) {
+                    notificationsRef.document(String.valueOf(notification.getNotificationId()))
+                            .set(notification)
+                            .addOnSuccessListener(aVoid -> {
+                                // Successfully added one notification
+                                callback.onSuccess("Notification sent to user: " + notification.getUserId());
+                            })
+                            .addOnFailureListener(e -> {
+                                callback.onFailure("Failed to send notification to user: " + notification.getUserId());
+                            });
+                }
+
+            }).addOnFailureListener(e -> {
+                callback.onFailure("Failed to fetch users in " + listType + " list: " + e.getMessage());
+            });
+
+        }).addOnFailureListener(e -> {
+            callback.onFailure("Failed to fetch event: " + e.getMessage());
+        });
+    }
+
+
+    private int generateUniqueNotificationId() {
+        Random random = new Random();
+        int notificationId;
+
+        do {
+            // Generate a random 6-digit integer
+            notificationId = 100000 + random.nextInt(900000);
+        } while (notificationIdExists(notificationId)); // Ensure it's unique
+
+        return notificationId;
+    }
+
+    private boolean notificationIdExists(int notificationId) {
+        // Check if a document with this ID already exists
+        final boolean[] exists = {false};
+        notificationsRef.document(String.valueOf(notificationId)).get().addOnSuccessListener(documentSnapshot -> {
+            if (documentSnapshot.exists()) {
+                exists[0] = true;
+            }
+        }).addOnFailureListener(e -> {
+            exists[0] = false; // If the check fails, assume ID does not exist
+        });
+
+        return exists[0];
+    }
+
+
+    public void sendLotteryWinNotification(String userId, int eventId, String organizerId, String eventName, final NotificationCallback callback) {
+        // Generate a unique 6-digit notification ID
+        int notificationId = generateUniqueNotificationId();
+
+        // Build the notification
+        Notification notification = new Notification();
+        notification.setNotificationId(notificationId);
+        notification.setUserId(userId);
+        notification.setEventId(eventId);
+        notification.setSenderId(organizerId);
+        notification.setType("Lottery Win");
+        notification.setCategory("events");
+        notification.setPriority("High");
+        notification.setTimestamp(Timestamp.now());
+        notification.setMessage("Congratulations! You have been invited to \"" + eventName + "\". Be sure to accept or decline the invite!");
+        notification.setMetadata(new HashMap<>() {{
+            put("event_name", eventName);
+        }});
+
+        // Write the notification to Firestore
+        notificationsRef.document(String.valueOf(notificationId))
+                .set(notification)
+                .addOnSuccessListener(aVoid -> callback.onSuccess("Notification sent to user: " + userId))
+                .addOnFailureListener(e -> callback.onFailure("Failed to send notification: " + e.getMessage()));
+    }
+
+
+    public void sendLotteryLossNotification(String userId, int eventId, String organizerId, String eventName, final NotificationCallback callback) {
+        // Generate a unique 6-digit notification ID
+        int notificationId = generateUniqueNotificationId();
+
+        // Build the notification
+        Notification notification = new Notification();
+        notification.setNotificationId(notificationId);
+        notification.setUserId(userId);
+        notification.setEventId(eventId);
+        notification.setSenderId(organizerId);
+        notification.setType("Lottery Loss");
+        notification.setCategory("events");
+        notification.setPriority("Low"); // Considered lower priority than a win
+        notification.setTimestamp(Timestamp.now());
+        notification.setMessage("A lottery selection has just been triggered for \"" + eventName + "\". Unfortunately you have not been selected. Do not lose faith! You will still be eligible to participate in the next lottery event, if someone declines their invitation.");
+        notification.setMetadata(new HashMap<>() {{
+            put("event_name", eventName); // Include event name in metadata
+        }});
+
+        // Write the notification to Firestore
+        notificationsRef.document(String.valueOf(notificationId))
+                .set(notification)
+                .addOnSuccessListener(aVoid -> callback.onSuccess("Notification sent to user: " + userId))
+                .addOnFailureListener(e -> callback.onFailure("Failed to send notification: " + e.getMessage()));
+    }
+
+    /**
+     * Deletes a notification from the Firestore database.
+     *
+     * @param notificationId The ID of the notification to delete.
+     * @param callback       Callback for success or failure.
+     */
+    public void deleteNotification(int notificationId, NotificationCallback callback) {
+        notificationsRef.document(String.valueOf(notificationId))
+                .delete()
+                .addOnSuccessListener(aVoid -> callback.onSuccess("Notification deleted successfully."))
+                .addOnFailureListener(e -> callback.onFailure("Failed to delete notification: " + e.getMessage()));
+    }
+
 
     /**
      * Fetch entrant lists (registered, waitlisted, invited, declined) for an event by its ID.

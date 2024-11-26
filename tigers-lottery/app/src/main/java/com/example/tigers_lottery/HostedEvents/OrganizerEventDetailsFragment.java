@@ -362,6 +362,13 @@ public class OrganizerEventDetailsFragment extends Fragment {
                 List<String> invitedEntrants = dbHelper.selectRandomEntrants(waitlistedEntrants, occupantLimit);
                 Log.d("LotteryDebug", "Selected invited entrants: " + invitedEntrants);
 
+                // Identify new invitees
+                List<String> newInvitees = new ArrayList<>(invitedEntrants);
+                List<String> lotteryLosers = new ArrayList<>(waitlistedEntrants);
+                lotteryLosers.removeAll(newInvitees); // Remove those who were invited
+                if (event.getInvitedEntrants() != null) {
+                    newInvitees.removeAll(event.getInvitedEntrants());
+                }
 
                 // Update Firestore with invited entrants and mark lottery as run
                 dbHelper.updateInvitedEntrantsAndSetLotteryRan(event.getEventId(), invitedEntrants, new DatabaseHelper.EventsCallback() {
@@ -375,6 +382,49 @@ public class OrganizerEventDetailsFragment extends Fragment {
                         Toast.makeText(getContext(), "Lottery run successfully!", Toast.LENGTH_SHORT).show();
                         runLotteryButton.setEnabled(false); // Disable button after running
                         event.setLotteryRan(true); // Mark the event's lottery as run
+
+                        // Send notifications to new invitees
+                        for (String invitee : newInvitees) {
+                            dbHelper.sendLotteryWinNotification(
+                                    invitee,
+                                    event.getEventId(),
+                                    event.getOrganizerId(),
+                                    event.getEventName(),
+                                    new DatabaseHelper.NotificationCallback() {
+                                        @Override
+                                        public void onSuccess(String responseMessage) {
+                                            Log.d("NotificationDebug", "Notification sent successfully: " + responseMessage);
+                                        }
+
+                                        @Override
+                                        public void onFailure(String errorMessage) {
+                                            Log.e("NotificationDebug", "Failed to send notification: " + errorMessage);
+                                        }
+                                    }
+                            );
+                        }
+
+                        // Send notifications to lottery losers
+                        for (String loser : lotteryLosers) {
+                            dbHelper.sendLotteryLossNotification(
+                                    loser,
+                                    event.getEventId(),
+                                    event.getOrganizerId(),
+                                    event.getEventName(),
+                                    new DatabaseHelper.NotificationCallback() {
+                                        @Override
+                                        public void onSuccess(String responseMessage) {
+                                            Log.d("NotificationDebug", "Loss notification sent successfully: " + responseMessage);
+                                        }
+
+                                        @Override
+                                        public void onFailure(String errorMessage) {
+                                            Log.e("NotificationDebug", "Failed to send loss notification: " + errorMessage);
+                                        }
+                                    }
+                            );
+                        }
+
                     }
 
                     /**
@@ -488,6 +538,26 @@ public class OrganizerEventDetailsFragment extends Fragment {
                     public void onEventsFetched(List<Event> events) {
                         Log.d("DeclineDebug", "Entrants updated after handling decline.");
                         isHandlingDecline = false; // Reset the flag once the update is complete
+
+                        // Send notification to the new invitee
+                        dbHelper.sendLotteryWinNotification(
+                                newInvitee,
+                                eventId,
+                                event.getOrganizerId(),
+                                event.getEventName(),
+                                new DatabaseHelper.NotificationCallback() {
+                                    @Override
+                                    public void onSuccess(String responseMessage) {
+                                        Log.d("NotificationDebug", "Notification sent successfully: " + responseMessage);
+                                    }
+
+                                    @Override
+                                    public void onFailure(String errorMessage) {
+                                        Log.e("NotificationDebug", "Failed to send notification: " + errorMessage);
+                                    }
+                                }
+                        );
+
                     }
 
                     @Override

@@ -1,9 +1,7 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:padding="16dp">
 
     <!-- Title for Registered Entrants -->
@@ -12,7 +10,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingBottom="8dp"
-        android:text="Registered Entrants(device IDs)"
+        android:text="Registered Entrants "
         android:textSize="24sp"
         android:textStyle="bold" />
 
@@ -23,7 +21,7 @@
         android:layout_height="wrap_content"
         android:text="No entrants found."
         android:visibility="gone"
-        android:layout_gravity="center"
+        android:layout_centerInParent="true"
         android:textSize="16sp"
         android:textColor="@android:color/darker_gray" />
 
@@ -31,6 +29,21 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/registeredEntrantsRecyclerView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_below="@id/registeredEntrantsTitle"
+        android:layout_marginBottom="16dp"
         android:scrollbars="vertical" />
-</LinearLayout>
+
+    <!-- Floating Action Button for sending notifications -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabSendNotifications"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="16dp"
+        android:src="@drawable/ic_send"
+        android:contentDescription="Send Notifications"
+        android:tint="@android:color/white"
+        android:backgroundTint="@color/app_primary_light_purple" />
+</RelativeLayout>
