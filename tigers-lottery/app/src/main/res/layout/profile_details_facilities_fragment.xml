@@ -28,7 +28,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.168"
+        app:layout_constraintVertical_bias="0.120000005"
         app:srcCompat="@drawable/baseline_account_circle_24" />
 
     <TextView
@@ -43,7 +43,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.338" />
+        app:layout_constraintVertical_bias="0.29000002" />
 
     <LinearLayout
         android:layout_width="317dp"
@@ -116,9 +116,8 @@
         android:text="Edit Profile"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.518"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.877" />
+        app:layout_constraintVertical_bias="0.84000003" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
