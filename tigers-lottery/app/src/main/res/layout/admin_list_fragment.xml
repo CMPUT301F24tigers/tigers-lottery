@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/app_secondary_light_purple"
+    android:background="@color/accent_1_teal"
     tools:context=".Admin.DashboardFragments.AdminEntrantsProfilesFragment">
 
     <TextView

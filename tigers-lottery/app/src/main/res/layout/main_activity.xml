@@ -11,7 +11,7 @@
         android:id="@+id/topAppBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/app_primary_light_purple">
+        android:background="@color/primary_background_pages">
 
         <!-- Title TextView -->
         <TextView
@@ -20,7 +20,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:text="Tigers Lottery"
-            android:textColor="@android:color/black"
+            android:textColor="@color/white"
             android:textSize="24sp"
             android:textStyle="bold" />
 
@@ -50,8 +50,11 @@
         android:id="@+id/nav_view"
         android:layout_width="match_parent"
         android:layout_height="50dp"
+        android:background="@color/secondary_background_cards"
         app:itemActiveIndicatorStyle="@style/BottomNavActiveIndicatorStyle"
-        app:itemRippleColor="@color/background_color"
+        app:itemTextColor="@color/white"
+        app:itemBackground="@color/secondary_background_cards"
+        app:itemRippleColor="@color/accent_1_teal"
         app:itemTextAppearanceActive="@style/BottomNavActiveText"
         app:itemTextAppearanceInactive="@style/BottomNavInactiveText"
         app:menu="@menu/menu_bottom_navigation" />

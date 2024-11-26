@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background_color"
+    android:background="@color/primary_background_pages"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <TextView
@@ -28,7 +28,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.163"
+        app:layout_constraintVertical_bias="0.120000005"
         app:srcCompat="@drawable/baseline_account_circle_24" />
 
     <TextView
@@ -44,7 +44,7 @@
         app:layout_constraintHorizontal_bias="0.459"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.299" />
+        app:layout_constraintVertical_bias="0.29000002" />
 
     <LinearLayout
         android:id="@+id/linearLayout"
@@ -64,7 +64,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="3sp"
             android:text="Email"
-            android:textColor="@color/gray"
+            android:textColor="@color/accent_2_light_blue"
             android:textSize="16sp"
             android:textStyle="bold" />
 
@@ -82,7 +82,7 @@
             android:layout_marginTop="10dp"
             android:layout_marginBottom="3sp"
             android:text="Date of Birth"
-            android:textColor="@color/gray"
+            android:textColor="@color/accent_2_light_blue"
             android:textSize="16sp"
             android:textStyle="bold" />
 
@@ -100,7 +100,7 @@
             android:layout_marginTop="10dp"
             android:layout_marginBottom="3sp"
             android:text="Mobile Number"
-            android:textColor="@color/gray"
+            android:textColor="@color/accent_2_light_blue"
             android:textSize="16sp"
             android:textStyle="bold" />
 
@@ -126,14 +126,15 @@
 
     <Button
         android:id="@+id/editUserProfileButton"
-        android:layout_width="318dp"
-        android:layout_height="45dp"
-        android:layout_marginTop="12dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:text="Edit Profile"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.495"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout"
+
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.84000003"
         app:layout_goneMarginBottom="12dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

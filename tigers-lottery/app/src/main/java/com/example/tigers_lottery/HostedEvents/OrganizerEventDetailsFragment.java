@@ -203,9 +203,12 @@ public class OrganizerEventDetailsFragment extends Fragment {
         eventTitle.setText(event.getEventName());
         eventDescription.setText(event.getDescription());
         eventLocation.setText("Location: " + event.getLocation());
-        waitlistOpenDate.setText("Waitlist Open Date: " + event.getFormattedWaitlistOpenDate());
-        waitlistCloseDate.setText("Waitlist Close Date: " + event.getFormattedWaitlistDeadline());
-        eventDate.setText("Event Date: " + event.getFormattedEventDate());
+        String dateSplitEventDate = event.getFormattedEventDate().split(" - ")[0];
+        String dateSplitWaitlistOpen = event.getFormattedWaitlistOpenDate().split(" - ")[0];
+        String dateSplitWaitlistDeadline = event.getFormattedWaitlistDeadline().split(" - ")[0];
+        waitlistOpenDate.setText("Waitlist Open Date: " + dateSplitWaitlistOpen);
+        waitlistCloseDate.setText("Waitlist Close Date: " + dateSplitWaitlistDeadline);
+        eventDate.setText("Event Date: " + dateSplitEventDate);
         waitlistLimit.setText("Waitlist Limit: " + (event.isWaitlistLimitFlag() ? event.getWaitlistLimit() : "N/A"));
         entrantLimit.setText("Entrant Limit: " + (event.getOccupantLimit()));
 

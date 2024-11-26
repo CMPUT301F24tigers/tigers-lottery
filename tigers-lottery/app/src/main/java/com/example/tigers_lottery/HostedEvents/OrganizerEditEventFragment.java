@@ -206,11 +206,17 @@ public class OrganizerEditEventFragment extends Fragment {
     private void loadEventData(Event event) {
         // Populate input fields with event data
         inputEventName.setText(event.getEventName());
+        inputEventName.setTextColor(0xFFFFFFFF);
         inputEventLocation.setText(event.getLocation());
+        inputEventLocation.setTextColor(0xFFFFFFFF);
         inputRegistrationOpens.setText(formatTimestamp(event.getWaitlistOpenDate()));
+        inputRegistrationOpens.setTextColor(0xFFFFFFFF);
         inputRegistrationDeadline.setText(formatTimestamp(event.getWaitlistDeadline()));
+        inputRegistrationDeadline.setTextColor(0xFFFFFFFF);
         inputEventDate.setText(formatTimestamp(event.getEventDate()));
+        inputEventDate.setTextColor(0xFFFFFFFF);
         inputEventDescription.setText(event.getDescription());
+        inputEventDescription.setTextColor(0xFFFFFFFF);
 
         // Disable checkbox to ensure it doesn’t re-enable the waitlist limit field
         checkboxWaitlistLimit.setChecked(false);

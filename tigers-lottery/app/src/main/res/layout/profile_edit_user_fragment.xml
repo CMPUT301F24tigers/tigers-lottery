@@ -4,20 +4,22 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background_color">
+    android:background="@color/primary_background_pages">
+
 
     <TextView
         android:id="@+id/textView2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Edit User Profile"
+        android:textColor="#F8F4F4"
         android:textSize="25sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.085"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintHorizontal_bias="0.085"
         app:layout_constraintVertical_bias="0.022" />
 
     <ImageButton
@@ -28,7 +30,7 @@
         android:contentDescription="Edit Profile"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.682"
+        app:layout_constraintHorizontal_bias="0.611"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.198"
@@ -62,7 +64,15 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="First Name"
-            android:textColor="@color/gray" />
+            android:textColor="@color/white" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp">
+
 
         <EditText
             android:id="@+id/editTextUserProfileFirstName"
@@ -70,14 +80,28 @@
             android:layout_height="wrap_content"
             android:autofillHints=""
             android:hint="user_first_name"
-            android:inputType="textEmailAddress" />
+            android:inputType="textEmailAddress"
+            android:background="@null"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"/>
+
+        </com.google.android.material.card.MaterialCardView>
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="3sp"
             android:text="Name"
-            android:textColor="@color/gray" />
+            android:textColor="@color/white" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp">
 
         <EditText
             android:id="@+id/editTextUserProfileLastName"
@@ -85,14 +109,29 @@
             android:layout_height="wrap_content"
             android:autofillHints=""
             android:hint="user last_name"
-            android:inputType="textEmailAddress" />
+            android:inputType="textEmailAddress"
+            android:background="@null"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"/>
+
+        </com.google.android.material.card.MaterialCardView>
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="3sp"
             android:text="Email"
-            android:textColor="@color/gray" />
+            android:textColor="@color/white" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp">
+
 
         <EditText
             android:id="@+id/editTextUserProfileEmail"
@@ -100,7 +139,14 @@
             android:layout_height="wrap_content"
             android:autofillHints=""
             android:hint="user email"
-            android:inputType="textEmailAddress" />
+            android:inputType="textEmailAddress"
+            android:background="@null"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"/>
+
+        </com.google.android.material.card.MaterialCardView>
 
         <TextView
             android:layout_width="match_parent"
@@ -108,7 +154,15 @@
             android:layout_marginTop="10dp"
             android:layout_marginBottom="3sp"
             android:text="Date of Birth"
-            android:textColor="@color/gray" />
+
+            android:textColor="@color/white" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp">
 
         <EditText
             android:id="@+id/editTextUserProfileDOB"
@@ -118,7 +172,14 @@
             android:clickable="true"
             android:focusable="false"
             android:hint="user birthday"
-            android:inputType="none" />
+            android:inputType="none"
+            android:background="@null"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"/>
+
+        </com.google.android.material.card.MaterialCardView>
 
         <TextView
             android:layout_width="match_parent"
@@ -126,7 +187,15 @@
             android:layout_marginTop="10dp"
             android:layout_marginBottom="3sp"
             android:text="Mobile Number"
-            android:textColor="@color/gray" />
+            android:textColor="@color/white" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp">
+
 
         <EditText
             android:id="@+id/editTextUserProfileMobile"
@@ -134,7 +203,13 @@
             android:layout_height="wrap_content"
             android:autofillHints=""
             android:hint="user mobile"
-            android:inputType="phone" />
+            android:inputType="phone"
+            android:background="@null"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"/>
+        </com.google.android.material.card.MaterialCardView>
 
     </LinearLayout>
 
@@ -143,11 +218,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Save Changes"
+        android:textColor="@color/white"
+        app:iconTint="@color/gray"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.96" />
+        app:layout_constraintVertical_bias="0.934"
+        app:rippleColor="#451515" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
