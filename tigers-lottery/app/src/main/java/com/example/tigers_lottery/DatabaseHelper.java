@@ -15,6 +15,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -204,6 +205,12 @@ public class DatabaseHelper {
         void onError(Exception e);
     }
 
+    public interface NotificationCallback {
+        void onSuccess(String message);
+        void onFailure(String errorMessage);
+    }
+
+
     /**
      * Fetches notifications for the current user based on their user_id.
      *
@@ -243,6 +250,128 @@ public class DatabaseHelper {
                 .addOnSuccessListener(aVoid -> Log.d(TAG, "Notification marked as read"))
                 .addOnFailureListener(e -> Log.e(TAG, "Failed to update notification read status", e));
     }
+
+    /** The organizer should be able to send a notification to all selected entrants/registered entrants. Several of the notfication fields are hardcoded for this type of notification
+     *
+     *
+     *
+     * @param eventId
+     * @param message
+     * @param priority
+     * @param callback
+     */
+    public void sendNotificationsToRegisteredEntrants(
+            int eventId, // Now expects an integer eventId
+            String message,
+            String priority,
+            final NotificationCallback callback) {
+
+        // Fetch the event by eventId
+        eventsRef.whereEqualTo("event_id", eventId).get().addOnSuccessListener(querySnapshot -> {
+            if (querySnapshot.isEmpty()) {
+                callback.onFailure("Event not found with ID: " + eventId);
+                return;
+            }
+
+            // Extract event data
+            Event event = querySnapshot.getDocuments().get(0).toObject(Event.class);
+            if (event == null || event.getRegisteredEntrants() == null || event.getRegisteredEntrants().isEmpty()) {
+                callback.onFailure("No registered entrants found for the event.");
+                return;
+            }
+
+            // Metadata to include the event name
+            String eventName = event.getEventName();
+            String organizerId = event.getOrganizerId();
+
+            // Fetch all user data for registered entrants
+            List<String> registeredEntrants = event.getRegisteredEntrants();
+            usersRef.whereIn("user_id", registeredEntrants).get().addOnSuccessListener(querySnapshotUsers -> {
+                List<Notification> notificationsToSend = new ArrayList<>();
+
+                for (QueryDocumentSnapshot userDoc : querySnapshotUsers) {
+                    // Check if the user has notifications enabled
+                    Boolean notificationFlag = userDoc.getBoolean("notification_flag");
+                    if (notificationFlag == null || !notificationFlag) {
+                        continue; // Skip users who have notifications disabled
+                    }
+
+                    // Generate a unique 6-digit notification ID
+                    int notificationId = generateUniqueNotificationId();
+
+                    // Build the notification
+                    Notification notification = new Notification();
+                    notification.setNotificationId(notificationId);
+                    notification.setUserId(userDoc.getString("user_id"));
+                    notification.setEventId(eventId); // Use the integer eventId
+                    notification.setSenderId(organizerId);
+                    notification.setType("Event Update"); // Fixed type
+                    notification.setCategory("events"); // Fixed category
+                    notification.setPriority(priority); // Priority from organizer input
+                    notification.setMessage(message); // Message from organizer input
+                    notification.setTimestamp(Timestamp.now());
+                    notification.setScheduledTime(Timestamp.now()); // Immediate delivery
+                    notification.setMetadata(new HashMap<>() {{
+                        put("event_name", eventName); // Include event name in metadata
+                    }});
+
+                    // Add the notification to the list
+                    notificationsToSend.add(notification);
+                }
+
+                if (notificationsToSend.isEmpty()) {
+                    callback.onFailure("No eligible users found to send notifications.");
+                    return;
+                }
+
+                // Write notifications to Firestore
+                for (Notification notification : notificationsToSend) {
+                    notificationsRef.document(String.valueOf(notification.getNotificationId()))
+                            .set(notification)
+                            .addOnSuccessListener(aVoid -> {
+                                // Successfully added one notification
+                                callback.onSuccess("Notification sent to user: " + notification.getUserId());
+                            })
+                            .addOnFailureListener(e -> {
+                                callback.onFailure("Failed to send notification to user: " + notification.getUserId());
+                            });
+                }
+
+            }).addOnFailureListener(e -> {
+                callback.onFailure("Failed to fetch registered users: " + e.getMessage());
+            });
+
+        }).addOnFailureListener(e -> {
+            callback.onFailure("Failed to fetch event: " + e.getMessage());
+        });
+    }
+
+    private int generateUniqueNotificationId() {
+        Random random = new Random();
+        int notificationId;
+
+        do {
+            // Generate a random 6-digit integer
+            notificationId = 100000 + random.nextInt(900000);
+        } while (notificationIdExists(notificationId)); // Ensure it's unique
+
+        return notificationId;
+    }
+
+    private boolean notificationIdExists(int notificationId) {
+        // Check if a document with this ID already exists
+        final boolean[] exists = {false};
+        notificationsRef.document(String.valueOf(notificationId)).get().addOnSuccessListener(documentSnapshot -> {
+            if (documentSnapshot.exists()) {
+                exists[0] = true;
+            }
+        }).addOnFailureListener(e -> {
+            exists[0] = false; // If the check fails, assume ID does not exist
+        });
+
+        return exists[0];
+    }
+
 
 
 

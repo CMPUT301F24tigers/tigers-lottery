@@ -51,7 +51,25 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         // Priority
         String priority = notification.getPriority();
         holder.notificationPriority.setText(priority + " Priority");
-        // ... Add your priority color logic here ...
+
+        int backgroundColor;
+        switch (priority.toLowerCase()) {
+            case "high":
+                backgroundColor = Color.RED;
+                break;
+            case "medium":
+                backgroundColor = Color.YELLOW;
+                holder.notificationPriority.setTextColor(Color.BLACK); // Adjust text color for visibility
+                break;
+            case "low":
+                backgroundColor = Color.GREEN;
+                break;
+            default:
+                backgroundColor = Color.GRAY;
+        }
+
+        GradientDrawable priorityBackground = (GradientDrawable) holder.notificationPriority.getBackground();
+        priorityBackground.setColor(backgroundColor);
 
         // Handle click to show dialog
         holder.itemView.setOnClickListener(view -> {
