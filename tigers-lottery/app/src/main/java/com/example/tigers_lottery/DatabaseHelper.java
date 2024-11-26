@@ -400,6 +400,58 @@ public class DatabaseHelper {
     }
 
 
+    public void sendLotteryWinNotification(String userId, int eventId, String organizerId, String eventName, final NotificationCallback callback) {
+        // Generate a unique 6-digit notification ID
+        int notificationId = generateUniqueNotificationId();
+
+        // Build the notification
+        Notification notification = new Notification();
+        notification.setNotificationId(notificationId);
+        notification.setUserId(userId);
+        notification.setEventId(eventId);
+        notification.setSenderId(organizerId);
+        notification.setType("Lottery Win");
+        notification.setCategory("events");
+        notification.setPriority("High");
+        notification.setTimestamp(Timestamp.now());
+        notification.setMessage("Congratulations! You have been invited to \"" + eventName + "\". Be sure to accept or decline the invite!");
+        notification.setMetadata(new HashMap<>() {{
+            put("event_name", eventName);
+        }});
+
+        // Write the notification to Firestore
+        notificationsRef.document(String.valueOf(notificationId))
+                .set(notification)
+                .addOnSuccessListener(aVoid -> callback.onSuccess("Notification sent to user: " + userId))
+                .addOnFailureListener(e -> callback.onFailure("Failed to send notification: " + e.getMessage()));
+    }
+
+
+    public void sendLotteryLossNotification(String userId, int eventId, String organizerId, String eventName, final NotificationCallback callback) {
+        // Generate a unique 6-digit notification ID
+        int notificationId = generateUniqueNotificationId();
+
+        // Build the notification
+        Notification notification = new Notification();
+        notification.setNotificationId(notificationId);
+        notification.setUserId(userId);
+        notification.setEventId(eventId);
+        notification.setSenderId(organizerId);
+        notification.setType("Lottery Loss");
+        notification.setCategory("events");
+        notification.setPriority("Low"); // Considered lower priority than a win
+        notification.setTimestamp(Timestamp.now());
+        notification.setMessage("A lottery selection has just been triggered for \"" + eventName + "\". Unfortunately you have not been selected. Do not lose faith! You will still be eligible to participate in the next lottery event, if someone declines their invitation.");
+        notification.setMetadata(new HashMap<>() {{
+            put("event_name", eventName); // Include event name in metadata
+        }});
+
+        // Write the notification to Firestore
+        notificationsRef.document(String.valueOf(notificationId))
+                .set(notification)
+                .addOnSuccessListener(aVoid -> callback.onSuccess("Notification sent to user: " + userId))
+                .addOnFailureListener(e -> callback.onFailure("Failed to send notification: " + e.getMessage()));
+    }
 
 
     /**
