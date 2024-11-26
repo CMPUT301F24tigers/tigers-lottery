@@ -93,8 +93,10 @@ public class AdminEventsFragment extends Fragment implements OnActionListener {
                                     String.valueOf(event.getEventId()),
                                     event.getEventName(),
                                     organizerName,
+                                    event.getPosterUrl(),
                                     "View Event Details",
-                                    "Delete Event"
+                                    "Delete Event",
+                                    true
                             ));
                             eventsAdapter.notifyDataSetChanged();  // Notify adapter after each addition
                         }
