@@ -26,7 +26,7 @@
         android:visibility="gone"
         android:layout_centerInParent="true"
         android:textSize="16sp"
-        android:textColor="@android:color/darker_gray" />
+        android:textColor="@color/white" />
 
     <!-- RecyclerView to display registered entrants -->
     <androidx.recyclerview.widget.RecyclerView
@@ -47,6 +47,6 @@
         android:layout_margin="16dp"
         android:src="@drawable/ic_send"
         android:contentDescription="Send Notifications"
-        android:tint="@android:color/white"
-        android:backgroundTint="@color/app_primary_light_purple" />
+        android:tint="@/white"
+        android:backgroundTint="@color/darker_teal" />
 </RelativeLayout>
