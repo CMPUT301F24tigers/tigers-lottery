@@ -58,11 +58,13 @@ public class NotificationDashboardFragment extends Fragment {
      * Loads notifications for the current user.
      */
     private void loadNotifications() {
-        String currentUserId = dbHelper.getCurrentUserId(); // Implement this method to get the logged-in user's ID
+        String currentUserId = dbHelper.getCurrentUserId();
 
         dbHelper.fetchNotificationsForUser(currentUserId, new DatabaseHelper.NotificationsCallback() {
             @Override
             public void onNotificationsFetched(List<Notification> notifications) {
+                // Sort notifications by timestamp in descending order (latest first)
+                notifications.sort((n1, n2) -> n2.getTimestamp().compareTo(n1.getTimestamp()));
                 notificationList.clear();
                 notificationList.addAll(notifications);
                 notificationAdapter.notifyDataSetChanged();

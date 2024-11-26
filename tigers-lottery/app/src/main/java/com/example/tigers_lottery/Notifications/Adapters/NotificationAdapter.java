@@ -63,6 +63,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
                 break;
             case "low":
                 backgroundColor = Color.GREEN;
+                holder.notificationPriority.setTextColor(Color.BLACK);
                 break;
             default:
                 backgroundColor = Color.GRAY;
@@ -92,8 +93,6 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
             holder.frameLayout.setBackground(null);
         }
     }
-
-
 
 
     @Override
