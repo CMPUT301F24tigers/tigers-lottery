@@ -5,12 +5,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.tigers_lottery.Admin.DashboardFragments.ListItems.AdminListItemModel;
 import com.example.tigers_lottery.Admin.DashboardFragments.ListItems.OnActionListener;
 import com.example.tigers_lottery.R;
@@ -18,10 +19,10 @@ import com.example.tigers_lottery.R;
 import java.util.List;
 
 /**
- * RecyclerView Adapter for displaying a list of admin items.
+ * RecyclerView Adapter for displaying a list of admin items (users or events).
  * Each item has expandable options and supports actions defined in the OnActionListener.
  */
-public class AdminRecyclerViewAdapter extends RecyclerView.Adapter<AdminRecyclerViewAdapter.UserViewHolder> {
+public class AdminRecyclerViewAdapter extends RecyclerView.Adapter<AdminRecyclerViewAdapter.ItemViewHolder> {
 
     private List<AdminListItemModel> itemList;
     private OnActionListener actionListener;
@@ -39,20 +40,37 @@ public class AdminRecyclerViewAdapter extends RecyclerView.Adapter<AdminRecycler
 
     @NonNull
     @Override
-    public UserViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public ItemViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.admin_list_item, parent, false);
-        return new UserViewHolder(view);
+        return new ItemViewHolder(view);
     }
 
-
     @Override
-    public void onBindViewHolder(@NonNull UserViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ItemViewHolder holder, int position) {
         AdminListItemModel item = itemList.get(position);
 
+        // Load the correct image (user or event)
+        boolean isEvent = item.isEvent();
+        String photoUrl = item.getProfilePictureUrl();
+
+        if (photoUrl == null || photoUrl.isEmpty()) {
+            if (isEvent) {
+                holder.profileImageView.setImageResource(R.drawable.event); // Event placeholder picture
+            } else {
+                holder.profileImageView.setImageResource(R.drawable.placeholder_user_image); // User placeholder picture
+            }
+        } else {
+            // Using Glide to load the actual image
+            Glide.with(holder.profileImageView.getContext())
+                    .load(photoUrl)
+                    .placeholder(item.isEvent() ? R.drawable.event : R.drawable.placeholder_user_image) // Conditional placeholder
+                    .into(holder.profileImageView);
+        }
+
         // Set text for item views
-        holder.userName.setText(item.getDisplayName());
-        holder.userEmail.setText(item.getSecondaryText());
+        holder.itemName.setText(item.getDisplayName());
+        holder.itemSecondaryText.setText(item.getSecondaryText());
         holder.expandableMenuTextView.setText("Actions for " + item.getDisplayName());
         holder.expandableMenuOption1.setText(item.getOption1Text());
         holder.expandableMenuOption2.setText(item.getOption2Text());
@@ -94,21 +112,23 @@ public class AdminRecyclerViewAdapter extends RecyclerView.Adapter<AdminRecycler
     /**
      * ViewHolder class for managing the views within each item.
      */
-    public static class UserViewHolder extends RecyclerView.ViewHolder {
-        TextView userName, userEmail, expandableMenuTextView;
+    public static class ItemViewHolder extends RecyclerView.ViewHolder {
+        TextView itemName, itemSecondaryText, expandableMenuTextView;
         ImageButton optionsButton;
-        Button expandableMenuOption1, expandableMenuOption2, expandableMenuOption3;
+        ImageView profileImageView;
+        Button expandableMenuOption1, expandableMenuOption2;
         ConstraintLayout expandableMenuLayout;
 
         /**
          * Initializes the views within each item in the RecyclerView.
          * @param itemView The item view.
          */
-        public UserViewHolder(@NonNull View itemView) {
+        public ItemViewHolder(@NonNull View itemView) {
             super(itemView);
-            userName = itemView.findViewById(R.id.textViewUserName);
-            userEmail = itemView.findViewById(R.id.textViewUserEmail);
+            itemName = itemView.findViewById(R.id.textViewUserName);
+            itemSecondaryText = itemView.findViewById(R.id.textViewUserEmail);
             optionsButton = itemView.findViewById(R.id.optionsButton);
+            profileImageView = itemView.findViewById(R.id.imageViewUserProfile);
             expandableMenuLayout = itemView.findViewById(R.id.expandableMenuLayout);
             expandableMenuTextView = itemView.findViewById(R.id.expandableMenuTextView);
             expandableMenuOption1 = itemView.findViewById(R.id.expandableMenuOption1);
