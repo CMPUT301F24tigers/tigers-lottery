@@ -283,13 +283,22 @@ public class DatabaseHelper {
 
             // Determine the list of entrants
             List<String> entrants;
-            if ("registered_entrants".equals(listType)) {
-                entrants = event.getRegisteredEntrants();
-            } else if ("waitlisted_entrants".equals(listType)) {
-                entrants = event.getWaitlistedEntrants();
-            } else {
-                callback.onFailure("Invalid list type: " + listType);
-                return;
+            switch (listType) {
+                case "registered_entrants":
+                    entrants = event.getRegisteredEntrants();
+                    break;
+                case "waitlisted_entrants":
+                    entrants = event.getWaitlistedEntrants();
+                    break;
+                case "invited_entrants":
+                    entrants = event.getInvitedEntrants();
+                    break;
+                case "declined_entrants":
+                    entrants = event.getDeclinedEntrants();
+                    break;
+                default:
+                    callback.onFailure("Invalid list type: " + listType);
+                    return;
             }
 
             // Validate entrants list
