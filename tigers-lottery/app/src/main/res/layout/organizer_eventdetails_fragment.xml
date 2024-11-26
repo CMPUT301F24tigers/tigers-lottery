@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/primary_background_pages"
     android:padding="16dp">
 
     <LinearLayout
@@ -16,6 +17,7 @@
             android:id="@+id/eventTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textColor="@color/white"
             android:textSize="24sp"
             android:textStyle="bold"
             android:paddingBottom="16dp" />
@@ -25,6 +27,7 @@
             android:id="@+id/photoPlaceholder"
             android:layout_width="363dp"
             android:layout_height="204dp"
+            android:backgroundTint="@color/secondary_background_cards"
             android:layout_marginStart="3dp"
             android:layout_marginEnd="3dp"
             android:layout_marginBottom="16dp"
@@ -48,14 +51,17 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="3dp"
             android:layout_marginEnd="3dp"
+            android:backgroundTint="@color/secondary_background_cards"
             android:layout_marginBottom="16dp"
             android:background="#F0F0F0"
             app:cardCornerRadius="16dp">
 
             <TextView
                 android:id="@+id/eventDescription"
+                android:backgroundTint="@color/secondary_background_cards"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:textColor="@color/white"
                 android:background="#F0F0F0"
                 android:padding="12dp"
                 android:textSize="16sp" />
@@ -67,6 +73,7 @@
             android:id="@+id/eventLocation"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textColor="@color/white"
             android:textSize="16sp"
             android:layout_marginBottom="8dp" />
 
@@ -75,6 +82,7 @@
             android:id="@+id/waitlistOpenDate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textColor="@color/white"
             android:textSize="16sp"
             android:layout_marginBottom="8dp" />
 
@@ -82,6 +90,7 @@
         <TextView
             android:id="@+id/waitlistCloseDate"
             android:layout_width="wrap_content"
+            android:textColor="@color/white"
             android:layout_height="wrap_content"
             android:textSize="16sp"
             android:layout_marginBottom="8dp" />
@@ -91,6 +100,7 @@
             android:id="@+id/eventDate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textColor="@color/white"
             android:textSize="16sp"
             android:layout_marginBottom="8dp" />
 
@@ -98,6 +108,7 @@
         <TextView
             android:id="@+id/waitlistLimit"
             android:layout_width="wrap_content"
+            android:textColor="@color/white"
             android:layout_height="wrap_content"
             android:textSize="16sp"
             android:layout_marginBottom="8dp" />
@@ -106,6 +117,7 @@
         <TextView
             android:id="@+id/entrantLimit"
             android:layout_width="wrap_content"
+            android:textColor="@color/white"
             android:layout_height="wrap_content"
             android:textSize="16sp"
             android:layout_marginBottom="8dp" />
@@ -124,6 +136,8 @@
         <Button
             android:id="@+id/runLotteryButton"
             android:layout_width="match_parent"
+            android:backgroundTint="@color/darker_teal"
+            android:textColor="@color/white"
             android:layout_height="wrap_content"
             android:text="Run Lottery"
             android:layout_marginBottom="8dp" />
@@ -131,6 +145,8 @@
         <Button
             android:id="@+id/clearListsButton"
             android:layout_width="match_parent"
+            android:backgroundTint="@color/darker_teal"
+            android:textColor="@color/white"
             android:layout_height="wrap_content"
             android:text="Clear Lists"
             android:layout_marginBottom="8dp" />
@@ -139,6 +155,7 @@
             android:id="@+id/viewQRCodeButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:backgroundTint="@color/darker_teal"
             android:text="View QR Code"
             android:layout_marginBottom="8dp"/>
 
@@ -146,6 +163,7 @@
             android:id="@+id/viewMapButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:backgroundTint="@color/darker_teal"
             android:text="View Map"
             android:layout_marginBottom="8dp" />
 
@@ -153,6 +171,7 @@
             android:id="@+id/viewRegisteredEntrants"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:backgroundTint="@color/accent_1_teal"
             android:text="View Registered Entrants"
             android:layout_marginBottom="8dp" />
 
@@ -160,6 +179,7 @@
             android:id="@+id/viewWaitlistedEntrants"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:backgroundTint="@color/pastel_green"
             android:text="View Waitlisted Entrants"
             android:layout_marginBottom="8dp" />
 
@@ -167,12 +187,14 @@
             android:id="@+id/viewInvitedEntrants"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:backgroundTint="@color/accent_3_light_purple"
             android:text="View Invited Entrants"
             android:layout_marginBottom="8dp" />
 
         <Button
             android:id="@+id/viewDeclinedEntrants"
             android:layout_width="match_parent"
+            android:backgroundTint="@color/pastel_red"
             android:layout_height="wrap_content"
             android:text="View Declined Entrants"
             android:layout_marginBottom="8dp" />
