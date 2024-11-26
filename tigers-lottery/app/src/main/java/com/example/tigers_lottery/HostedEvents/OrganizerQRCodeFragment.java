@@ -1,6 +1,8 @@
 package com.example.tigers_lottery.HostedEvents;
 
 
+import static android.view.View.GONE;
+
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -8,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -20,6 +23,7 @@ import com.example.tigers_lottery.models.Event;
 import com.example.tigers_lottery.utils.QRCodeGenerator;
 
 import java.util.List;
+import java.util.Objects;
 
 
 /**
@@ -32,6 +36,7 @@ public class OrganizerQRCodeFragment extends Fragment {
     private int eventId;
     private Event event;
     private ImageView QRImage;
+    private TextView title, description;
     private Button regenerateButton;
 
     public OrganizerQRCodeFragment(){}
@@ -75,11 +80,14 @@ public class OrganizerQRCodeFragment extends Fragment {
         View view = inflater.inflate(R.layout.organizer_qrcode_fragment, container, false);
         regenerateButton = view.findViewById(R.id.qrCodeRegenerateButton);
         QRImage = view.findViewById(R.id.qrCodeImageLarge);
-
+        title = view.findViewById(R.id.qrCodeText);
+        description = view.findViewById(R.id.qrCodeDescription);
+        QRImage.setVisibility(View.INVISIBLE);
         loadEventDetails();
 
-        regenerateButton.setOnClickListener(v->{
 
+        regenerateButton.setOnClickListener(v->{
+            regenerateQRCode();
         });
         return view;
     }
@@ -94,6 +102,8 @@ public class OrganizerQRCodeFragment extends Fragment {
             public void onEventFetched(Event fetchedEvent) {
                 if(fetchedEvent != null){
                     event = fetchedEvent;
+                    String eventName = event.getEventName();
+                    title.setText("QR Code\n" +  eventName);
                     setUpQRCode();
                 } else{
                     Toast.makeText(getContext(), "Event not found", Toast.LENGTH_SHORT).show();
@@ -108,9 +118,64 @@ public class OrganizerQRCodeFragment extends Fragment {
         });
     }
     private void setUpQRCode(){
-        QRCodeGenerator qrCodeGenerator = new QRCodeGenerator(event);
-        Bitmap QRCode = qrCodeGenerator.generateQRCodeFromHashData();
-        QRImage.setImageBitmap(QRCode);
-
+        if(event.getQRCode() != null && !(event.getQRCode().isEmpty())) {
+            QRCodeGenerator qrCodeGenerator = new QRCodeGenerator(event);
+            Bitmap QRCode = qrCodeGenerator.generateQRCodeFromHashData();
+            QRImage.setVisibility(View.VISIBLE);
+            QRImage.setImageBitmap(QRCode);
+            description.setTextColor(0xFFFFFFFF);
+            description.setText("Users may use this QR Code to join the waitlist for your event." +
+                    " You may use the 'Regenerate QR Code' button to be given a new QR Code." +
+                    " Please note that any previous QR Codes will be rendered unusable.");
+            regenerateButton.setText("Regenerate QR Code");
+        } else {
+            description.setText("Your QR Code has been removed by an administrator for violating app policy. You may use the " +
+                    "'Generate a QR Code' button to be given a new QR Code which users may use to join " +
+                    "the waitlist for your event.");
+            description.setTextColor(0xFFFF0000);
+            QRImage.setVisibility(View.VISIBLE);
+            regenerateButton.setText("Generate a QR Code");
+        }
     }
+
+    private void regenerateQRCode(){
+        QRCodeGenerator qrCodeGenerator = new QRCodeGenerator(event);
+        qrCodeGenerator.setHashData();
+        event.setQRCode(qrCodeGenerator.getHashData());
+        updateEventInDatabase();
+        setUpQRCode();
+    }
+
+    private void updateEventInDatabase() {
+        dbHelper.updateEvent(event, new DatabaseHelper.EventsCallback() {
+            /**
+             * Navigates back to the dashboard and displays the organizer's events
+             * @param events list of events from the organizer.
+             */
+            @Override
+            public void onEventsFetched(List<Event> events) {
+                Toast.makeText(getContext(), "You have generated a new QR Code!", Toast.LENGTH_SHORT).show();
+            }
+
+            /**
+             * Unused in this fragment.
+             * @param event single event.
+             */
+
+            @Override
+            public void onEventFetched(Event event) {
+            }
+
+            /**
+             * Handles error during event updating.
+             * @param e exception catcher for event updating.
+             */
+
+            @Override
+            public void onError(Exception e) {
+                Toast.makeText(getContext(), "Failed to update event", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
 }

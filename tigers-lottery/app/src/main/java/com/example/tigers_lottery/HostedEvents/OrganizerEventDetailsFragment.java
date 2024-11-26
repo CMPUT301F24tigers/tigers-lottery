@@ -1,5 +1,6 @@
 package com.example.tigers_lottery.HostedEvents;
 
+import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -48,11 +49,9 @@ public class OrganizerEventDetailsFragment extends Fragment {
     private boolean isInitialDeclineSync = true;
 
     // UI Components
-
     private TextView eventTitle, eventDescription, eventLocation, waitlistOpenDate, waitlistCloseDate, eventDate, waitlistLimit, entrantLimit;
-    private ImageView eventPoster, qrImage;
-    private Button viewRegisteredEntrants, viewWaitlistedEntrants, viewInvitedEntrants, viewDeclinedEntrants, runLotteryButton, clearListsButton, viewMapButton;
-
+    private ImageView eventPoster;
+    private Button viewRegisteredEntrants, viewWaitlistedEntrants, viewInvitedEntrants, viewDeclinedEntrants, runLotteryButton, clearListsButton, viewMapButton, viewQRCode;
 
     /**
      * Required empty public constructor.
@@ -107,6 +106,7 @@ public class OrganizerEventDetailsFragment extends Fragment {
      * @return the view for the fragment's UI.
      */
 
+    @SuppressLint("MissingInflatedId")
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -128,10 +128,8 @@ public class OrganizerEventDetailsFragment extends Fragment {
         runLotteryButton = view.findViewById(R.id.runLotteryButton);
         eventPoster = view.findViewById(R.id.eventPoster);
         clearListsButton = view.findViewById(R.id.clearListsButton);
-        qrImage = view.findViewById(R.id.qrCodeImage);
-
+        viewQRCode = view.findViewById(R.id.viewQRCodeButton);
         viewMapButton = view.findViewById(R.id.viewMapButton);
-
 
         // Fetch and display event details
         loadEventDetails();
@@ -205,42 +203,13 @@ public class OrganizerEventDetailsFragment extends Fragment {
         eventTitle.setText(event.getEventName());
         eventDescription.setText(event.getDescription());
         eventLocation.setText("Location: " + event.getLocation());
-        waitlistOpenDate.setText("Waitlist Open Date: " + event.getFormattedWaitlistOpenDate());
-        waitlistCloseDate.setText("Waitlist Close Date: " + event.getFormattedWaitlistDeadline());
-        eventDate.setText("Event Date: " + event.getFormattedEventDate());
+        String dateSplitEventDate = event.getFormattedEventDate().split(" - ")[0];
+        String dateSplitWaitlistOpen = event.getFormattedWaitlistOpenDate().split(" - ")[0];
+        String dateSplitWaitlistDeadline = event.getFormattedWaitlistDeadline().split(" - ")[0];
+        waitlistOpenDate.setText("Waitlist Open Date: " + dateSplitWaitlistOpen);
+        waitlistCloseDate.setText("Waitlist Close Date: " + dateSplitWaitlistDeadline);
+        eventDate.setText("Event Date: " + dateSplitEventDate);
         waitlistLimit.setText("Waitlist Limit: " + (event.isWaitlistLimitFlag() ? event.getWaitlistLimit() : "N/A"));
-
-/*
-        Map<Integer, Byte> byteMap = event.getQRCode();
-        if (byteMap != null) {
-            byte[] byteArray = new byte[byteMap.size()];
-            for (int i = 0; i < byteMap.size(); i++) {
-                byteArray[i] = byteMap.get(i);
-            }
-            Bitmap QRCode = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
-            qrImage.setImageBitmap(QRCode);
-        }
-        QRCodeGenerator qrCodeGenerator = new QRCodeGenerator();
-
- */
-        QRCodeGenerator qrCodeGenerator = new QRCodeGenerator(event);
-        Bitmap QRCode = qrCodeGenerator.generateQRCodeFromHashData();
-        qrImage.setImageBitmap(QRCode);
-
-        /*
-        List<Integer> intList = event.getQRCode();
-
-        if(intList !=null) {
-            byte[] byteArray = new byte[intList.size()];
-            for (int i = 0; i < intList.size(); i++) {
-                byteArray[i] = (byte) (intList.get(i) & 0xFF);
-            }
-            Bitmap QRCode = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
-            qrImage.setImageBitmap(QRCode);
-        }
-
-         */
-
         entrantLimit.setText("Entrant Limit: " + (event.getOccupantLimit()));
 
         // Initialize entrant lists only if they are null and avoid altering the invitedEntrants if isLotteryRan is false
@@ -315,8 +284,7 @@ public class OrganizerEventDetailsFragment extends Fragment {
         viewWaitlistedEntrants.setOnClickListener(v -> openEntrantFragment(new OrganizerWaitingListFragment()));
         viewInvitedEntrants.setOnClickListener(v -> openEntrantFragment(new OrganizerInvitedEntrantsFragment()));
         viewDeclinedEntrants.setOnClickListener(v -> openEntrantFragment(new OrganizerDeclinedEntrantsFragment()));
-        qrImage.setOnClickListener(v -> openEntrantFragment(new OrganizerQRCodeFragment()));
-
+        viewQRCode.setOnClickListener(v -> openEntrantFragment(new OrganizerQRCodeFragment()));
         viewMapButton.setOnClickListener(v -> openMapFragment());
 
     }

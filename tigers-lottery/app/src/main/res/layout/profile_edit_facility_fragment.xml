@@ -4,7 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#2A334C">
+
+    android:background="@color/primary_background_pages">
+
 
     <TextView
         android:id="@+id/textView2"
@@ -71,6 +73,7 @@
             app:cardCornerRadius="16dp"
             app:cardElevation="4dp">
 
+
         <EditText
             android:id="@+id/editTextName"
             android:layout_width="match_parent"
@@ -99,6 +102,8 @@
             app:cardCornerRadius="16dp"
             app:cardElevation="4dp">
 
+
+
         <EditText
             android:id="@+id/editTextEmail"
             android:layout_width="match_parent"
@@ -120,6 +125,7 @@
             android:layout_marginTop="10dp"
             android:layout_marginBottom="3sp"
             android:text="Mobile Number"
+
             android:textColor="@color/white" />
 
         <com.google.android.material.card.MaterialCardView
@@ -149,7 +155,9 @@
             android:layout_marginTop="10dp"
             android:layout_marginBottom="3sp"
             android:text="Location"
+
             android:textColor="@color/white" />
+
 
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"

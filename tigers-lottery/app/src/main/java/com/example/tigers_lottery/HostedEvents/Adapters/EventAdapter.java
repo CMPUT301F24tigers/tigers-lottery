@@ -1,5 +1,7 @@
 package com.example.tigers_lottery.HostedEvents.Adapters;
 
+import static java.security.AccessController.getContext;
+
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
@@ -10,6 +12,8 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.bumptech.glide.Glide;
 import com.example.tigers_lottery.R;
 import com.example.tigers_lottery.models.Event;
 import java.util.List;
@@ -75,11 +79,18 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
 
         // Set the event details
         holder.eventName.setText(event.getEventName());
-        holder.eventDate.setText("Event Date: " + event.getFormattedEventDate());
+        String dateSplit = event.getFormattedEventDate().split(" - ")[0];
+        holder.eventDate.setText("Date: " + dateSplit);
         holder.eventId.setText("Event ID: " + event.getEventId());
         holder.organizerId.setText("Organizer ID: " + event.getOrganizerId());
         holder.waitlistLimit.setText("Waitlist Limit: " + event.getWaitlistLimit());
-        holder.eventGeolocation.setText("Location: " + event.getGeolocation());
+        if (event.getPosterUrl() != null && !event.getPosterUrl().isEmpty()) {
+            Glide.with(context)
+                    .load(event.getPosterUrl())
+                    .placeholder(R.drawable.placeholder_image_background)
+                    .into(holder.eventIcon);
+        }
+        holder.eventGeolocation.setText("Location: " + event.getLocation());
 
         // Set up the options menu for each item
         holder.optionsMenu.setOnClickListener(view -> {
@@ -122,7 +133,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
 
     static class EventViewHolder extends RecyclerView.ViewHolder {
         TextView eventName, eventDate, eventId, organizerId, waitlistLimit, eventGeolocation;
-        ImageView optionsMenu;
+        ImageView optionsMenu, eventIcon;
 
         /**
          * Constructor for EventViewHolder,initializes textViews for all event details.
@@ -139,6 +150,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
             waitlistLimit = itemView.findViewById(R.id.waitlistLimit);
             eventGeolocation = itemView.findViewById(R.id.eventGeolocation);
             optionsMenu = itemView.findViewById(R.id.optionsMenu);
+            eventIcon = itemView.findViewById(R.id.eventIcon);
         }
     }
 

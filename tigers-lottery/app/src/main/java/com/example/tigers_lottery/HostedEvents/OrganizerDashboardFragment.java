@@ -18,6 +18,8 @@ import com.example.tigers_lottery.models.Event;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -110,6 +112,12 @@ public class OrganizerDashboardFragment extends Fragment implements EventAdapter
              */
             @Override
             public void onEventsFetched(List<Event> events) {
+                Collections.sort(events, new Comparator<Event>() {
+                    @Override
+                    public int compare(Event event, Event t1) {
+                        return event.getEventName().compareToIgnoreCase(t1.getEventName());
+                    }
+                });
                 eventList.clear();
                 eventList.addAll(events);
                 eventAdapter.notifyDataSetChanged();

@@ -23,11 +23,13 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import com.bumptech.glide.Glide;
 import com.example.tigers_lottery.DatabaseHelper;
 import android.Manifest; // Add this
 import com.example.tigers_lottery.HostedEvents.OrganizerEventDetailsFragment;
 import com.example.tigers_lottery.R;
 import com.example.tigers_lottery.models.Event;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
@@ -79,7 +81,7 @@ public class EntrantDashboardFragment extends Fragment {
 
         LinearLayout eventsListLinearLayout = view.findViewById(R.id.linear_layout_events_list);
         dbHelper = new DatabaseHelper(getContext());
-        Button joinEventButton = view.findViewById(R.id.join_event_button);
+        FloatingActionButton joinEventButton = view.findViewById(R.id.join_event_button);
 
         List<Event> entrantsEvents = new ArrayList<>();
 
@@ -116,17 +118,27 @@ public class EntrantDashboardFragment extends Fragment {
                     ImageView eventPhoto = eventView.findViewById(R.id.eventItemPhoto);
 
                     eventNameTextView.setText(event.getEventName());
-                    eventLocationTextView.setText(event.getLocation());
-                    eventDateTextView.setText(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(event.getEventDate().toDate()));
+                    eventLocationTextView.setText("Location: " + event.getLocation());
+                    eventDateTextView.setText("Date: " + new SimpleDateFormat("yyyy-MM-dd").format(event.getEventDate().toDate()));
+                    if (event.getPosterUrl() != null && !event.getPosterUrl().isEmpty()) {
+                        Glide.with(getContext())
+                                .load(event.getPosterUrl())
+                                .placeholder(R.drawable.placeholder_image_background)
+                                .into(eventPhoto);
+                    }
 
                     if (event.getDeclinedEntrants().contains(deviceId)) {
-                        eventStatusTextView.setText("Declined");
+                        eventStatusTextView.setTextColor(0xFFFF0000);
+                        eventStatusTextView.setText("Status: Declined");
                     } else if (event.getInvitedEntrants().contains(deviceId)) {
-                        eventStatusTextView.setText("Invited");
+                        eventStatusTextView.setTextColor(0xFF00FF00);
+                        eventStatusTextView.setText("Status: Invited");
                     } else if (event.getWaitlistedEntrants().contains(deviceId)) {
-                        eventStatusTextView.setText("Waitlisted");
+                        eventStatusTextView.setTextColor(0xFF0000FF);
+                        eventStatusTextView.setText("Status: Waitlisted");
                     } else if (event.getRegisteredEntrants().contains(deviceId)) {
-                        eventStatusTextView.setText("Registered");
+                        eventStatusTextView.setTextColor(0xFF800080);
+                        eventStatusTextView.setText("Status: Registered");
                     }
 
                     eventView.setOnClickListener(view -> {

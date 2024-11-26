@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background_color"
+    android:background="@color/primary_background_pages"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <TextView
@@ -64,7 +64,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="3sp"
             android:text="Email"
-            android:textColor="@color/gray"
+            android:textColor="@color/accent_2_light_blue"
             android:textSize="16sp"
             android:textStyle="bold" />
 
@@ -82,7 +82,7 @@
             android:layout_marginTop="10dp"
             android:layout_marginBottom="3sp"
             android:text="Date of Birth"
-            android:textColor="@color/gray"
+            android:textColor="@color/accent_2_light_blue"
             android:textSize="16sp"
             android:textStyle="bold" />
 
@@ -100,7 +100,7 @@
             android:layout_marginTop="10dp"
             android:layout_marginBottom="3sp"
             android:text="Mobile Number"
-            android:textColor="@color/gray"
+            android:textColor="@color/accent_2_light_blue"
             android:textSize="16sp"
             android:textStyle="bold" />
 
