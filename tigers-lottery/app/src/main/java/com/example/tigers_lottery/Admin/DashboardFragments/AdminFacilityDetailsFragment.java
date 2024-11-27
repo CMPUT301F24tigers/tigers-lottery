@@ -26,12 +26,12 @@ import java.util.Locale;
 import java.util.Objects;
 
 /**
- * Fragment for displaying and managing user details for admins.
- * This fragment allows an admin to view detailed information about a user,
- * including their name, email, phone number, date of birth, and profile picture.
- * The admin can also remove the user's profile picture if one exists.
+ * Fragment for displaying and managing facility details for admins.
+ * This fragment allows an admin to view detailed information about a facility,
+ * including the facility's name, email, phone, location, and profile picture.
+ * Admins can also remove the facility's profile picture if one exists.
  */
-public class AdminUserDetailsFragment extends Fragment {
+public class AdminFacilityDetailsFragment extends Fragment {
 
     private static final String ARG_USER_ID = "user_id";
     private String userId;
@@ -39,21 +39,22 @@ public class AdminUserDetailsFragment extends Fragment {
     private User user;
 
     // UI Components
-    private TextView userName;
-    private TextView userEmail;
-    private TextView userMobile;
-    private TextView userDOB;
-    private ImageView userPhoto;
-    private Button removeUserProfilePhoto;
+    private TextView facilityName;
+    private TextView facilityEmail;
+    private TextView facilityPhone;
+    private TextView facilityLocation;
+    private TextView facilityOwner;
+    private ImageView facilityPhoto;
+    private Button removeFacilityPhoto;
 
     /**
      * Factory method to create a new instance of this fragment.
      *
-     * @param userId The ID of the user whose details are to be displayed.
-     * @return A new instance of AdminUserDetailsFragment.
+     * @param userId The ID of the user whose facility details are to be displayed.
+     * @return A new instance of AdminFacilityDetailsFragment.
      */
-    public static AdminUserDetailsFragment newInstance(String userId) {
-        AdminUserDetailsFragment fragment = new AdminUserDetailsFragment();
+    public static AdminFacilityDetailsFragment newInstance(String userId) {
+        AdminFacilityDetailsFragment fragment = new AdminFacilityDetailsFragment();
         Bundle args = new Bundle();
         args.putString(ARG_USER_ID, userId);
         fragment.setArguments(args);
@@ -77,6 +78,7 @@ public class AdminUserDetailsFragment extends Fragment {
 
     /**
      * Inflates the layout for this fragment and initializes UI components.
+     * Hides unrelated UI components that are not relevant to facilities.
      *
      * @param inflater           LayoutInflater to inflate the layout.
      * @param container          Parent container for the fragment.
@@ -89,12 +91,13 @@ public class AdminUserDetailsFragment extends Fragment {
         View view = inflater.inflate(R.layout.organizer_eventdetails_fragment, container, false);
 
         // Initialize UI components
-        userName = view.findViewById(R.id.eventTitle);
-        userEmail = view.findViewById(R.id.eventLocation);
-        userDOB = view.findViewById(R.id.waitlistOpenDate);
-        userMobile = view.findViewById(R.id.waitlistCloseDate);
-        userPhoto = view.findViewById(R.id.eventPoster);
-        removeUserProfilePhoto = view.findViewById(R.id.runLotteryButton);
+        facilityName = view.findViewById(R.id.eventTitle);
+        facilityEmail = view.findViewById(R.id.eventLocation);
+        facilityPhone = view.findViewById(R.id.waitlistOpenDate);
+        facilityLocation = view.findViewById(R.id.waitlistCloseDate);
+        facilityOwner = view.findViewById(R.id.eventDate);
+        facilityPhoto = view.findViewById(R.id.eventPoster);
+        removeFacilityPhoto = view.findViewById(R.id.runLotteryButton);
 
         // Hide unrelated UI components
         TextView description = view.findViewById(R.id.eventDescription);
@@ -114,12 +117,12 @@ public class AdminUserDetailsFragment extends Fragment {
         description.setVisibility(View.GONE);
         viewQRCode.setVisibility(View.GONE);
         viewMap.setVisibility(View.GONE);
-        removeUserProfilePhoto.setVisibility(View.GONE);
+        removeFacilityPhoto.setVisibility(View.GONE);
 
-        removeUserProfilePhoto.setText("Remove User Profile Photo");
+        removeFacilityPhoto.setText("Remove Facility Profile Photo");
 
-        // Load user details
-        loadUserDetails();
+        // Load facility details
+        loadFacilityDetails();
 
         // Setup button listeners
         setupButtonListeners();
@@ -128,97 +131,95 @@ public class AdminUserDetailsFragment extends Fragment {
     }
 
     /**
-     * Fetches user details from the database using the user ID
+     * Fetches facility details from the database using the user ID
      * and updates the UI to display the details.
+     * If the facility is not found, the fragment navigates back to the previous screen.
      */
-    private void loadUserDetails() {
+    private void loadFacilityDetails() {
         dbHelper.fetchUserById(userId, new DatabaseHelper.UsersCallback() {
             @Override
             public void onUsersFetched(List<User> users) {
-                // Not used
+                // Not used in this context.
             }
 
             @Override
             public void onUserFetched(User fetchedUser) {
                 if (fetchedUser != null) {
                     user = fetchedUser;
-                    displayUserDetails(user);
+                    displayFacilityDetails(user);
                 } else {
-                    Toast.makeText(getContext(), "User not found", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Facility not found", Toast.LENGTH_SHORT).show();
                     requireActivity().getSupportFragmentManager().popBackStack();
                 }
             }
 
             @Override
             public void onError(Exception e) {
-                Toast.makeText(getContext(), "Error fetching user details: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Error fetching facility details: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     /**
-     * Displays user details in the UI components.
-     * If a profile picture exists, it is loaded into the ImageView.
+     * Displays facility details in the UI components.
+     * If a profile picture exists, it is loaded into the ImageView using Glide.
      *
-     * @param user The user object containing the details to display.
+     * @param user The user object containing the facility details to display.
      */
-    private void displayUserDetails(User user) {
-        userName.setText(user.getFirstName() + " " + user.getLastName());
-        userEmail.setText("Email Address: " + user.getEmailAddress());
+    private void displayFacilityDetails(User user) {
+        facilityName.setText(user.getFacilityName());
+        facilityEmail.setText("Email Address: " + user.getFacilityEmail());
         if (!Objects.equals(user.getPhoneNumber(), "")) {
-            userMobile.setText("Phone Number: " + user.getPhoneNumber());
+            facilityPhone.setText("Phone Number: " + user.getFacilityPhone());
         } else {
-            userMobile.setText("Phone Number: No Phone Number Added");
+            facilityPhone.setText("Phone Number: No Phone Number Added");
         }
 
-        Timestamp dobTimestamp = user.getDateOfBirth();
-        Date dobDate = dobTimestamp.toDate();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault());
-        String formattedDate = dateFormat.format(dobDate);
-        userDOB.setText("Date of Birth: " + formattedDate);
+        facilityLocation.setText("Facility Location: " + user.getFacilityLocation());
+        facilityOwner.setText("Facility Owner: " + user.getFirstName() + " " + user.getLastName());
 
         // Display the placeholder image initially
-        userPhoto.setImageResource(R.drawable.placeholder_user_image);
+        facilityPhoto.setImageResource(R.drawable.image_facility_placeholder);
 
         // Fetch and display the profile image
-        String profileUrl = user.getUserPhoto();
-        if (profileUrl != null && !profileUrl.isEmpty() && !profileUrl.equals("NoProfilePhoto")) {
+        String facilityUrl = user.getFacilityPhoto();
+        if (facilityUrl != null && !facilityUrl.isEmpty() && !facilityUrl.equals("NoFacilityPhoto")) {
             Glide.with(requireContext())
-                    .load(profileUrl)
-                    .placeholder(R.drawable.placeholder_user_image)
-                    .into(userPhoto);
+                    .load(facilityUrl)
+                    .placeholder(R.drawable.image_facility_placeholder)
+                    .into(facilityPhoto);
 
-            removeUserProfilePhoto.setVisibility(View.VISIBLE);
-            userPhoto.setOnClickListener(v -> showImagePreviewDialog(profileUrl));
+            removeFacilityPhoto.setVisibility(View.VISIBLE);
+            facilityPhoto.setOnClickListener(v -> showImagePreviewDialog(facilityUrl));
         }
     }
 
     /**
-     * Sets up button listeners for admin actions, including
-     * removing the user's profile photo.
+     * Sets up button listeners for admin actions.
+     * Currently, this includes removing the facility's profile photo.
      */
     private void setupButtonListeners() {
-        removeUserProfilePhoto.setOnClickListener(v -> {
-            dbHelper.removeImage("user", userId, new DatabaseHelper.Callback() {
+        removeFacilityPhoto.setOnClickListener(v -> {
+            dbHelper.removeImage("facility", userId, new DatabaseHelper.Callback() {
                 @Override
                 public void onSuccess(String message) {
-                    //TODO: Dispatch notification to the user
-                    Toast.makeText(getContext(), user.getFirstName() + " " + user.getLastName() + "'s profile picture has been removed", Toast.LENGTH_SHORT).show();
-                    removeUserProfilePhoto.setVisibility(View.GONE);
-                    userPhoto.setOnClickListener(null);
-                    loadUserDetails();
+                    // Dispatch a notification to the admin if necessary
+                    Toast.makeText(getContext(), user.getFacilityName() + "'s facility profile photo has been removed", Toast.LENGTH_SHORT).show();
+                    removeFacilityPhoto.setVisibility(View.GONE);
+                    facilityPhoto.setOnClickListener(null);
+                    loadFacilityDetails();
                 }
 
                 @Override
                 public void onFailure(Exception e) {
-                    Toast.makeText(getContext(), "Failed to remove profile image: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Failed to remove facility profile photo: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             });
         });
     }
 
     /**
-     * Shows a dialog to preview the user's profile image in fullscreen.
+     * Shows a dialog to preview the facility's profile image in fullscreen.
      *
      * @param imageUrl The URL of the profile image to preview.
      */

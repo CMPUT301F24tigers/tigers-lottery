@@ -172,23 +172,19 @@ public class ProfileEditFacilityFragment extends Fragment {
                         .addOnFailureListener(e -> Log.w("Firestore Update", "Error updating document", e));
 
                 // Upload image to Firebase Storage if a new image is selected
-                if (imageUri != null) {
-                    imageRef.putFile(imageUri).addOnSuccessListener(taskSnapshot -> {
-                        // Get the download URL after the image upload
-                        imageRef.getDownloadUrl().addOnSuccessListener(downloadUri -> {
-                            String downloadUrl = downloadUri.toString();
 
-                            // Save download URL to Firestore
-                            DocumentReference docRef = db.collection("Users").document(deviceId);
-                            docRef.update("Facility Photo", downloadUrl).addOnSuccessListener(aVoid -> {
-//                                Toast.makeText(getContext(), "Image uploaded and URL saved to Firestore", Toast.LENGTH_SHORT).show();
-                            }).addOnFailureListener(e -> {
-//                                Toast.makeText(getContext(), "Failed to save URL to Firestore: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                            });
-                        });
-                    }).addOnFailureListener(e -> {
-//                        Toast.makeText(getContext(), "Failed to upload image: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    });
+                if (imageUri != null) {
+                    imageRef.putFile(imageUri)
+                            .addOnSuccessListener(taskSnapshot -> {
+                                imageRef.getDownloadUrl().addOnSuccessListener(downloadUri -> {
+                                    String downloadUrl = downloadUri.toString();
+                                    DocumentReference docRef = db.collection("users").document(deviceId);
+                                    docRef.update("facility_photo", downloadUrl)
+                                            .addOnSuccessListener(aVoid -> Log.d("Firestore Update", "Document updated successfully"))
+                                            .addOnFailureListener(e -> Log.w("Firestore Update", "Error updating document", e));
+                                });
+                            })
+                            .addOnFailureListener(e -> Log.w("Firestore Update", "Error updating document", e));
                 }
 
                 // Navigate back to ProfileDetailsFacilityFragment after saving

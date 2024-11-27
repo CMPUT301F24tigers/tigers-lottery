@@ -71,8 +71,8 @@ public class AdminEntrantsProfilesFragment extends Fragment implements OnActionL
                                 user.getUserId(),
                                 user.getFirstName() + " " + user.getLastName(),
                                 user.getEmailAddress(),
-                                "Remove User",
-                                "View User Profile"
+                                "View User Profile",
+                                "Remove User Profile"
                         ));
                     }
                 }
@@ -100,6 +100,23 @@ public class AdminEntrantsProfilesFragment extends Fragment implements OnActionL
      */
     @Override
     public void onOptionOneClick(String userId) {
+        AdminUserDetailsFragment userDetailsFragment = AdminUserDetailsFragment.newInstance(userId);
+
+        requireActivity().getSupportFragmentManager().beginTransaction()
+                .replace(R.id.main_activity_fragment_container, userDetailsFragment)
+                .addToBackStack(null)
+                .commit();
+    }
+
+    /**
+     * Handles the action to view a specific user's profile.
+     * This method is triggered when the "View User Profile" option is selected.
+     *
+     * @param userId The ID of the user whose profile will be viewed.
+     */
+    @Override
+    public void onOptionTwoClick(String userId) {
+
         DatabaseHelper dbHelper = new DatabaseHelper(requireContext());
         dbHelper.getUser(userId, new DatabaseHelper.UserCallback() {
             @Override
@@ -115,22 +132,6 @@ public class AdminEntrantsProfilesFragment extends Fragment implements OnActionL
         dbHelper.removeUser(userId);
         userAdapter.setExpandedPosition(-1);
         userAdapter.notifyDataSetChanged();
-    }
-
-    /**
-     * Handles the action to view a specific user's profile.
-     * This method is triggered when the "View User Profile" option is selected.
-     *
-     * @param userId The ID of the user whose profile will be viewed.
-     */
-    @Override
-    public void onOptionTwoClick(String userId) {
-        AdminUserDetailsFragment userDetailsFragment = AdminUserDetailsFragment.newInstance(userId);
-
-        requireActivity().getSupportFragmentManager().beginTransaction()
-                .replace(R.id.main_activity_fragment_container, userDetailsFragment)
-                .addToBackStack(null)
-                .commit();
     }
 
     /**

@@ -43,6 +43,7 @@ public class AdminDashboardFragment extends Fragment {
 
         btnEntrantProfiles.setText("Entrant Profiles (Loading...)");
         btnAllEvents.setText("All Events (Loading...)");
+        btnFacilityProfiles.setText("All Facilities (Loading...)");
 
         DatabaseHelper dbHelper = new DatabaseHelper(requireContext());
 
@@ -72,6 +73,20 @@ public class AdminDashboardFragment extends Fragment {
             public void onError(Exception e) {
                 Toast.makeText(getContext(), "Failed to retrieve event count", Toast.LENGTH_SHORT).show();
                 btnAllEvents.setText("All Events (Error)");
+            }
+        });
+
+        // Fetch Active Facility Count and update the button
+        dbHelper.getFacilityCount(new DatabaseHelper.CountCallback() {
+            @Override
+            public void onCountFetched(int count) {
+                btnFacilityProfiles.setText("All Facilities (" + count + ")");
+            }
+
+            @Override
+            public void onError(Exception e) {
+                Toast.makeText(getContext(), "Failed to retrieve facility count", Toast.LENGTH_SHORT).show();
+                btnAllEvents.setText("All Facilities (Error)");
             }
         });
 
