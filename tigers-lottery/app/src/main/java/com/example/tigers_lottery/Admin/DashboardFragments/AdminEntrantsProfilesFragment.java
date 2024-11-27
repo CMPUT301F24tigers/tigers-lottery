@@ -83,7 +83,7 @@ public class AdminEntrantsProfilesFragment extends Fragment implements OnActionL
                                 user.getEmailAddress(),
                                 userPhoto,
                                 "View User Profile",
-                                "Remove User Profile"
+                                "Remove User Profile",
                                  false
                         ));
                     }
