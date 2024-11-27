@@ -10,4 +10,5 @@
     <color name="pastel_red">#ff5a6b</color>
     <color name="pastel_green">#77f487</color>
     <color name="darker_teal">#245750</color>
+    <color name="hint_text_color">#6F6F6F</color>
 </resources>

@@ -19,18 +19,17 @@
             android:id="@+id/cardViewUserProfile"
             android:layout_width="60dp"
             android:layout_height="60dp"
-            android:layout_marginEnd="16dp"
             app:cardCornerRadius="8dp"
             app:cardElevation="4dp"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintVertical_bias="0.5"> <!-- Centers vertically -->
+            app:layout_constraintVertical_bias="0.05"> <!-- Centers vertically -->
 
             <ImageView
                 android:id="@+id/imageViewUserProfile"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="59dp"
                 android:contentDescription="@string/profile_picture"
                 android:scaleType="centerCrop"
                 android:src="@drawable/ic_baseline_account_circle_24"
@@ -46,8 +45,10 @@
             android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/optionsButton"
+            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toEndOf="@id/cardViewUserProfile"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.043">
 
             <TextView
                 android:id="@+id/textViewUserName"
@@ -71,13 +72,13 @@
             android:id="@+id/optionsButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
+            android:layout_marginTop="8dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="Options"
             android:paddingRight="8dp"
             android:src="@drawable/temp_list_item_menu"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/user_info_layout"
             app:layout_constraintTop_toTopOf="parent" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -85,7 +86,7 @@
             android:layout_width="353dp"
             android:layout_height="103dp"
             android:layout_marginLeft="12dp"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="44dp"
             android:layout_marginEnd="12dp"
             android:background="@drawable/expandable_list_item_menu"
             android:gravity="center_horizontal"
@@ -93,7 +94,7 @@
             android:padding="8dp"
             android:visibility="visible"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.687"
+            app:layout_constraintHorizontal_bias="0.571"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/user_info_layout">
 
@@ -111,7 +112,7 @@
                 android:layout_width="317dp"
                 android:layout_height="48dp"
                 android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="28dp"
                 android:gravity="center_horizontal"
                 android:orientation="horizontal"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -123,10 +124,10 @@
                     android:id="@+id/expandableMenuOption1"
                     android:layout_width="113dp"
                     android:layout_height="43dp"
+                    android:backgroundTint="@color/darker_teal"
                     android:padding="8dp"
                     android:text="Option 1"
                     app:cornerRadius="8dp"
-                    android:backgroundTint="@color/darker_teal"
                     app:layout_constraintEnd_toStartOf="@+id/expandableMenuOption2"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -136,8 +137,8 @@
                     android:layout_width="113dp"
                     android:layout_height="43dp"
                     android:layout_marginStart="8dp"
-                    android:padding="8dp"
                     android:backgroundTint="@color/darker_teal"
+                    android:padding="8dp"
                     android:text="Option 2"
                     app:cornerRadius="8dp"
                     app:layout_constraintEnd_toEndOf="parent"

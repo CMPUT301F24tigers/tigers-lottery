@@ -61,7 +61,8 @@
             android:id="@+id/inputEventName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColorHint="@color/white"
+            android:textColorHint="@color/hint_text_color"
+            android:textColor="@color/white"
             android:hint="Enter event name"
             android:layout_marginBottom="12dp"
             android:inputType="text" />
@@ -77,7 +78,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Enter location"
-            android:textColorHint="@color/white"
+            android:textColor="@color/white"
+            android:textColorHint="@color/hint_text_color"
             android:layout_marginBottom="12dp"
             android:inputType="text" />
 
@@ -86,9 +88,13 @@
             android:id="@+id/checkboxGeolocationRequired"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/white"
+            android:layout_marginBottom="12dp"
+            android:backgroundTint="@color/white"
+            android:buttonTint="#FFFFFF"
             android:text="Require Geolocation?"
-            android:layout_marginBottom="12dp" />
+            android:textColor="@color/white"
+            android:textColorLink="@color/accent_3_light_purple"
+            android:textSize="16sp" />
 
 
         <!-- Registration Opens Label and Input -->
@@ -100,7 +106,8 @@
         <EditText
             android:id="@+id/inputRegistrationOpens"
             android:layout_width="match_parent"
-            android:textColorHint="@color/white"
+            android:textColor="@color/white"
+            android:textColorHint="@color/hint_text_color"
             android:layout_height="wrap_content"
             android:hint="Select registration open date"
             android:layout_marginBottom="12dp"
@@ -115,7 +122,8 @@
         <EditText
             android:id="@+id/inputRegistrationDeadline"
             android:layout_width="match_parent"
-            android:textColorHint="@color/white"
+            android:textColorHint="@color/hint_text_color"
+            android:textColor="@color/white"
             android:layout_height="wrap_content"
             android:hint="Select registration deadline"
             android:layout_marginBottom="12dp"
@@ -131,7 +139,8 @@
             android:id="@+id/inputEventDate"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColorHint="@color/white"
+            android:textColor="@color/white"
+            android:textColorHint="@color/hint_text_color"
             android:hint="Select event date"
             android:layout_marginBottom="12dp"
             android:inputType="date" />
@@ -147,7 +156,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Enter description"
-            android:textColorHint="@color/white"
+            android:textColorHint="@color/hint_text_color"
+            android:textColor="@color/white"
             android:inputType="textMultiLine"
             android:layout_marginBottom="12dp" />
 
@@ -162,7 +172,8 @@
             android:id="@+id/inputOccupantLimit"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColorHint="@color/white"
+            android:textColorHint="@color/hint_text_color"
+            android:textColor="@color/white"
             android:hint="Enter occupant limit"
             android:inputType="number"
             android:layout_marginBottom="16dp" />
@@ -179,7 +190,8 @@
                 android:id="@+id/checkboxWaitlistLimit"
                 android:layout_width="wrap_content"
                 android:textColor="@color/white"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:buttonTint="#FFFFFF"/>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -204,7 +216,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Enter limit"
-            android:textColorHint="@color/white"
+            android:textColorHint="@color/hint_text_color"
+            android:textColor="@color/white"
             android:inputType="number"
             android:visibility="gone"
             android:layout_marginBottom="16dp" />
