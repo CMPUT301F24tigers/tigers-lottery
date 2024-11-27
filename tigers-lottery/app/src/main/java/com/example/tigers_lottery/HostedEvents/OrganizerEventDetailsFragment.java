@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -51,8 +52,8 @@ public class OrganizerEventDetailsFragment extends Fragment {
     // UI Components
     private TextView eventTitle, eventDescription, eventLocation, waitlistOpenDate, waitlistCloseDate, eventDate, waitlistLimit, entrantLimit;
     private ImageView eventPoster;
-    private Button viewRegisteredEntrants, viewWaitlistedEntrants, viewInvitedEntrants, viewDeclinedEntrants, runLotteryButton, clearListsButton, viewMapButton, viewQRCode;
-
+    private Button viewRegisteredEntrants, viewWaitlistedEntrants, viewInvitedEntrants, viewDeclinedEntrants;
+    private LinearLayout runLotteryButton, viewQRCode, viewMapButton, clearListsButton;
     /**
      * Required empty public constructor.
      */

@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -49,7 +50,8 @@ public class AdminEventDetailsFragment extends Fragment {
     private TextView entrantLimit;
     private TextView organizerNameTv;
     private ImageView eventPoster;
-    private Button removeEventPoster, viewQRCode;
+    private LinearLayout removeEventPoster, viewQRCode;
+    private TextView removeEventText, removeQRCodeText;
 
     /**
      * Factory method to create a new instance of this fragment.
@@ -109,15 +111,17 @@ public class AdminEventDetailsFragment extends Fragment {
         waitlistLimit = view.findViewById(R.id.waitlistLimit);
         entrantLimit = view.findViewById(R.id.entrantLimit);
         organizerNameTv = view.findViewById(R.id.organizerName);
+        removeEventText = view.findViewById(R.id.runLotteryText);
+        removeQRCodeText = view.findViewById(R.id.viewQRCodeText);
 
         removeEventPoster = view.findViewById(R.id.runLotteryButton);
         Button viewRegistered = view.findViewById(R.id.viewRegisteredEntrants);
         Button viewDeclined = view.findViewById(R.id.viewDeclinedEntrants);
         Button viewWaitlisted = view.findViewById(R.id.viewWaitlistedEntrants);
         Button viewInvited = view.findViewById(R.id.viewInvitedEntrants);
-        Button clearLists = view.findViewById(R.id.clearListsButton);
+        LinearLayout clearLists = view.findViewById(R.id.clearListsButton);
         viewQRCode = view.findViewById(R.id.viewQRCodeButton);
-        Button viewMap = view.findViewById(R.id.viewMapButton);
+        LinearLayout viewMap = view.findViewById(R.id.viewMapButton);
 
         clearLists.setVisibility(View.GONE);
         viewInvited.setVisibility(View.GONE);
@@ -126,10 +130,10 @@ public class AdminEventDetailsFragment extends Fragment {
         viewWaitlisted.setVisibility(View.GONE);
         viewMap.setVisibility(View.GONE);
 
-        removeEventPoster.setText("Remove Event Poster");
+        removeEventText.setText("Remove Event Poster");
         removeEventPoster.setVisibility(View.GONE);
 
-        viewQRCode.setText("Delete QR Code");
+        removeQRCodeText.setText("Delete QR Code");
         viewQRCode.setVisibility(View.GONE);
 
 
