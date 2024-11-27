@@ -30,23 +30,25 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.120000005"
+        android:background="@drawable/rounded_image"
         app:srcCompat="@drawable/baseline_account_circle_24" />
 
     <TextView
         android:id="@+id/userName"
-        android:layout_width="330dp"
-        android:layout_height="103dp"
-        android:textColor="@color/white"
+        android:layout_width="334dp"
+        android:layout_height="56dp"
         android:text="user name"
         android:textAlignment="center"
+        android:textColor="@color/white"
         android:textSize="25sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.459"
+        app:layout_constraintHorizontal_bias="0.493"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.29000002" />
+        app:layout_constraintVertical_bias="0.343" />
+
 
     <LinearLayout
         android:id="@+id/linearLayout"
@@ -58,7 +60,7 @@
         app:layout_constraintHorizontal_bias="0.494"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.644">
+        app:layout_constraintVertical_bias="0.689">
 
         <TextView
             android:id="@+id/textView4"
@@ -74,8 +76,8 @@
             android:id="@+id/userEmail"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="@color/white"
             android:text="user email"
+            android:textColor="@color/white"
             android:textSize="16sp" />
 
         <TextView
@@ -92,9 +94,9 @@
         <TextView
             android:id="@+id/userBirthday"
             android:layout_width="match_parent"
-            android:textColor="@color/white"
             android:layout_height="wrap_content"
             android:text="user birthday"
+            android:textColor="@color/white"
             android:textSize="16sp" />
 
         <TextView
@@ -111,9 +113,9 @@
         <TextView
             android:id="@+id/userMobile"
             android:layout_width="match_parent"
-            android:textColor="@color/white"
             android:layout_height="wrap_content"
             android:text="user mobile"
+            android:textColor="@color/white"
             android:textSize="16sp" />
 
         <Button
@@ -123,24 +125,23 @@
             android:layout_marginTop="65dp"
             android:background="#00FFFFFF"
             android:text="Are you an Admin ?"
+            android:textColor="@color/admin_text_color"
             android:visibility="invisible"
-            android:textColor="#6750A4"
             app:strokeColor="#AA00FF" />
 
     </LinearLayout>
-
 
     <Button
         android:id="@+id/editUserProfileButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:backgroundTint="@color/darker_teal"
         android:text="Edit Profile"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        android:backgroundTint="@color/darker_teal"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.84000003"
+        app:layout_constraintVertical_bias="0.893"
         app:layout_goneMarginBottom="12dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

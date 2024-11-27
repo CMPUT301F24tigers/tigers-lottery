@@ -8,10 +8,12 @@ import android.os.Bundle;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,6 +24,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.example.tigers_lottery.DatabaseHelper;
 import com.example.tigers_lottery.R;
 import com.example.tigers_lottery.models.User;
@@ -50,6 +53,7 @@ public class ProfileEditFacilityFragment extends Fragment {
     EditText nameEditText, emailEditText, mobileEditText, locationEditText;
     Button saveChangesButton;
     ImageButton editProfilePhotoButton;
+    ImageView facilityEditProfilePhoto;
 
     private Uri imageUri;
     private ActivityResultLauncher<Intent> activityResultLauncher;
@@ -97,7 +101,7 @@ public class ProfileEditFacilityFragment extends Fragment {
                 result -> {
                     if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
                         imageUri = result.getData().getData();
-                        ImageView imageView = getView().findViewById(R.id.profilePhoto);
+                        ImageView imageView = getView().findViewById(R.id.facilityEditProfilePhoto);
                         imageView.setImageURI(imageUri); // Display selected image
                     }
                 });
@@ -124,12 +128,14 @@ public class ProfileEditFacilityFragment extends Fragment {
         StorageReference storageRef = storage.getReference();
         StorageReference imageRef = storageRef.child("profile_images/" + UUID.randomUUID().toString());
 
+        facilityEditProfilePhoto = view.findViewById(R.id.facilityEditProfilePhoto);
         nameEditText = view.findViewById(R.id.editTextName);
         emailEditText = view.findViewById(R.id.editTextEmail);
         mobileEditText = view.findViewById(R.id.editTextMobile);
         locationEditText = view.findViewById(R.id.editTextLocation);
         saveChangesButton = view.findViewById(R.id.saveChangesButton);
         editProfilePhotoButton = view.findViewById(R.id.editProfilePhoto);
+        ImageButton removeFacilityProfilePictureButton = view.findViewById(R.id.removeFacilityProfilePictureButton);
 
         String deviceId = getArguments().getString("deviceId");
 
@@ -141,6 +147,11 @@ public class ProfileEditFacilityFragment extends Fragment {
                 mobileEditText.setText(user.getFacilityPhone());
                 locationEditText.setText(user.getFacilityLocation());
 
+                if(user.getFacilityPhoto() != null && !Objects.equals(user.getFacilityPhoto(), "NoFacilityPhoto")) {
+                    Glide.with(requireContext())
+                            .load(user.getFacilityPhoto())
+                            .into(facilityEditProfilePhoto);
+                }
             }
 
             @Override
@@ -165,26 +176,30 @@ public class ProfileEditFacilityFragment extends Fragment {
                                 "facility_name", nameEditText.getText().toString(),
                                 "facility_phone", mobileEditText.getText().toString(),
                                 "facility_email", emailEditText.getText().toString(),
-                                "facility_location", locationEditText.getText().toString(),
-                                "facility_photo", imageUri
+                                "facility_location", locationEditText.getText().toString()
+//                                "facility_photo", imageUri
                         )
                         .addOnSuccessListener(aVoid -> Log.d("Firestore Update", "Document updated successfully"))
                         .addOnFailureListener(e -> Log.w("Firestore Update", "Error updating document", e));
 
                 // Upload image to Firebase Storage if a new image is selected
-
                 if (imageUri != null) {
-                    imageRef.putFile(imageUri)
-                            .addOnSuccessListener(taskSnapshot -> {
-                                imageRef.getDownloadUrl().addOnSuccessListener(downloadUri -> {
-                                    String downloadUrl = downloadUri.toString();
-                                    DocumentReference docRef = db.collection("users").document(deviceId);
-                                    docRef.update("facility_photo", downloadUrl)
-                                            .addOnSuccessListener(aVoid -> Log.d("Firestore Update", "Document updated successfully"))
-                                            .addOnFailureListener(e -> Log.w("Firestore Update", "Error updating document", e));
-                                });
-                            })
-                            .addOnFailureListener(e -> Log.w("Firestore Update", "Error updating document", e));
+                    imageRef.putFile(imageUri).addOnSuccessListener(taskSnapshot -> {
+                        // Get the download URL after the image upload
+                        imageRef.getDownloadUrl().addOnSuccessListener(downloadUri -> {
+                            String downloadUrl = downloadUri.toString();
+
+                            // Save download URL to Firestore
+                            DocumentReference docRef = db.collection("users").document(deviceId);
+                            docRef.update("facility_photo", downloadUrl).addOnSuccessListener(aVoid -> {
+//                                Toast.makeText(getContext(), "Image uploaded and URL saved to Firestore", Toast.LENGTH_SHORT).show();
+                            }).addOnFailureListener(e -> {
+//                                Toast.makeText(getContext(), "Failed to save URL to Firestore: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            });
+                        });
+                    }).addOnFailureListener(e -> {
+//                        Toast.makeText(getContext(), "Failed to upload image: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    });
                 }
 
                 // Navigate back to ProfileDetailsFacilityFragment after saving
@@ -206,6 +221,62 @@ public class ProfileEditFacilityFragment extends Fragment {
                 Intent intent = new Intent(Intent.ACTION_PICK);
                 intent.setType("image/*");
                 activityResultLauncher.launch(intent);
+            }
+        });
+
+        removeFacilityProfilePictureButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
+                builder.setTitle("Delete facility profile photo");
+                builder.setMessage("Do you want to delete facility profile photo?");
+
+                // Positive button
+                builder.setPositiveButton("Confirm", (dialog, which) -> {
+                    // Replace this with your actual device ID
+                    String deviceId = Settings.Secure.getString(getContext().getContentResolver(), Settings.Secure.ANDROID_ID);;
+
+                    // Firestore: Document reference under device ID
+                    DocumentReference docRef = db.collection("users").document(deviceId);
+
+                    // Get the photo URL or path stored in Firestore
+                    docRef.get().addOnSuccessListener(documentSnapshot -> {
+                        if (documentSnapshot.exists()) {
+                            String photoPath = documentSnapshot.getString("facility_photo"); // Adjust to your Firestore field
+
+                            if (!Objects.equals(photoPath, "NoFacilityPhoto")) {
+                                // Firebase Storage: Reference to the photo
+                                assert photoPath != null;
+                                StorageReference photoRef = storage.getReferenceFromUrl(photoPath);
+
+                                // Delete the photo
+                                photoRef.delete().addOnSuccessListener(aVoid -> {
+                                    // Delete Firestore entry if needed
+                                    docRef.update("facility_photo", "NoFacilityPhoto").addOnSuccessListener(aVoid1 -> {
+                                        facilityEditProfilePhoto.setImageResource(R.drawable.baseline_account_circle_24);
+                                    }).addOnFailureListener(e -> {
+
+                                    });
+
+                                }).addOnFailureListener(e -> {
+
+                                });
+                            } else {
+
+                            }
+                        } else {
+
+                        }
+                    }).addOnFailureListener(e -> {
+
+                    });
+                });
+
+                // Negative button
+                builder.setNegativeButton("Cancel", (dialog, which) -> {});
+
+                // Show the dialog
+                builder.show();
             }
         });
 

@@ -2,6 +2,7 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="admin_text_color">#BBAAAA</color>
     <color name="primary_background_pages">#2a334c </color>
     <color name="secondary_background_cards">#404e76 </color>
     <color name="accent_1_teal">#3C9D82  </color>

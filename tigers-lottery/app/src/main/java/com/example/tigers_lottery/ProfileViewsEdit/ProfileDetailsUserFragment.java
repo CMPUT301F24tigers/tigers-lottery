@@ -134,7 +134,7 @@ public class ProfileDetailsUserFragment extends Fragment {
                                 userBirthdayTextView.setText(new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(document.getTimestamp("DOB").toDate()));
                                 userMobileTextView.setText(document.getString("phone_number"));
 
-                                if (document.getString("user_photo") != null) {
+                                if (document.getString("user_photo") != null && !Objects.equals(document.getString("user_photo"), "NoProfilePhoto")) {
                                     loadImageFromFirebase(document.getString("user_photo"), userPhoto);
                                 }
                             } else {

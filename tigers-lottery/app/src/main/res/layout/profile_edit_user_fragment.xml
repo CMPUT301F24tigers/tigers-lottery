@@ -29,19 +29,33 @@
         android:contentDescription="Edit Profile"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.611"
+        app:layout_constraintHorizontal_bias="0.709"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.198"
         app:srcCompat="@android:drawable/ic_menu_edit" />
 
-    <ImageView
-        android:id="@+id/userProfilePhoto"
-        android:layout_width="111dp"
-        android:layout_height="107dp"
+    <ImageButton
+        android:id="@+id/removeUserProfilePictureButton"
+        android:layout_width="43dp"
+        android:layout_height="29dp"
+        android:background="?android:attr/selectableItemBackground"
+        android:contentDescription="Edit Profile"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.466"
+        app:layout_constraintHorizontal_bias="0.709"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.086"
+        app:srcCompat="@android:drawable/ic_delete" />
+
+    <ImageView
+        android:id="@+id/userEditProfilePhoto"
+        android:layout_width="111dp"
+        android:layout_height="107dp"
+        android:background="@drawable/rounded_image"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.097"

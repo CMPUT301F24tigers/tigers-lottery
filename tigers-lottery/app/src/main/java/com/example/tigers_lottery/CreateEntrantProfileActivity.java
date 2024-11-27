@@ -2,7 +2,13 @@ package com.example.tigers_lottery;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,6 +22,7 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
 
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -23,6 +30,9 @@ import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -90,9 +100,6 @@ public class CreateEntrantProfileActivity extends AppCompatActivity {
         mobileEditText = findViewById(R.id.editUserTextMobile);
         editProfilePhotoButton = findViewById(R.id.sign_up_add_profile_button);
 
-        getWindow().setStatusBarColor(0xFF2A334C);
-
-
         saveInfoButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -122,6 +129,11 @@ public class CreateEntrantProfileActivity extends AppCompatActivity {
                 userData.put("email_address", emailEditText.getText().toString());
                 userData.put("DOB", date);
                 userData.put("phone_number", mobileEditText.getText().toString());
+
+                if(imageUri == null) {
+                    Bitmap imageBitmap = generateProfilePicture(firstnameEditText.getText().toString(), lastnameEditText.getText().toString(), 300);
+                    imageUri = saveBitmapToUri(getApplicationContext(), imageBitmap);
+                }
 
                 dbHelper.addUser(userData, imageUri);
 
@@ -184,5 +196,73 @@ public class CreateEntrantProfileActivity extends AppCompatActivity {
 
     public boolean validatingUserProfileInput(String firstName, String lastName, String email, Date date) {
         return (Objects.equals(firstName, "") || Objects.equals(lastName, "") || Objects.equals(email, "") || date == null);
+    }
+
+    public static Bitmap generateProfilePicture(String firstName, String lastName, int size) {
+        // Extract initials
+        String initials = "";
+        if (firstName != null && firstName.length() > 0) {
+            initials += firstName.substring(0, 1).toUpperCase();
+        }
+        if (lastName != null && lastName.length() > 0) {
+            initials += lastName.substring(0, 1).toUpperCase();
+        }
+
+        // Create a bitmap
+        Bitmap bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
+
+        // Create a canvas to draw on the bitmap
+        Canvas canvas = new Canvas(bitmap);
+
+        // Generate a random background color
+        int backgroundColor = generateRandomColor();
+        canvas.drawColor(backgroundColor);
+
+        // Set up paint for the text
+        Paint textPaint = new Paint();
+        textPaint.setColor(Color.WHITE); // Text color
+        textPaint.setAntiAlias(true);
+        textPaint.setTextSize(size / 2f); // Adjust text size
+
+        // Measure text size to center it
+        Rect textBounds = new Rect();
+        textPaint.getTextBounds(initials, 0, initials.length(), textBounds);
+        int x = (bitmap.getWidth() - textBounds.width()) / 2 - textBounds.left;
+        int y = (bitmap.getHeight() + textBounds.height()) / 2 - textBounds.bottom;
+
+        // Draw initials on the canvas
+        canvas.drawText(initials, x, y, textPaint);
+
+        return bitmap;
+    }
+
+    /**
+     * Generate a random pastel color.
+     *
+     * @return A random color as an integer.
+     */
+    private static int generateRandomColor() {
+        float[] hsv = new float[3];
+        hsv[0] = (float) (Math.random() * 360); // Hue
+        hsv[1] = 0.5f; // Saturation
+        hsv[2] = 0.9f; // Value
+        return Color.HSVToColor(hsv);
+    }
+
+    private static Uri saveBitmapToUri(Context context, Bitmap bitmap) {
+        File cacheDir = context.getCacheDir();
+        File file = new File(cacheDir, "profile_image_" + System.currentTimeMillis() + ".png");
+        try {
+            FileOutputStream outputStream = new FileOutputStream(file);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+            outputStream.flush();
+            outputStream.close();
+
+            // Use FileProvider for secure access
+            return Uri.fromFile(file);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }
