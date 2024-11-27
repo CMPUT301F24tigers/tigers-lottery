@@ -60,6 +60,8 @@ import java.util.UUID;
  * - checkUserExists(ProfileCallback callback): Checks if a user exists in the database.
  * - getUserCount(CountCallback callback): Fetches the number of users in the database.
  * - addUser(HashMap<String, Object> userData, Uri imageUri): Adds a new user to the database.
+ * - removeFacility(User user, Callback callback): Removes a facility and its associated events
+ * - getFacilityCount(final CountCallback callback): Gets the count of all active facilities
 
  * Event Management:
  * - organizerFetchEvents(EventsCallback callback): Fetches events created by the current user.
@@ -1397,6 +1399,65 @@ public class DatabaseHelper {
     }
 
     /**
+     * Removes a Facility and all its associated events
+     *
+     * @param user      The User object whose facility is getting removed.
+     * @param callback  A callback to handle success or failure of the update.
+     */
+    public void removeFacility(User user, Callback callback) {
+        if (user == null || user.getUserId() == null || user.getUserId().isEmpty()) {
+            callback.onFailure(new IllegalArgumentException("Invalid user object. User ID is required."));
+            return;
+        }
+
+        List<Integer> hostedEventIds = new ArrayList<>();
+        hostedEventIds = user.getHostedEvents();
+
+        for (Integer eventId: hostedEventIds) {
+            deleteEvent(eventId, new EventsCallback() {
+                @Override
+                public void onEventsFetched(List<Event> events) {}
+
+                @Override
+                public void onEventFetched(Event event) {
+                    Log.d("DatabaseHelper", "Event " + eventId + " has been removed");
+                }
+
+                @Override
+                public void onError(Exception e) {}
+            });
+        }
+
+        // Clear facility-related fields
+        user.setFacilityName("");
+        user.setFacilityLocation("");
+        user.setFacilityEmail("");
+        user.setFacilityPhone("");
+        user.setFacilityPhoto("NoFacilityPhoto");
+        String userId = user.getUserId();
+
+        // Check if the user document exists before attempting the update
+        db.collection("users")
+                .document(userId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        // User exists; proceed with the update
+                        db.collection("users")
+                                .document(userId)
+                                .set(user) // Directly map the User object to Firestore
+                                .addOnSuccessListener(aVoid -> callback.onSuccess("User updated successfully."))
+                                .addOnFailureListener(callback::onFailure);
+                    } else {
+                        // User does not exist
+                        callback.onFailure(new Exception("User with ID " + userId + " does not exist."));
+                    }
+                })
+                .addOnFailureListener(e -> callback.onFailure(new Exception("Failed to verify user existence: " + e.getMessage(), e)));
+    }
+
+
+    /**
      * Adds a user to the firestore database along with their data.
      *
      * @param userData user object to be added
@@ -1509,6 +1570,44 @@ public class DatabaseHelper {
     }
 
     /**
+     * Retrieves the count of facilities in the users collection that meet specific conditions:
+     * - Facility name, email, and location are not empty.
+     * - User ID does not match the current user's ID.
+     *
+     * @param callback Callback to handle the facility count or any errors.
+     */
+    public void getFacilityCount(final CountCallback callback) {
+        usersRef.get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        QuerySnapshot snapshot = task.getResult();
+                        if (snapshot != null) {
+                            int facilityCount = 0;
+
+                            for (DocumentSnapshot document : snapshot.getDocuments()) {
+                                User user = document.toObject(User.class);
+
+                                if (user != null
+                                        && !Objects.equals(user.getUserId(), getCurrentUserId())
+                                        && !Objects.equals(user.getFacilityName(), "")
+                                        && !Objects.equals(user.getFacilityEmail(), "")
+                                        && !Objects.equals(user.getFacilityLocation(), "")) {
+                                    facilityCount++;
+                                }
+                            }
+
+                            callback.onCountFetched(facilityCount);
+                        } else {
+                            callback.onCountFetched(0); // No documents, count is 0
+                        }
+                    } else {
+                        Log.e(TAG, "Error fetching facility count", task.getException());
+                        callback.onError(task.getException());
+                    }
+                });
+    }
+
+    /**
      * Removes a user's profile image or an event poster from Firebase Storage
      * and sets the corresponding Firestore field to a default value.
      *
@@ -1518,29 +1617,45 @@ public class DatabaseHelper {
      */
     public void removeImage(String type, String id, Callback callback) {
         String normalizedType = type.toLowerCase(Locale.ROOT);
-        boolean isUserRef;
+        String imageField;
+        String imageName;
+        String defaultURL;
         CollectionReference activeRef;
 
-        if (normalizedType.equals("user")) {
-            isUserRef = true;
-            activeRef = usersRef;
-        } else if (normalizedType.equals("event")) {
-            isUserRef = false;
-            activeRef = eventsRef;
-        } else {
-            callback.onFailure(new Exception("Invalid type. Must be 'user' or 'event'."));
-            return;
+        switch (normalizedType) {
+            case "user":
+                activeRef = usersRef;
+                imageField = "user_photo";
+                defaultURL = "NoProfilePhoto";
+                imageName = "User Profile Photo ";
+                break;
+            case "event":
+                activeRef = eventsRef;
+                imageField = "poster_url";
+                defaultURL = "https://example.com/default-poster.png";
+                imageName = "Event Poster ";
+                break;
+            case "facility":
+                activeRef = usersRef;
+                imageField = "facility_photo";
+                defaultURL = "NoFacilityPhoto";
+                imageName = "Facility Profile Photo ";
+                break;
+            default:
+                callback.onFailure(new Exception("Invalid type. Must be 'user' or 'event'."));
+                return;
         }
 
         // Fetch the document from Firestore
         activeRef.document(id).get().addOnSuccessListener(documentSnapshot -> {
             if (documentSnapshot.exists()) {
-                String imageUrl = documentSnapshot.getString(isUserRef ? "user_photo" : "poster_url");
+                String imageUrl = documentSnapshot.getString(imageField);
 
                 // Check if the image URL is valid or already default
-                if (imageUrl == null || imageUrl.isEmpty() || imageUrl.equals("NoProfilePhoto") ||
-                        imageUrl.equals("https://example.com/default-poster.png")) {
-                    callback.onFailure(new Exception("No profile photo or poster to remove."));
+                if (imageUrl == null || imageUrl.isEmpty() || imageUrl.equals("NoProfilePhoto")
+                        || imageUrl.equals("https://example.com/default-poster.png")
+                        || imageUrl.equals("NoFacilityPhoto")){
+                    callback.onFailure(new Exception("No image found to remove."));
                     return;
                 }
 
@@ -1548,11 +1663,10 @@ public class DatabaseHelper {
                 StorageReference photoRef = FirebaseStorage.getInstance().getReferenceFromUrl(imageUrl);
                 photoRef.delete().addOnSuccessListener(aVoid -> {
                     // Update Firestore with the default value after deletion
-                    String defaultImage = isUserRef ? "NoProfilePhoto" : "https://example.com/default-poster.png";
                     activeRef.document(id)
-                            .update(isUserRef ? "user_photo" : "poster_url", defaultImage)
+                            .update(imageField, defaultURL)
                             .addOnSuccessListener(unused -> callback.onSuccess(
-                                    (isUserRef ? "Profile photo " : "Event poster ") + "was removed successfully."))
+                                    imageName + "was removed successfully."))
                             .addOnFailureListener(e -> {
                                 Log.e("DatabaseHelper", "Error updating Firestore: " + e.getMessage(), e);
                                 callback.onFailure(e);
@@ -1613,6 +1727,19 @@ public class DatabaseHelper {
             @Override
             public void onSuccess(String message) {
                 Log.d("DatabaseHelper", "User " + userId + message);
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                Log.d("DatabaseHelper", Objects.requireNonNull(e.getMessage()));
+            }
+        });
+
+        //Remove user profile photo from storage
+        removeImage("facility", userId, new Callback() {
+            @Override
+            public void onSuccess(String message) {
+                Log.d("DatabaseHelper", "Facility of User: " + userId + message);
             }
 
             @Override

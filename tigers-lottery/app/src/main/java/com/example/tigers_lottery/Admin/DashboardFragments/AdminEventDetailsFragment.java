@@ -115,12 +115,16 @@ public class AdminEventDetailsFragment extends Fragment {
         Button viewWaitlisted = view.findViewById(R.id.viewWaitlistedEntrants);
         Button viewInvited = view.findViewById(R.id.viewInvitedEntrants);
         Button clearLists = view.findViewById(R.id.clearListsButton);
+        Button viewQRCode = view.findViewById(R.id.viewQRCodeButton);
+        Button viewMap = view.findViewById(R.id.viewMapButton);
 
         clearLists.setVisibility(View.GONE);
         viewInvited.setVisibility(View.GONE);
         viewDeclined.setVisibility(View.GONE);
         viewRegistered.setVisibility(View.GONE);
         viewWaitlisted.setVisibility(View.GONE);
+        viewQRCode.setVisibility(View.GONE);
+        viewMap.setVisibility(View.GONE);
 
         removeEventPoster.setText("Remove Event Poster");
         removeEventPoster.setVisibility(View.GONE);
