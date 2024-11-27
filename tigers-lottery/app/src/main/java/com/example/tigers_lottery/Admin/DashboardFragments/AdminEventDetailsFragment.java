@@ -18,6 +18,7 @@ import com.example.tigers_lottery.DatabaseHelper;
 import com.example.tigers_lottery.R;
 import com.example.tigers_lottery.models.Event;
 import com.example.tigers_lottery.models.User;
+import com.example.tigers_lottery.utils.QRCodeGenerator;
 import com.google.firebase.Timestamp;
 
 import java.text.SimpleDateFormat;
@@ -48,7 +49,7 @@ public class AdminEventDetailsFragment extends Fragment {
     private TextView entrantLimit;
     private TextView organizerNameTv;
     private ImageView eventPoster;
-    private Button removeEventPoster;
+    private Button removeEventPoster, viewQRCode;
 
     /**
      * Factory method to create a new instance of this fragment.
@@ -115,7 +116,7 @@ public class AdminEventDetailsFragment extends Fragment {
         Button viewWaitlisted = view.findViewById(R.id.viewWaitlistedEntrants);
         Button viewInvited = view.findViewById(R.id.viewInvitedEntrants);
         Button clearLists = view.findViewById(R.id.clearListsButton);
-        Button viewQRCode = view.findViewById(R.id.viewQRCodeButton);
+        viewQRCode = view.findViewById(R.id.viewQRCodeButton);
         Button viewMap = view.findViewById(R.id.viewMapButton);
 
         clearLists.setVisibility(View.GONE);
@@ -123,11 +124,14 @@ public class AdminEventDetailsFragment extends Fragment {
         viewDeclined.setVisibility(View.GONE);
         viewRegistered.setVisibility(View.GONE);
         viewWaitlisted.setVisibility(View.GONE);
-        viewQRCode.setVisibility(View.GONE);
         viewMap.setVisibility(View.GONE);
 
         removeEventPoster.setText("Remove Event Poster");
         removeEventPoster.setVisibility(View.GONE);
+
+        viewQRCode.setText("Delete QR Code");
+        viewQRCode.setVisibility(View.GONE);
+
 
         // Load event details
         loadEventDetails();
@@ -183,7 +187,7 @@ public class AdminEventDetailsFragment extends Fragment {
         dbHelper.getUser(event.getOrganizerId(), new DatabaseHelper.UserCallback() {
             @Override
             public void onUserFetched(User user) {
-                organizerNameTv.setText("Organizer Name: " + user.getFirstName() + " " + user.getLastName());
+                organizerNameTv.setText("Organizer Name: " + user.getFacilityName());
             }
 
             @Override
@@ -203,6 +207,9 @@ public class AdminEventDetailsFragment extends Fragment {
 
         // Display the placeholder image initially
         eventPoster.setImageResource(R.drawable.placeholder_image_background);
+        if(event.getQRCode() != null  && !(event.getQRCode().isEmpty())){
+            viewQRCode.setVisibility(View.VISIBLE);
+        }
 
         // Fetch and display the event poster
         String posterUrl = event.getPosterUrl();
@@ -238,6 +245,40 @@ public class AdminEventDetailsFragment extends Fragment {
                 }
             });
         });
+        viewQRCode.setOnClickListener(v ->{
+            event.setQRCode(null);
+            dbHelper.updateEvent(event, new DatabaseHelper.EventsCallback() {
+                /**
+                 *
+                 * @param events list of events from the organizer.
+                 */
+                @Override
+                public void onEventsFetched(List<Event> events) {
+                    Toast.makeText(getContext(), "You have deleted this event's QR Code", Toast.LENGTH_SHORT).show();
+                    viewQRCode.setVisibility(View.GONE);
+                }
+
+                /**
+                 * Unused in this fragment.
+                 * @param event single event.
+                 */
+
+                @Override
+                public void onEventFetched(Event event) {
+                }
+
+                /**
+                 * Handles error during event updating.
+                 * @param e exception catcher for event updating.
+                 */
+
+                @Override
+                public void onError(Exception e) {
+                    Toast.makeText(getContext(), "Failed to update event", Toast.LENGTH_SHORT).show();
+                }
+            });
+        });
+
     }
 
     /**
