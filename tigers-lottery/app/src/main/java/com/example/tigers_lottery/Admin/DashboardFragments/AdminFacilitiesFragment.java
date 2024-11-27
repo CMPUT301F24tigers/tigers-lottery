@@ -125,24 +125,15 @@ public class AdminFacilitiesFragment extends Fragment implements OnActionListene
      */
     @Override
     public void onOptionTwoClick(String userId) {
-        final User[] userToUpdate = new User[1];
         DatabaseHelper dbHelper = new DatabaseHelper(requireContext());
 
         dbHelper.getUser(userId, new DatabaseHelper.UserCallback() {
             @Override
             public void onUserFetched(User user) {
                 Toast.makeText(getContext(), "Removing Facility:  " + user.getFacilityName(), Toast.LENGTH_SHORT).show();
-                userToUpdate[0] = user;
-
-                // Clear facility-related fields
-                userToUpdate[0].setFacilityName("");
-                userToUpdate[0].setFacilityLocation("");
-                userToUpdate[0].setFacilityEmail("");
-                userToUpdate[0].setFacilityPhone("");
-                userToUpdate[0].setFacilityPhoto("NoFacilityPhoto");
 
                 // Update the user in the database
-                dbHelper.updateUser(userToUpdate[0], new DatabaseHelper.Callback() {
+                dbHelper.removeFacility(user, new DatabaseHelper.Callback() {
                     @Override
                     public void onSuccess(String message) {
                         Log.d("AdminFacilityFragment", "The Facility profile has been deleted successfully");

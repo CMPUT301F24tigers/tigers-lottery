@@ -83,7 +83,7 @@ public class AdminEventsFragment extends Fragment implements OnActionListener {
                         @Override
                         public void onUserFetched(User user) {
                             String organizerName = (user != null)
-                                    ? "by " + user.getFirstName() + " " + user.getLastName()
+                                    ? "by " + user.getFacilityName()
                                     : "Organizer Not Found";
 
                             globalOrganizerName = organizerName;

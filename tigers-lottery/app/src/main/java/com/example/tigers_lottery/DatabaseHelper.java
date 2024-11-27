@@ -58,7 +58,7 @@ import java.util.UUID;
  * - checkUserExists(ProfileCallback callback): Checks if a user exists in the database.
  * - getUserCount(CountCallback callback): Fetches the number of users in the database.
  * - addUser(HashMap<String, Object> userData, Uri imageUri): Adds a new user to the database.
- * - updateUser(User updatedUser, Callback callback): Updates and existing user record
+ * - removeFacility(User user, Callback callback): Removes a facility and its associated events
  * - getFacilityCount(final CountCallback callback): Gets the count of all active facilities
 
  * Event Management:
@@ -1125,18 +1125,42 @@ public class DatabaseHelper {
     }
 
     /**
-     * Updates a user in Firestore using the provided User object.
+     * Removes a Facility and all its associated events
      *
-     * @param updatedUser The User object containing updated user information.
-     * @param callback    A callback to handle success or failure of the update.
+     * @param user      The User object whose facility is getting removed.
+     * @param callback  A callback to handle success or failure of the update.
      */
-    public void updateUser(User updatedUser, Callback callback) {
-        if (updatedUser == null || updatedUser.getUserId() == null || updatedUser.getUserId().isEmpty()) {
+    public void removeFacility(User user, Callback callback) {
+        if (user == null || user.getUserId() == null || user.getUserId().isEmpty()) {
             callback.onFailure(new IllegalArgumentException("Invalid user object. User ID is required."));
             return;
         }
 
-        String userId = updatedUser.getUserId();
+        List<Integer> hostedEventIds = new ArrayList<>();
+        hostedEventIds = user.getHostedEvents();
+
+        for (Integer eventId: hostedEventIds) {
+            deleteEvent(eventId, new EventsCallback() {
+                @Override
+                public void onEventsFetched(List<Event> events) {}
+
+                @Override
+                public void onEventFetched(Event event) {
+                    Log.d("DatabaseHelper", "Event " + eventId + " has been removed");
+                }
+
+                @Override
+                public void onError(Exception e) {}
+            });
+        }
+
+        // Clear facility-related fields
+        user.setFacilityName("");
+        user.setFacilityLocation("");
+        user.setFacilityEmail("");
+        user.setFacilityPhone("");
+        user.setFacilityPhoto("NoFacilityPhoto");
+        String userId = user.getUserId();
 
         // Check if the user document exists before attempting the update
         db.collection("users")
@@ -1147,7 +1171,7 @@ public class DatabaseHelper {
                         // User exists; proceed with the update
                         db.collection("users")
                                 .document(userId)
-                                .set(updatedUser) // Directly map the User object to Firestore
+                                .set(user) // Directly map the User object to Firestore
                                 .addOnSuccessListener(aVoid -> callback.onSuccess("User updated successfully."))
                                 .addOnFailureListener(callback::onFailure);
                     } else {
@@ -1429,6 +1453,19 @@ public class DatabaseHelper {
             @Override
             public void onSuccess(String message) {
                 Log.d("DatabaseHelper", "User " + userId + message);
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                Log.d("DatabaseHelper", Objects.requireNonNull(e.getMessage()));
+            }
+        });
+
+        //Remove user profile photo from storage
+        removeImage("facility", userId, new Callback() {
+            @Override
+            public void onSuccess(String message) {
+                Log.d("DatabaseHelper", "Facility of User: " + userId + message);
             }
 
             @Override
