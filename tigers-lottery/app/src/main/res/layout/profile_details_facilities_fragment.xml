@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background_color"
+    android:background="@color/primary_background_pages"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <TextView
@@ -13,6 +13,7 @@
         android:text="Facility Profile"
         android:textSize="25sp"
         android:textStyle="bold"
+        android:textColor="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.047"
@@ -24,26 +25,29 @@
         android:id="@+id/facilityProfilePic"
         android:layout_width="111dp"
         android:layout_height="107dp"
+        android:background="@drawable/rounded_image"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.168"
+        app:layout_constraintVertical_bias="0.120000005"
         app:srcCompat="@drawable/baseline_account_circle_24" />
 
     <TextView
         android:id="@+id/facilityName"
-        android:layout_width="305dp"
-        android:layout_height="34dp"
+        android:layout_width="334dp"
+        android:layout_height="50dp"
         android:text="facility name"
         android:textAlignment="center"
+        android:textColor="@color/white"
         android:textSize="25sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.493"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.338" />
+        app:layout_constraintVertical_bias="0.37" />
 
     <LinearLayout
         android:layout_width="317dp"
@@ -63,13 +67,14 @@
             android:text="Email"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:textColor="@color/gray" />
+            android:textColor="@color/accent_3_light_purple" />
 
         <TextView
             android:id="@+id/facilityEmail"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="16sp"
+            android:textColor="@color/white"
             android:text="facility email" />
 
         <TextView
@@ -81,12 +86,13 @@
             android:textSize="16sp"
             android:textStyle="bold"
             android:text="Mobile Number"
-            android:textColor="@color/gray" />
+            android:textColor="@color/accent_3_light_purple" />
 
         <TextView
             android:id="@+id/facilityMobile"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textColor="@color/white"
             android:textSize="16sp"
             android:text="facility mobile" />
 
@@ -99,12 +105,13 @@
             android:text="Location"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:textColor="@color/gray" />
+            android:textColor="@color/accent_3_light_purple" />
 
         <TextView
             android:id="@+id/facilityLocation"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textColor="@color/white"
             android:textSize="16sp"
             android:text="facility location" />
     </LinearLayout>
@@ -116,9 +123,9 @@
         android:text="Edit Profile"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.518"
         app:layout_constraintStart_toStartOf="parent"
+        android:backgroundTint="@color/darker_teal"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.877" />
+        app:layout_constraintVertical_bias="0.84000003" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

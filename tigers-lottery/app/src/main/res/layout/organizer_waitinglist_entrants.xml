@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="@color/primary_background_pages"
     android:padding="16dp">
 
     <!-- Title for Waitlisted Entrants -->
@@ -12,6 +13,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingBottom="8dp"
+        android:textColor="@color/white"
         android:text="Waitlisted Entrants"
         android:textSize="24sp"
         android:textStyle="bold" />
@@ -25,7 +27,7 @@
         android:visibility="gone"
         android:layout_centerInParent="true"
         android:textSize="16sp"
-        android:textColor="@android:color/darker_gray" />
+        android:textColor="@android:color/white" />
 
     <!-- RecyclerView to display waitlisted entrants -->
     <androidx.recyclerview.widget.RecyclerView
@@ -45,7 +47,7 @@
         android:layout_margin="16dp"
         android:src="@drawable/ic_send"
         android:contentDescription="Send Notifications"
-        android:tint="@android:color/white"
-        android:backgroundTint="@color/app_primary_light_purple" />
+        android:tint="@color/white"
+        android:backgroundTint="@color/darker_teal" />
 
 </RelativeLayout>

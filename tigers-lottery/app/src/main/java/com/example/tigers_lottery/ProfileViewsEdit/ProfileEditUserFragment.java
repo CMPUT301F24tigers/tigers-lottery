@@ -2,17 +2,25 @@ package com.example.tigers_lottery.ProfileViewsEdit;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.provider.ContactsContract;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,6 +31,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.example.tigers_lottery.DatabaseHelper;
 import com.example.tigers_lottery.R;
 import com.example.tigers_lottery.models.User;
@@ -31,12 +40,16 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Fragment that allows users to edit their personal profile information,
@@ -102,7 +115,7 @@ public class ProfileEditUserFragment extends Fragment {
                 result -> {
                     if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
                         imageUri = result.getData().getData();
-                        ImageView imageView = requireView().findViewById(R.id.userProfilePhoto);
+                        ImageView imageView = requireView().findViewById(R.id.userEditProfilePhoto);
                         imageView.setImageURI(imageUri); // Display selected image
                     }
                 });
@@ -131,6 +144,9 @@ public class ProfileEditUserFragment extends Fragment {
         editTextMobile = view.findViewById(R.id.editTextUserProfileMobile);
         Button saveChangesButton = view.findViewById(R.id.saveChangesUserProfileButton);
         ImageButton editProfilePhotoButton = view.findViewById(R.id.editUserProfilePhoto);
+        ImageButton removeUserProfilePictureButton = view.findViewById(R.id.removeUserProfilePictureButton);
+        ImageView userEditProfilePhoto = view.findViewById(R.id.userEditProfilePhoto);
+        AtomicReference<Boolean> profilePhotoDelete = new AtomicReference<>(false);
         DatabaseHelper dbHelper = new DatabaseHelper(getContext());
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         FirebaseStorage storage = FirebaseStorage.getInstance();
@@ -156,6 +172,12 @@ public class ProfileEditUserFragment extends Fragment {
                 selectedYear = calendar.get(Calendar.YEAR);
                 selectedMonth = calendar.get(Calendar.MONTH)+1; // Months are 0-based, so add 1
                 selectedDay = calendar.get(Calendar.DAY_OF_MONTH);
+
+                if(user.getUserPhoto() != null && !Objects.equals(user.getUserPhoto(), "NoProfilePhoto")) {
+                    Glide.with(requireContext())
+                            .load(user.getUserPhoto())
+                            .into(userEditProfilePhoto);
+                }
             }
 
             @Override
@@ -202,6 +224,11 @@ public class ProfileEditUserFragment extends Fragment {
                         .addOnSuccessListener(aVoid -> Log.d("Firestore Update", "Document updated successfully"))
                         .addOnFailureListener(e -> Log.w("Firestore Update", "Error updating document", e));
 
+                if(profilePhotoDelete.get() && imageUri == null) {
+                    Bitmap imageBitmap = generateProfilePicture(editTextFirstName.getText().toString(), editTextLastName.getText().toString(), 300);
+                    imageUri = saveBitmapToUri(getContext(), imageBitmap);
+                }
+
                 // Upload image to Firebase Storage if a new image is selected
                 if (imageUri != null) {
                     imageRef.putFile(imageUri)
@@ -247,6 +274,66 @@ public class ProfileEditUserFragment extends Fragment {
             }
         });
 
+        removeUserProfilePictureButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
+                builder.setTitle("Delete user profile photo");
+                builder.setMessage("Do you want to delete user profile photo?");
+
+                // Positive button
+                builder.setPositiveButton("Confirm", (dialog, which) -> {
+                    // Replace this with your actual device ID
+                    String deviceId = Settings.Secure.getString(getContext().getContentResolver(), Settings.Secure.ANDROID_ID);
+                    ;
+
+                    // Firestore: Document reference under device ID
+                    DocumentReference docRef = db.collection("users").document(deviceId);
+
+                    // Get the photo URL or path stored in Firestore
+                    docRef.get().addOnSuccessListener(documentSnapshot -> {
+                        if (documentSnapshot.exists()) {
+                            String photoPath = documentSnapshot.getString("user_photo"); // Adjust to your Firestore field
+
+                            if (!Objects.equals(photoPath, "NoProfilePhoto")) {
+                                // Firebase Storage: Reference to the photo
+                                assert photoPath != null;
+                                StorageReference photoRef = storage.getReferenceFromUrl(photoPath);
+
+                                // Delete the photo
+                                photoRef.delete().addOnSuccessListener(aVoid -> {
+                                    // Delete Firestore entry if needed
+                                    docRef.update("user_photo", "NoProfilePhoto").addOnSuccessListener(aVoid1 -> {
+                                        userEditProfilePhoto.setImageResource(R.drawable.baseline_account_circle_24);
+                                        imageUri = null;
+                                        profilePhotoDelete.set(true);
+                                    }).addOnFailureListener(e -> {
+
+                                    });
+
+                                }).addOnFailureListener(e -> {
+
+                                });
+                            } else {
+
+                            }
+                        } else {
+
+                        }
+                    }).addOnFailureListener(e -> {
+
+                    });
+                });
+
+                // Negative button
+                builder.setNegativeButton("Cancel", (dialog, which) -> {
+                });
+
+                // Show the dialog
+                builder.show();
+            }
+        });
+
         return view;
     }
 
@@ -280,5 +367,73 @@ public class ProfileEditUserFragment extends Fragment {
 
     public boolean validatingUserProfileInput(String firstName, String lastName, String email, Date date) {
         return (Objects.equals(firstName, "") || Objects.equals(lastName, "") || Objects.equals(email, "") || date == null);
+    }
+
+    public static Bitmap generateProfilePicture(String firstName, String lastName, int size) {
+        // Extract initials
+        String initials = "";
+        if (firstName != null && firstName.length() > 0) {
+            initials += firstName.substring(0, 1).toUpperCase();
+        }
+        if (lastName != null && lastName.length() > 0) {
+            initials += lastName.substring(0, 1).toUpperCase();
+        }
+
+        // Create a bitmap
+        Bitmap bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
+
+        // Create a canvas to draw on the bitmap
+        Canvas canvas = new Canvas(bitmap);
+
+        // Generate a random background color
+        int backgroundColor = generateRandomColor();
+        canvas.drawColor(backgroundColor);
+
+        // Set up paint for the text
+        Paint textPaint = new Paint();
+        textPaint.setColor(Color.WHITE); // Text color
+        textPaint.setAntiAlias(true);
+        textPaint.setTextSize(size / 2f); // Adjust text size
+
+        // Measure text size to center it
+        Rect textBounds = new Rect();
+        textPaint.getTextBounds(initials, 0, initials.length(), textBounds);
+        int x = (bitmap.getWidth() - textBounds.width()) / 2 - textBounds.left;
+        int y = (bitmap.getHeight() + textBounds.height()) / 2 - textBounds.bottom;
+
+        // Draw initials on the canvas
+        canvas.drawText(initials, x, y, textPaint);
+
+        return bitmap;
+    }
+
+    /**
+     * Generate a random pastel color.
+     *
+     * @return A random color as an integer.
+     */
+    private static int generateRandomColor() {
+        float[] hsv = new float[3];
+        hsv[0] = (float) (Math.random() * 360); // Hue
+        hsv[1] = 0.5f; // Saturation
+        hsv[2] = 0.9f; // Value
+        return Color.HSVToColor(hsv);
+    }
+
+    private static Uri saveBitmapToUri(Context context, Bitmap bitmap) {
+        File cacheDir = context.getCacheDir();
+        File file = new File(cacheDir, "profile_image_" + System.currentTimeMillis() + ".png");
+        try {
+            FileOutputStream outputStream = new FileOutputStream(file);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+            outputStream.flush();
+            outputStream.close();
+
+            // Use FileProvider for secure access
+            return Uri.fromFile(file);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

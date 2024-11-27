@@ -2,6 +2,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/primary_background_pages"
     android:padding="16dp">
 
     <LinearLayout
@@ -15,6 +16,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Create an Event"
+            android:textColor="@color/white"
             android:textSize="24sp"
             android:textStyle="bold"
             android:layout_gravity="center"
@@ -44,7 +46,7 @@
                 android:text="Poster Placeholder"
                 android:textSize="16sp"
                 android:layout_gravity="center"
-                android:textColor="#808080" />
+                android:textColor="@color/white" />
         </FrameLayout>
 
 
@@ -53,11 +55,14 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textColor="@color/white"
             android:text="Event Name" />
         <EditText
             android:id="@+id/inputEventName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textColorHint="@color/hint_text_color"
+            android:textColor="@color/white"
             android:hint="Enter event name"
             android:layout_marginBottom="12dp"
             android:inputType="text" />
@@ -66,12 +71,15 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textColor="@color/white"
             android:text="Location" />
         <EditText
             android:id="@+id/inputEventLocation"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Enter location"
+            android:textColor="@color/white"
+            android:textColorHint="@color/hint_text_color"
             android:layout_marginBottom="12dp"
             android:inputType="text" />
 
@@ -80,18 +88,26 @@
             android:id="@+id/checkboxGeolocationRequired"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:backgroundTint="@color/white"
+            android:buttonTint="#FFFFFF"
             android:text="Require Geolocation?"
-            android:layout_marginBottom="12dp" />
+            android:textColor="@color/white"
+            android:textColorLink="@color/accent_3_light_purple"
+            android:textSize="16sp" />
 
 
         <!-- Registration Opens Label and Input -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textColor="@color/white"
             android:text="Registration Opens (YYYY-MM-DD)" />
         <EditText
             android:id="@+id/inputRegistrationOpens"
             android:layout_width="match_parent"
+            android:textColor="@color/white"
+            android:textColorHint="@color/hint_text_color"
             android:layout_height="wrap_content"
             android:hint="Select registration open date"
             android:layout_marginBottom="12dp"
@@ -101,10 +117,13 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textColor="@color/white"
             android:text="Registration Deadline (YYYY-MM-DD)" />
         <EditText
             android:id="@+id/inputRegistrationDeadline"
             android:layout_width="match_parent"
+            android:textColorHint="@color/hint_text_color"
+            android:textColor="@color/white"
             android:layout_height="wrap_content"
             android:hint="Select registration deadline"
             android:layout_marginBottom="12dp"
@@ -114,11 +133,14 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textColor="@color/white"
             android:text="Event Date (YYYY-MM-DD)" />
         <EditText
             android:id="@+id/inputEventDate"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:textColorHint="@color/hint_text_color"
             android:hint="Select event date"
             android:layout_marginBottom="12dp"
             android:inputType="date" />
@@ -127,12 +149,15 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textColor="@color/white"
             android:text="Description" />
         <EditText
             android:id="@+id/inputEventDescription"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Enter description"
+            android:textColorHint="@color/hint_text_color"
+            android:textColor="@color/white"
             android:inputType="textMultiLine"
             android:layout_marginBottom="12dp" />
 
@@ -140,12 +165,15 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textColor="@color/white"
             android:text="Occupant Limit"
             android:id="@+id/LabelOccupantLimit" />
         <EditText
             android:id="@+id/inputOccupantLimit"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textColorHint="@color/hint_text_color"
+            android:textColor="@color/white"
             android:hint="Enter occupant limit"
             android:inputType="number"
             android:layout_marginBottom="16dp" />
@@ -161,11 +189,14 @@
             <CheckBox
                 android:id="@+id/checkboxWaitlistLimit"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:textColor="@color/white"
+                android:layout_height="wrap_content"
+                android:buttonTint="#FFFFFF"/>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textColor="@color/white"
                 android:id="@+id/assignWaitlistLabel"
                 android:text="Assign Waitlist Limit?"
                 android:paddingStart="8dp"
@@ -177,6 +208,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Set Waitlist Limit"
+            android:textColor="@color/white"
             android:visibility="gone"
             android:id="@+id/labelWaitlistLimit" />
         <EditText
@@ -184,6 +216,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Enter limit"
+            android:textColorHint="@color/hint_text_color"
+            android:textColor="@color/white"
             android:inputType="number"
             android:visibility="gone"
             android:layout_marginBottom="16dp" />
@@ -192,6 +226,7 @@
         <Button
             android:id="@+id/btnCreateEvent"
             android:layout_width="match_parent"
+            android:backgroundTint="@color/darker_teal"
             android:layout_height="wrap_content"
             android:text="Create Event" />
     </LinearLayout>

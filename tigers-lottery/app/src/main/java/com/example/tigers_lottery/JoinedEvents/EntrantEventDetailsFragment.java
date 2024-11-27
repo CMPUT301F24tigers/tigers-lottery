@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
@@ -14,6 +15,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import com.bumptech.glide.Glide;
 import com.example.tigers_lottery.DatabaseHelper;
 import com.example.tigers_lottery.JoinedEvents.EntrantDashboardFragment;
 import com.example.tigers_lottery.R;
@@ -104,6 +106,7 @@ public class EntrantEventDetailsFragment extends Fragment {
         TextView eventTextViewDate = view.findViewById(R.id.eventDetailsTextViewDate);
         TextView eventTextViewRegistrationDeadline = view.findViewById(R.id.eventDetailsTextViewRegistrationDeadline);
         TextView eventTextViewStatus = view.findViewById(R.id.eventDetailsTextViewStatus);
+        ImageView eventDetailsImageView = view.findViewById(R.id.eventDetailsImageView);
 
         assert args != null;
         dbHelper.fetchEventById(args.getInt("eventId"), new DatabaseHelper.EventsCallback() {
@@ -116,6 +119,13 @@ public class EntrantEventDetailsFragment extends Fragment {
                 eventTextViewLocation.setText("Location: " + event.getLocation());
                 eventTextViewDate.setText("Date: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(event.getEventDate().toDate()));
                 eventTextViewRegistrationDeadline.setText("Registration Deadline: : " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(event.getWaitlistDeadline().toDate()));
+
+                if (event.getPosterUrl() != null && !event.getPosterUrl().isEmpty()) {
+                    Glide.with(getContext())
+                            .load(event.getPosterUrl())
+                            .placeholder(R.drawable.placeholder_image_background)
+                            .into(eventDetailsImageView);
+                }
 
                 eventDetailsButton.setText("Join Waitlist");
 
@@ -146,7 +156,7 @@ public class EntrantEventDetailsFragment extends Fragment {
                 eventDetailsButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        if (!event.getWaitlistedEntrants().contains(deviceId)) {
+                        if (!event.getWaitlistedEntrants().contains(deviceId) && !event.getRegisteredEntrants().contains(deviceId) && !event.getInvitedEntrants().contains(deviceId) && !event.getDeclinedEntrants().contains(deviceId)) {
                             // User is NOT on the waitlist, Join Waitlist functionality
                             AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
                             builder.setTitle("Join Waitlist");
@@ -194,46 +204,98 @@ public class EntrantEventDetailsFragment extends Fragment {
                             builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
                             builder.create().show();
 
-                        } else {
-                            // User is already on the waitlist, Leave Waitlist functionality
+                        } else if(event.getWaitlistedEntrants().contains(deviceId)) {
                             AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                            builder.setTitle("Leave Waitlist");
-                            builder.setMessage("Are you sure you want to leave the waitlist for this event?");
+                            builder.setTitle("Confirmation");
+                            builder.setMessage("Are you sure you want to leave waiting list?");
 
-                            // Confirm leaving
-                            builder.setPositiveButton("Leave", (dialog, which) -> {
+                            // Set the Proceed button
+                            builder.setPositiveButton("Proceed", (dialog, which) -> {
                                 dbHelper.entrantLeaveWaitingList(event.getEventId(), new DatabaseHelper.StatusCallback() {
                                     @Override
                                     public void onStatusUpdated() {
-                                        // Successfully left the waitlist, update UI
-                                        eventTextViewStatus.setText("Status: Not Registered");
-                                        eventDetailsButton.setText("Join Waitlist"); // Change button text dynamically
+                                        eventDetailsButton.setVisibility(View.INVISIBLE);
+                                        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+                                        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
-                                        // Notify the user
-                                        new AlertDialog.Builder(getContext())
-                                                .setTitle("Success")
-                                                .setMessage("You have successfully left the waitlist!")
-                                                .setPositiveButton("OK", null)
-                                                .create()
-                                                .show();
+                                        Fragment transitionedFragment = new EntrantDashboardFragment();
+
+                                        fragmentTransaction.replace(R.id.main_activity_fragment_container, transitionedFragment);
+                                        fragmentTransaction.addToBackStack(null);
+                                        fragmentTransaction.commit();
                                     }
 
                                     @Override
                                     public void onError(Exception e) {
-                                        // Handle errors
-                                        new AlertDialog.Builder(getContext())
-                                                .setTitle("Error")
-                                                .setMessage("Could not leave waitlist: " + e.getMessage())
-                                                .setPositiveButton("OK", null)
-                                                .create()
-                                                .show();
+
                                     }
                                 });
                             });
 
-                            // Cancel action
-                            builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
-                            builder.create().show();
+                            // Set the Cancel button
+                            builder.setNegativeButton("Cancel", (dialog, which) -> {
+                                // Dismiss the dialog when the user cancels
+                                dialog.dismiss();
+                            });
+
+                            // Show the AlertDialog
+                            AlertDialog dialog = builder.create();
+                            dialog.show();
+
+                        }else if(event.getInvitedEntrants().contains(deviceId)) {
+                            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                            builder.setTitle("Accept/Decline Invitation");
+                            builder.setMessage("Do you want to accept the invitation");
+
+                            // Set the Proceed button
+                            builder.setPositiveButton("Yes", (dialog, which) -> {
+                                dbHelper.entrantAcceptDeclineInvitation(event.getEventId(), "accept", new DatabaseHelper.StatusCallback() {
+                                    @Override
+                                    public void onStatusUpdated() {
+                                        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+                                        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+                                        Fragment transitionedFragment = new EntrantEventDetailsFragment();
+                                        transitionedFragment.setArguments(bundle);
+
+                                        fragmentTransaction.replace(R.id.main_activity_fragment_container, transitionedFragment);
+                                        fragmentTransaction.addToBackStack(null);
+                                        fragmentTransaction.commit();
+                                    }
+
+                                    @Override
+                                    public void onError(Exception e) {
+
+                                    }
+                                });
+                            });
+
+                            // Set the Cancel button
+                            builder.setNegativeButton("No", (dialog, which) -> {
+                                dbHelper.entrantAcceptDeclineInvitation(event.getEventId(), "decline", new DatabaseHelper.StatusCallback() {
+                                    @Override
+                                    public void onStatusUpdated() {
+                                        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+                                        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+                                        Fragment transitionedFragment = new EntrantEventDetailsFragment();
+                                        transitionedFragment.setArguments(bundle);
+
+                                        fragmentTransaction.replace(R.id.main_activity_fragment_container, transitionedFragment);
+                                        fragmentTransaction.addToBackStack(null);
+                                        fragmentTransaction.commit();
+                                    }
+
+                                    @Override
+                                    public void onError(Exception e) {
+
+                                    }
+                                });
+                            });
+
+                            // Show the AlertDialog
+                            AlertDialog dialog = builder.create();
+                            dialog.show();
                         }
                     }
                 });

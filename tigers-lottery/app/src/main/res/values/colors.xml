@@ -2,9 +2,14 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="app_primary_light_purple">#FEF7FF</color>
-    <color name="app_secondary_light_purple">#F5EAF6</color>
-    <color name="background_color">#EAD7EC</color>
-    <color name="gray">#646262</color>
-    <color name="light_grey">#DBD5D5</color>
+    <color name="admin_text_color">#BBAAAA</color>
+    <color name="primary_background_pages">#2a334c </color>
+    <color name="secondary_background_cards">#404e76 </color>
+    <color name="accent_1_teal">#3C9D82  </color>
+    <color name="accent_2_light_blue">#64B7C6</color>
+    <color name="accent_3_light_purple">#8bbdff</color>
+    <color name="pastel_red">#ff5a6b</color>
+    <color name="pastel_green">#77f487</color>
+    <color name="darker_teal">#245750</color>
+    <color name="hint_text_color">#6F6F6F</color>
 </resources>

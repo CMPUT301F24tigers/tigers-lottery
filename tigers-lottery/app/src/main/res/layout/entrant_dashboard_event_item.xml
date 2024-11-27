@@ -1,51 +1,119 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="horizontal"
-    android:padding="8dp"
-    android:background="@color/background_color">
+    android:background="@color/secondary_background_cards"
+    android:layout_margin="8dp"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="4dp">
 
-    <!-- Event Image -->
-    <ImageView
-        android:id="@+id/eventItemPhoto"
-        android:layout_width="99dp"
-        android:layout_height="85dp"
-        android:layout_marginEnd="8dp"
-        tools:srcCompat="@tools:sample/avatars" />
-
-    <!-- Container for event details -->
-    <LinearLayout
-        android:layout_width="0dp"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_weight="1">
+        android:background="@color/secondary_background_cards"
+        android:padding="8dp">
+
+        <!-- Event ID (Hidden) -->
+        <TextView
+            android:id="@+id/eventId"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:visibility="gone" />
+
+        <!-- Organizer ID (Hidden) -->
+        <TextView
+            android:id="@+id/organizerId"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:visibility="gone" />
+
+        <!-- Waitlist Limit (Hidden) -->
+        <TextView
+            android:id="@+id/waitlistLimit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:visibility="gone" />
+
+        <!-- Event Icon -->
+
+        <!-- Event Date -->
+        <ImageView
+            android:id="@+id/eventItemPhoto"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:layout_marginStart="2dp"
+            android:layout_marginEnd="4dp"
+            android:background="@drawable/rounded_image"
+            android:clipToOutline="true"
+            android:scaleType="centerCrop"
+            android:src="@drawable/circular_image"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.024"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.502"
+            tools:srcCompat="@tools:sample/avatars" />
 
         <TextView
             android:id="@+id/eventItemName"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="event_name"
-            android:textStyle="bold" />
+            android:text="Event 1"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginStart="8dp"
+            android:layout_marginBottom="8dp"
+            app:layout_constraintBottom_toTopOf="@id/eventItemLocation"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/eventItemPhoto"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/eventItemLocation"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="event_location" />
+            android:text="Location: UofA"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            android:layout_marginBottom="16dp"
+            app:layout_constraintBottom_toTopOf="@id/eventItemTime"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="@id/eventItemName"
+            app:layout_constraintTop_toBottomOf="@id/eventItemName" />
 
         <TextView
             android:id="@+id/eventItemTime"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="event_time" />
-
+            android:text="Date: October 19, 2024"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            app:layout_constraintBottom_toTopOf="@id/eventItemStatus"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@id/eventItemLocation"
+            app:layout_constraintTop_toBottomOf="@id/eventItemLocation" />
 
         <TextView
             android:id="@+id/eventItemStatus"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="event_status" />
-    </LinearLayout>
+            android:text="event_status"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@id/eventItemName"
+            app:layout_constraintTop_toBottomOf="@id/eventItemTime" />
 
-</LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.cardview.widget.CardView>
+
+

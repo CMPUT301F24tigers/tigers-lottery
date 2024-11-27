@@ -25,6 +25,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.bumptech.glide.Glide;
 
+import java.util.Objects;
+
 /**
  * Fragment that displays facility profile details and allows the user to edit their profile information.
  * Loads profile data from Firebase Firestore and displays it in the appropriate UI components.
@@ -121,7 +123,7 @@ public class ProfileDetailsFacilityFragment extends Fragment {
                                 facilityLocation.setText(document.getString("facility_location"));
 
                                 // Load facility photo if available
-                                if (document.getString("facility_photo") != null) {
+                                if (document.getString("facility_photo") != null && !Objects.equals(document.getString("facility_photo"), "NoFacilityPhoto")) {
                                     loadImageFromFirebase(document.getString("facility_photo"), facilityPhoto);
                                 }
                             } else {

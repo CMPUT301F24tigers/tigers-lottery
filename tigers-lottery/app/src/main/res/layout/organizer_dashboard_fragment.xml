@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
+    android:background="@color/primary_background_pages"
     android:padding="16dp">
 
     <!-- Title for the dashboard -->
@@ -12,6 +13,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingBottom="8dp"
+        android:textColor="@color/white"
         android:text="Upcoming Events"
         android:textSize="24sp"
         android:textStyle="bold" />
@@ -21,11 +23,14 @@
         android:id="@+id/searchView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:backgroundTint="@color/white"
         android:layout_marginBottom="8dp"
         android:background="@drawable/search_bar_background"
         android:queryHint="Search events" />
 
     <!-- RecyclerView to display the list of events -->
+
+    <!-- Floating Action Button to create a new event -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/eventsRecyclerView"
         android:layout_width="match_parent"
@@ -33,15 +38,16 @@
         android:layout_weight="1"
         android:padding="8dp" />
 
-    <!-- Floating Action Button to create a new event -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabCreateEvent"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="end|bottom"
         android:layout_margin="16dp"
+        android:contentDescription="Create Event"
         android:src="@drawable/ic_add_event"
-        android:contentDescription="Create Event" />
+        app:tint="@color/white"
+        app:backgroundTint="@color/darker_teal"/>
 
 </LinearLayout>
 

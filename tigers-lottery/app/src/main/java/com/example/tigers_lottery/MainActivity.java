@@ -13,6 +13,7 @@ import com.google.android.material.navigation.NavigationBarView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import android.util.Log;
@@ -55,6 +56,7 @@ public class MainActivity extends AppCompatActivity {
         // BottomNavigationView setup
         BottomNavigationView bottomNav = findViewById(R.id.nav_view);
         MenuItem adminMenuItem = bottomNav.getMenu().findItem(R.id.navigation_admin);
+        getWindow().setStatusBarColor(0xFF2A334C);
 
         // Check if the user profile exists; if not, navigate to CreateEntrantProfileActivity
         dbHelper.checkUserExists(new DatabaseHelper.ProfileCallback() {

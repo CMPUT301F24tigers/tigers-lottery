@@ -79,8 +79,10 @@ public class AdminFacilitiesFragment extends Fragment implements OnActionListene
                                 user.getUserId(),
                                 user.getFacilityName(),
                                 "by " + user.getFirstName() + " " + user.getLastName(),
+                                user.getFacilityPhoto(),
                                 "View Facility",
-                                "Remove Facility"
+                                "Remove Facility",
+                                false
                         ));
                     }
                 }

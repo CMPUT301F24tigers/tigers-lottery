@@ -4,18 +4,21 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="#EAD7EC">
+    android:background="@color/primary_background_pages">
 
     <ScrollView
-        android:layout_width="408dp"
-        android:layout_height="649dp"
         android:id="@+id/scrollViewEntrants"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_width="386dp"
+        android:layout_height="580dp"
+        android:layout_marginTop="64dp"
+        android:layout_marginEnd="24dp"
+        android:padding="8dp"
+        app:layout_constraintBottom_toTopOf="@id/join_event_button"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="1.0">
+        app:layout_constraintHorizontal_bias="0.466"
+        app:layout_constraintStart_toStartOf="@id/textView"
+        app:layout_constraintTop_toBottomOf="@id/textView"
+        app:layout_constraintTop_toTopOf="parent">
 
         <LinearLayout
             android:id="@+id/linear_layout_events_list"
@@ -24,33 +27,36 @@
             android:orientation="vertical" />
     </ScrollView>
 
-    <Button
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/join_event_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="#BE86C0"
-        android:shadowColor="@color/black"
-        android:text="Join an event"
+        android:layout_marginBottom="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/scrollViewEntrants"
         app:layout_constraintHorizontal_bias="0.942"
+        android:backgroundTint="@color/darker_teal"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.023" />
+        android:layout_gravity="end|bottom"
+        app:layout_constraintTop_toBottomOf="@id/scrollViewEntrants"
+        app:tint="@color/white"
+        android:src="@drawable/ic_add_event" />
+
 
     <TextView
         android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="My Events"
+        android:textColor="@color/white"
         android:textSize="24sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/scrollViewEntrants"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.078"
+        app:layout_constraintHorizontal_bias="0.053"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.038" />
+        app:layout_constraintVertical_bias="0.355" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
