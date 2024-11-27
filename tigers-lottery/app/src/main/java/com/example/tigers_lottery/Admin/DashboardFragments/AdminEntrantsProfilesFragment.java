@@ -82,9 +82,10 @@ public class AdminEntrantsProfilesFragment extends Fragment implements OnActionL
                                 user.getFirstName() + " " + user.getLastName(),
                                 user.getEmailAddress(),
                                 userPhoto,
-                                "Remove User",
                                 "View User Profile",
-                                false));
+                                "Remove User Profile"
+                                 false
+                        ));
                     }
                 }
                 userAdapter.notifyDataSetChanged();
@@ -111,6 +112,23 @@ public class AdminEntrantsProfilesFragment extends Fragment implements OnActionL
      */
     @Override
     public void onOptionOneClick(String userId) {
+        AdminUserDetailsFragment userDetailsFragment = AdminUserDetailsFragment.newInstance(userId);
+
+        requireActivity().getSupportFragmentManager().beginTransaction()
+                .replace(R.id.main_activity_fragment_container, userDetailsFragment)
+                .addToBackStack(null)
+                .commit();
+    }
+
+    /**
+     * Handles the action to view a specific user's profile.
+     * This method is triggered when the "View User Profile" option is selected.
+     *
+     * @param userId The ID of the user whose profile will be viewed.
+     */
+    @Override
+    public void onOptionTwoClick(String userId) {
+
         DatabaseHelper dbHelper = new DatabaseHelper(requireContext());
         dbHelper.getUser(userId, new DatabaseHelper.UserCallback() {
             @Override
@@ -127,23 +145,6 @@ public class AdminEntrantsProfilesFragment extends Fragment implements OnActionL
         userAdapter.setExpandedPosition(-1);
         userAdapter.notifyDataSetChanged();
     }
-
-    /**
-     * Handles the action to view a specific user's profile.
-     * This method is triggered when the "View User Profile" option is selected.
-     *
-     * @param userId The ID of the user whose profile will be viewed.
-     */
-    @Override
-    public void onOptionTwoClick(String userId) {
-        AdminUserDetailsFragment userDetailsFragment = AdminUserDetailsFragment.newInstance(userId);
-
-        requireActivity().getSupportFragmentManager().beginTransaction()
-                .replace(R.id.main_activity_fragment_container, userDetailsFragment)
-                .addToBackStack(null)
-                .commit();
-    }
-
 
     /**
      * Creates a new instance of the AdminEntrantsProfilesFragment.
