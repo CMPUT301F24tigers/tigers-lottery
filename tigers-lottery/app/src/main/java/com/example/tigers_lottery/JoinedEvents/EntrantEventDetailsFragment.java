@@ -107,6 +107,7 @@ public class EntrantEventDetailsFragment extends Fragment {
         TextView eventTextViewRegistrationDeadline = view.findViewById(R.id.eventDetailsTextViewRegistrationDeadline);
         TextView eventTextViewStatus = view.findViewById(R.id.eventDetailsTextViewStatus);
         ImageView eventDetailsImageView = view.findViewById(R.id.eventDetailsImageView);
+        eventDetailsButton.setVisibility(View.INVISIBLE);
 
         assert args != null;
         dbHelper.fetchEventById(args.getInt("eventId"), new DatabaseHelper.EventsCallback() {
@@ -136,18 +137,24 @@ public class EntrantEventDetailsFragment extends Fragment {
                 }
 
                 if(event.getRegisteredEntrants().contains(deviceId)) {
+                    eventTextViewStatus.setTextColor(0xFF800080);
                     eventTextViewStatus.setText("Status: Registered");
                     eventDetailsButton.setVisibility(View.INVISIBLE);
                 }else if(event.getInvitedEntrants().contains(deviceId)) {
+                    eventTextViewStatus.setTextColor(0xFF00FF00);
                     eventTextViewStatus.setText("Status: Invited");
                     eventDetailsButton.setText("Accept/Decline Invitation");
+                    eventDetailsButton.setVisibility(View.VISIBLE);
                 }else if(event.getDeclinedEntrants().contains(deviceId)) {
+                    eventTextViewStatus.setTextColor(0xFFFF0000);
                     eventTextViewStatus.setText("Status: Declined");
                     eventDetailsButton.setVisibility(View.INVISIBLE);
                 }else if(event.getWaitlistedEntrants().contains(deviceId)) {
+                    eventTextViewStatus.setTextColor(0xFF0000FF);
                     eventTextViewStatus.setText("Status: Waitlisted");
                     eventDetailsButton.setText("Leave Waiting List");
-                }
+                    eventDetailsButton.setVisibility(View.VISIBLE);
+                } else{eventDetailsButton.setVisibility(View.VISIBLE);}
 
 
                 Bundle bundle = new Bundle();
@@ -168,6 +175,7 @@ public class EntrantEventDetailsFragment extends Fragment {
                                     @Override
                                     public void onEventFetched(Event updatedEvent) {
                                         // Successfully joined the waitlist, update UI
+                                        eventTextViewStatus.setTextColor(0xFF0000FF);
                                         eventTextViewStatus.setText("Status: Waitlisted");
                                         eventDetailsButton.setText("Leave Waitlist"); // Change button text dynamically
 
@@ -180,6 +188,14 @@ public class EntrantEventDetailsFragment extends Fragment {
                                                 })
                                                 .create()
                                                 .show();
+                                        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+                                        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+                                        Fragment transitionedFragment = new EntrantDashboardFragment();
+
+                                        fragmentTransaction.replace(R.id.main_activity_fragment_container, transitionedFragment);
+                                        fragmentTransaction.addToBackStack(null);
+                                        fragmentTransaction.commit();
                                     }
 
                                     @Override

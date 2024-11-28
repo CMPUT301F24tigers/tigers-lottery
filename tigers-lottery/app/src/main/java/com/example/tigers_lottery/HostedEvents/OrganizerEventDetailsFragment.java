@@ -29,6 +29,7 @@ import com.example.tigers_lottery.R;
 import com.example.tigers_lottery.models.Event;
 import com.example.tigers_lottery.utils.QRCodeGenerator;
 import com.google.firebase.Timestamp;
+import com.google.zxing.qrcode.encoder.QRCode;
 
 import java.util.ArrayList;
 import java.util.Base64;
@@ -51,7 +52,7 @@ public class OrganizerEventDetailsFragment extends Fragment {
 
     // UI Components
     private TextView eventTitle, eventDescription, eventLocation, waitlistOpenDate, waitlistCloseDate, eventDate, waitlistLimit, entrantLimit;
-    private ImageView eventPoster;
+    private ImageView eventPoster, viewQRCodeImage;
     private Button viewRegisteredEntrants, viewWaitlistedEntrants, viewInvitedEntrants, viewDeclinedEntrants;
     private LinearLayout runLotteryButton, viewQRCode, viewMapButton, clearListsButton;
     /**
@@ -131,6 +132,7 @@ public class OrganizerEventDetailsFragment extends Fragment {
         clearListsButton = view.findViewById(R.id.clearListsButton);
         viewQRCode = view.findViewById(R.id.viewQRCodeButton);
         viewMapButton = view.findViewById(R.id.viewMapButton);
+        viewQRCodeImage = view.findViewById(R.id.viewQRCodeButtonImage);
 
         // Fetch and display event details
         loadEventDetails();
@@ -158,6 +160,14 @@ public class OrganizerEventDetailsFragment extends Fragment {
                 if (fetchedEvent != null) {
                     event = fetchedEvent;
                     displayEventDetails(event);
+                    if(event.getQRCode() != null && !(event.getQRCode().isEmpty())){
+                        QRCodeGenerator qrCodeGenerator = new QRCodeGenerator(event);
+                        qrCodeGenerator.setHashData();
+                        Bitmap QRcode = qrCodeGenerator.generateQRCodeFromHashData();
+                        viewQRCodeImage.setImageBitmap(QRcode);
+                    }else{
+                        viewQRCodeImage.setImageResource(R.drawable.default_qr_code);
+                    }
                     setupLotteryButton();
                     setupDeclineListener();
                     setupClearListsButton();

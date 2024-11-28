@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -43,8 +44,9 @@ public class AdminUserDetailsFragment extends Fragment {
     private TextView userEmail;
     private TextView userMobile;
     private TextView userDOB;
-    private ImageView userPhoto;
-    private Button removeUserProfilePhoto;
+    private ImageView userPhoto, removeUserProfilePhotoImage;
+    private LinearLayout removeUserProfilePhoto;
+    private TextView removeUserText;
 
     /**
      * Factory method to create a new instance of this fragment.
@@ -95,6 +97,8 @@ public class AdminUserDetailsFragment extends Fragment {
         userMobile = view.findViewById(R.id.waitlistCloseDate);
         userPhoto = view.findViewById(R.id.eventPoster);
         removeUserProfilePhoto = view.findViewById(R.id.runLotteryButton);
+        removeUserText = view.findViewById(R.id.runLotteryText);
+        removeUserProfilePhotoImage = view.findViewById(R.id.runLotteryImage);
 
         // Hide unrelated UI components
         TextView description = view.findViewById(R.id.eventDescription);
@@ -102,9 +106,9 @@ public class AdminUserDetailsFragment extends Fragment {
         Button viewDeclined = view.findViewById(R.id.viewDeclinedEntrants);
         Button viewWaitlisted = view.findViewById(R.id.viewWaitlistedEntrants);
         Button viewInvited = view.findViewById(R.id.viewInvitedEntrants);
-        Button clearLists = view.findViewById(R.id.clearListsButton);
-        Button viewQRCode = view.findViewById(R.id.viewQRCodeButton);
-        Button viewMap = view.findViewById(R.id.viewMapButton);
+        LinearLayout clearLists = view.findViewById(R.id.clearListsButton);
+        LinearLayout viewQRCode = view.findViewById(R.id.viewQRCodeButton);
+        LinearLayout viewMap = view.findViewById(R.id.viewMapButton);
 
         clearLists.setVisibility(View.GONE);
         viewInvited.setVisibility(View.GONE);
@@ -115,8 +119,8 @@ public class AdminUserDetailsFragment extends Fragment {
         viewQRCode.setVisibility(View.GONE);
         viewMap.setVisibility(View.GONE);
         removeUserProfilePhoto.setVisibility(View.GONE);
-
-        removeUserProfilePhoto.setText("Remove User Profile Photo");
+        removeUserText.setText("Remove User Profile Photo");
+        removeUserProfilePhotoImage.setImageResource(R.drawable.placeholder_user_image);
 
         // Load user details
         loadUserDetails();

@@ -1,5 +1,6 @@
 package com.example.tigers_lottery.Admin.DashboardFragments;
 
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,6 +22,7 @@ import com.example.tigers_lottery.models.Event;
 import com.example.tigers_lottery.models.User;
 import com.example.tigers_lottery.utils.QRCodeGenerator;
 import com.google.firebase.Timestamp;
+import com.google.zxing.qrcode.encoder.QRCode;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -49,7 +51,7 @@ public class AdminEventDetailsFragment extends Fragment {
     private TextView waitlistLimit;
     private TextView entrantLimit;
     private TextView organizerNameTv;
-    private ImageView eventPoster;
+    private ImageView eventPoster, removeEventImage, removeQRImage;
     private LinearLayout removeEventPoster, viewQRCode;
     private TextView removeEventText, removeQRCodeText;
 
@@ -113,6 +115,8 @@ public class AdminEventDetailsFragment extends Fragment {
         organizerNameTv = view.findViewById(R.id.organizerName);
         removeEventText = view.findViewById(R.id.runLotteryText);
         removeQRCodeText = view.findViewById(R.id.viewQRCodeText);
+        removeQRImage = view.findViewById(R.id.viewQRCodeButtonImage);
+        removeEventImage = view.findViewById(R.id.runLotteryImage);
 
         removeEventPoster = view.findViewById(R.id.runLotteryButton);
         Button viewRegistered = view.findViewById(R.id.viewRegisteredEntrants);
@@ -213,6 +217,10 @@ public class AdminEventDetailsFragment extends Fragment {
         eventPoster.setImageResource(R.drawable.placeholder_image_background);
         if(event.getQRCode() != null  && !(event.getQRCode().isEmpty())){
             viewQRCode.setVisibility(View.VISIBLE);
+            QRCodeGenerator qrCodeGenerator = new QRCodeGenerator(event);
+            qrCodeGenerator.setHashData();
+            Bitmap QRCode = qrCodeGenerator.generateQRCodeFromHashData();
+            removeQRImage.setImageBitmap(QRCode);
         }
 
         // Fetch and display the event poster
@@ -224,6 +232,7 @@ public class AdminEventDetailsFragment extends Fragment {
                     .into(eventPoster);
 
             removeEventPoster.setVisibility(View.VISIBLE);
+            removeEventImage.setImageResource(R.drawable.placeholder_user_image);
             eventPoster.setOnClickListener(v -> showImagePreviewDialog(posterUrl));
         }
     }
