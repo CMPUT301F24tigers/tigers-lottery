@@ -332,17 +332,20 @@ public class OrganizerEventDetailsFragment extends Fragment {
 
             // Alternatively, if manual triggering is also intended, keep button enabled
             runLotteryButton.setEnabled(false);
+            runLotteryButton.setBackgroundResource(R.drawable.square_button_background_disabled);
             runLotteryButton.setOnClickListener(null);
 
         } else if (event.getWaitlistDeadline().compareTo(currentTimestamp) <= 0 && !event.isLotteryRan()) {
             // Enable the button if it's past the waitlist deadline and before the event date
             Log.d("LotteryDebug", "Lottery button enabled.");
             runLotteryButton.setEnabled(true);
+            runLotteryButton.setBackgroundResource(R.drawable.square_button_background);
             runLotteryButton.setOnClickListener(v -> runLottery());
         } else {
             // Disable button and remove listener if conditions don't allow the lottery to be run
             Log.d("LotteryDebug", "Lottery button disabled.");
             runLotteryButton.setEnabled(false);
+            runLotteryButton.setBackgroundResource(R.drawable.square_button_background_disabled);
             runLotteryButton.setOnClickListener(null);
         }
     }
@@ -395,6 +398,7 @@ public class OrganizerEventDetailsFragment extends Fragment {
                         Log.d("LotteryDebug", "Lottery successfully updated in Firestore.");
                         Toast.makeText(getContext(), "Lottery run successfully!", Toast.LENGTH_SHORT).show();
                         runLotteryButton.setEnabled(false); // Disable button after running
+                        runLotteryButton.setBackgroundResource(R.drawable.square_button_background_disabled);
                         event.setLotteryRan(true); // Mark the event's lottery as run
 
                         // Send notifications to new invitees

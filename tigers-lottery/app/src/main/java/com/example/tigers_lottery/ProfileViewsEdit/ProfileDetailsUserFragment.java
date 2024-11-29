@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -222,11 +223,14 @@ public class ProfileDetailsUserFragment extends Fragment {
             }
         });
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext(), R.style.CustomDialogTheme);
         builder.setTitle("Admin Verification");
 
         // Create an EditText to enter the code
         final EditText input = new EditText(requireContext());
+        input.setTextColor(ContextCompat.getColor(requireContext(), R.color.white));
+        input.setHintTextColor(ContextCompat.getColor(requireContext(), R.color.hint_text_color));
+
         input.setHint("Enter Admin Authentication Code");
         builder.setView(input);
 

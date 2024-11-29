@@ -147,24 +147,26 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_margin="2dp"
-                android:orientation="vertical"
-                android:gravity="center"
                 android:background="@drawable/square_button_background"
+                android:gravity="center"
+                android:orientation="vertical"
                 android:padding="16dp"
-                app:layout_columnWeight="1">
+                app:layout_column="0"
+                app:layout_columnWeight="1"
+                app:layout_row="0">
 
-            <ImageView
-                android:id="@+id/runLotteryImage"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:src="@drawable/ic_lottery" />
+                <ImageView
+                    android:id="@+id/runLotteryImage"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:src="@drawable/ic_lottery" />
 
-            <TextView
-                android:id="@+id/runLotteryText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Run Lottery"
-                android:gravity="center" />
+                <TextView
+                    android:id="@+id/runLotteryText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="Run Lottery" />
             </LinearLayout>
 
             <LinearLayout
@@ -247,7 +249,7 @@
             android:id="@+id/viewRegisteredEntrants"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:backgroundTint="@color/accent_1_teal"
+            android:backgroundTint="@color/darker_teal"
             android:text="View Registered Entrants"
             android:layout_marginBottom="8dp" />
 
@@ -255,7 +257,7 @@
             android:id="@+id/viewWaitlistedEntrants"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:backgroundTint="@color/lighter_purple"
+            android:backgroundTint="@color/darker_teal"
             android:text="View Waitlisted Entrants"
             android:layout_marginBottom="8dp" />
 
@@ -263,14 +265,14 @@
             android:id="@+id/viewInvitedEntrants"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:backgroundTint="@color/accent_3_light_purple"
+            android:backgroundTint="@color/darker_teal"
             android:text="View Invited Entrants"
             android:layout_marginBottom="8dp" />
 
         <Button
             android:id="@+id/viewDeclinedEntrants"
             android:layout_width="match_parent"
-            android:backgroundTint="@color/pastel_red"
+            android:backgroundTint="@color/darker_teal"
             android:layout_height="wrap_content"
             android:text="View Declined Entrants"
             android:layout_marginBottom="8dp" />

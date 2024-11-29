@@ -38,9 +38,6 @@
             android:textSize="14sp"
             android:visibility="gone" />
 
-        <!-- Event Icon -->
-
-        <!-- Event Date -->
         <ImageView
             android:id="@+id/eventItemPhoto"
             android:layout_width="70dp"
@@ -112,7 +109,6 @@
             android:text="Event Status"
             android:textColor="@android:color/white"
             android:textSize="12sp"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toStartOf="parent"
