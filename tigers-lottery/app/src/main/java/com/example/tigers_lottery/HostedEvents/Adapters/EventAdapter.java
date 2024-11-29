@@ -84,7 +84,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
         // Set the event details
         holder.eventName.setText(event.getEventName());
         String dateSplit = event.getFormattedEventDate().split(" - ")[0];
-        holder.eventDate.setText("Date: " + dateSplit);
+        holder.eventDate.setText(dateSplit);
         holder.eventId.setText("Event ID: " + event.getEventId());
         holder.organizerId.setText("Organizer ID: " + event.getOrganizerId());
         holder.waitlistLimit.setText("Waitlist Limit: " + event.getWaitlistLimit());
@@ -94,19 +94,21 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
                     .placeholder(R.drawable.event_poster_placeholder)
                     .into(holder.eventIcon);
         }
-        holder.eventGeolocation.setText("Location: " + event.getLocation());
+        holder.eventGeolocation.setText(event.getLocation());
 
         holder.optionsMenu.setOnClickListener(view -> {
             PopupMenu popupMenu = new PopupMenu(context, holder.optionsMenu);
-            MenuInflater inflater = popupMenu.getMenuInflater();
-            inflater.inflate(R.menu.organizer_event_item_menu, popupMenu.getMenu());
+            popupMenu.inflate(R.menu.organizer_event_item_menu);
 
+            // Apply black text color to all menu items
             for (int i = 0; i < popupMenu.getMenu().size(); i++) {
                 MenuItem menuItem = popupMenu.getMenu().getItem(i);
                 SpannableString spanString = new SpannableString(menuItem.getTitle());
-                spanString.setSpan(new ForegroundColorSpan(ContextCompat.getColor(context, R.color.black)), 0, spanString.length(), 0);
+                spanString.setSpan(new ForegroundColorSpan(ContextCompat.getColor(context, android.R.color.black)), 0, spanString.length(), 0);
                 menuItem.setTitle(spanString);
             }
+
+            popupMenu.show();
 
             popupMenu.setOnMenuItemClickListener(item -> {
                 if (item.getItemId() == R.id.action_edit) {
@@ -119,7 +121,6 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
                 return false;
             });
 
-            popupMenu.show();
         });
 
         holder.itemView.setOnClickListener(v -> eventClickListener.onEventClick(event));

@@ -12,7 +12,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/secondary_background_cards"
-        android:padding="8dp">
+        android:padding="8dp"
+        android:clipChildren="false"
+        android:clipToPadding="false">
 
         <!-- Event ID (Hidden) -->
         <TextView
@@ -39,7 +41,6 @@
             android:textSize="14sp" />
 
         <!-- Event Icon -->
-
         <ImageView
             android:id="@+id/eventIcon"
             android:layout_width="70dp"
@@ -53,63 +54,91 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
+        <!-- Event Name -->
         <TextView
             android:id="@+id/eventName"
-            android:layout_width="265dp"
-            android:layout_height="30dp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:text="Event 1"
+            android:text="Test Event"
             android:textColor="@color/white"
             android:textSize="18sp"
             android:textStyle="bold"
-            app:layout_constraintBottom_toTopOf="@+id/eventGeolocation"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
+            android:ellipsize="none"
+            android:singleLine="false"
+            android:breakStrategy="simple"
+            app:layout_constraintBottom_toTopOf="@+id/eventGeolocationContainer"
             app:layout_constraintStart_toEndOf="@id/eventIcon"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- Event Date -->
+        <!-- Location Container -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/eventGeolocationContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:layout_constraintTop_toBottomOf="@id/eventName"
+            app:layout_constraintStart_toStartOf="@id/eventName">
+
+        <!-- Location -->
         <TextView
             android:id="@+id/eventGeolocation"
-            android:layout_width="262dp"
-            android:layout_height="36dp"
-            android:layout_marginTop="4dp"
-            android:text="Location: UofA"
-            android:textColor="@color/white"
-            android:textSize="14sp"
-            app:layout_constraintBottom_toTopOf="@+id/eventDate"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="@id/eventName"
-            app:layout_constraintTop_toBottomOf="@id/eventName" />
-
-        <!-- Options Menu Icon -->
-        <TextView
-            android:id="@+id/eventDate"
-            android:layout_width="259dp"
-            android:layout_height="33dp"
-            android:layout_marginTop="4dp"
-            android:text="Date: October 19, 2024"
-            android:textColor="@color/white"
-            android:textSize="14sp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="@id/eventGeolocation"
-            app:layout_constraintTop_toBottomOf="@+id/eventGeolocation" />
-
-        <ImageView
-            android:id="@+id/optionsMenu"
-            android:layout_width="29dp"
-            android:layout_height="30dp"
-            android:contentDescription="Options menu"
-            android:src="@android:drawable/ic_menu_more"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="1.0"
-            app:layout_constraintStart_toEndOf="@+id/eventName"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.0" />
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:paddingTop="1dp"
+            android:paddingBottom="1dp"
+            android:text="Location: 6830 Speaker Vista NW, Edmonton, Alberta, Canada"
+            android:textColor="@color/black"
+            android:textSize="12sp"
+            android:ellipsize="none"
+            android:singleLine="false"
+            android:breakStrategy="simple"
+            android:background="@drawable/rounded_pill_background"
+            app:layout_constraintEnd_toEndOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Event Date Container -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/eventDateContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        app:layout_constraintTop_toBottomOf="@id/eventGeolocationContainer"
+        app:layout_constraintStart_toStartOf="@id/eventGeolocationContainer"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <!-- Event Date -->
+        <TextView
+            android:id="@+id/eventDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:paddingTop="1dp"
+            android:paddingBottom="1dp"
+            android:layout_marginEnd="8dp"
+            android:text="Date: October 19, 2024"
+            android:textColor="@color/black"
+            android:textSize="12sp"
+            android:background="@drawable/rounded_pill_background" />
+
+        <!-- Dropdown Icon -->
+        <ImageView
+            android:id="@+id/optionsMenu"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:contentDescription="Options menu"
+            android:src="@drawable/dropdown_arrow"
+            app:tint="@color/white"
+            android:layout_marginLeft="105dp"
+            app:layout_constraintStart_toEndOf="@id/eventDate"
+            app:layout_constraintTop_toTopOf="@id/eventDate"
+            app:layout_constraintBottom_toBottomOf="@id/eventDate" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
 </androidx.cardview.widget.CardView>
