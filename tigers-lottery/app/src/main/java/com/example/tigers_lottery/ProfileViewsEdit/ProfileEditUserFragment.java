@@ -50,6 +50,8 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Fragment that allows users to edit their personal profile information,
@@ -60,6 +62,7 @@ public class ProfileEditUserFragment extends Fragment {
 
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
+    private static final String EMAIL_REGEX = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
 
     private String mParam2;
 
@@ -208,6 +211,9 @@ public class ProfileEditUserFragment extends Fragment {
 
                 if(validatingUserProfileInput(editTextFirstName.getText().toString(), editTextLastName.getText().toString(), editTextEmail.getText().toString(), date)) {
                     Toast.makeText(getContext(), "Every field except for Phone Number must be filled!", Toast.LENGTH_LONG).show();
+                    return;
+                } else if(!validateEmail(editTextEmail.getText().toString())){
+                    Toast.makeText(getContext(), "This email address is invalid!", Toast.LENGTH_LONG).show();
                     return;
                 }
                 
@@ -435,5 +441,13 @@ public class ProfileEditUserFragment extends Fragment {
             e.printStackTrace();
             return null;
         }
+    }
+    public static boolean validateEmail(String email) {
+        if (email == null) {
+            return false;
+        }
+        Pattern pattern = Pattern.compile(EMAIL_REGEX);
+        Matcher matcher = pattern.matcher(email);
+        return matcher.matches();
     }
 }
