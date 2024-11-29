@@ -219,6 +219,50 @@ public class DatabaseHelper {
         void onFailure(String errorMessage);
     }
 
+    /**
+     * Callback interface for notification count operations.
+     */
+    public interface NotificationCountCallback {
+        void onCountFetched(int count);
+        void onError(Exception e);
+    }
+
+    /**
+     * Fetches the count of unread notifications for the current user.
+     *
+     * @param callback Callback to return the count or handle errors.
+     */
+    public void getUnreadNotificationCount(NotificationCountCallback callback) {
+        String currentUserId = getCurrentUserId(); // Fetch the logged-in user's ID
+
+        notificationsRef
+                .whereEqualTo("user_id", currentUserId)
+                .whereEqualTo("read_status", false) // Filter unread notifications
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    int count = querySnapshot.size(); // Get the count of documents
+                    callback.onCountFetched(count);
+                })
+                .addOnFailureListener(callback::onError);
+    }
+
+    public void listenForUnreadNotifications(String userId, NotificationCountCallback callback) {
+        db.collection("notifications")
+                .whereEqualTo("user_id", userId)
+                .whereEqualTo("read_status", false) // Only unread notifications
+                .addSnapshotListener((querySnapshot, e) -> {
+                    if (e != null) {
+                        callback.onError(e);
+                        return;
+                    }
+
+                    if (querySnapshot != null) {
+                        int count = querySnapshot.size();
+                        callback.onCountFetched(count);
+                    }
+                });
+    }
+
 
     /**
      * Fetches notifications for the current user based on their user_id.

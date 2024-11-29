@@ -20,6 +20,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.TextView;
 
 import com.example.tigers_lottery.ProfileViewsEdit.ProfileDetailsActivity;
 
@@ -34,6 +35,8 @@ public class MainActivity extends AppCompatActivity {
      * Button to open the Profile Details Activity.
      */
     ImageButton editProfile;
+    private DatabaseHelper dbHelper;
+    private TextView notificationBadge;
 
     /**
      * Called when the activity is first created. Sets up the UI components,
@@ -50,13 +53,15 @@ public class MainActivity extends AppCompatActivity {
         String deviceId = DeviceIDHelper.getDeviceId(this);
         editProfile = findViewById(R.id.profileButton);
         ImageButton notificationButton = findViewById(R.id.notificationButton);
+        notificationBadge = findViewById(R.id.notificationBadge);
 
-        DatabaseHelper dbHelper = new DatabaseHelper(getApplicationContext());
+        dbHelper = new DatabaseHelper(this);
 
         // BottomNavigationView setup
         BottomNavigationView bottomNav = findViewById(R.id.nav_view);
         MenuItem adminMenuItem = bottomNav.getMenu().findItem(R.id.navigation_admin);
         getWindow().setStatusBarColor(0xFF2A334C);
+
 
         // Check if the user profile exists; if not, navigate to CreateEntrantProfileActivity
         dbHelper.checkUserExists(new DatabaseHelper.ProfileCallback() {
@@ -123,15 +128,43 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Set listener for notifications button to navigate to NotificationDashboardFragment
-        notificationButton.setOnClickListener(new View.OnClickListener() {
+        // Handle notification button click
+        notificationButton.setOnClickListener(view -> loadFragment(new NotificationDashboardFragment()));
+
+        setupNotificationBadgeListener();
+
+    }
+
+    /**
+     * Sets up a real-time listener for unread notification count updates.
+     */
+    private void setupNotificationBadgeListener() {
+        String userId = dbHelper.getCurrentUserId();
+        dbHelper.listenForUnreadNotifications(userId, new DatabaseHelper.NotificationCountCallback() {
             @Override
-            public void onClick(View view) {
-                loadFragment(new NotificationDashboardFragment());
+            public void onCountFetched(int count) {
+                runOnUiThread(() -> updateNotificationBadge(count));
+            }
+
+            @Override
+            public void onError(Exception e) {
+                //Log.e("Error listening for unread notifications");
             }
         });
+    }
 
-
+    /**
+     * Updates the notification badge with the unread notification count.
+     *
+     * @param count The number of unread notifications.
+     */
+    private void updateNotificationBadge(int count) {
+        if (count > 0) {
+            notificationBadge.setVisibility(View.VISIBLE);
+            notificationBadge.setText(String.valueOf(count));
+        } else {
+            notificationBadge.setVisibility(View.GONE);
+        }
     }
 
     /**

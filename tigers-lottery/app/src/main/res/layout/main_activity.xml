@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -13,17 +12,37 @@
         android:layout_height="wrap_content"
         android:background="@color/primary_background_pages">
 
-
-        <!-- Notification Icon Button -->
-        <ImageButton
-            android:id="@+id/notificationButton"
+        <RelativeLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_mailbox"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Notifications"
-            android:layout_gravity="start"
-            android:padding="10dp" />
+            android:layout_gravity="start">
+
+            <!-- Notification Bell Icon -->
+            <ImageButton
+                android:id="@+id/notificationButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_mailbox"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Notifications"
+                android:padding="10dp" />
+
+            <!-- Badge Indicator -->
+            <TextView
+                android:id="@+id/notificationBadge"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:background="@drawable/notification_badge_background"
+                android:textColor="@android:color/white"
+                android:gravity="center"
+                android:textSize="12sp"
+                android:visibility="gone"
+                android:layout_alignEnd="@+id/notificationButton"
+                android:layout_alignTop="@+id/notificationButton"
+                android:layout_marginEnd="4dp"
+                android:layout_marginTop="4dp" />
+        </RelativeLayout>
+
 
         <!-- Title TextView -->
         <TextView
@@ -44,8 +63,8 @@
             android:src="@drawable/baseline_account_circle_24"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="Profile"
-            android:layout_gravity="end"
-            android:padding="10dp" />
+            android:padding="10dp"
+            android:layout_gravity="end" />
     </com.google.android.material.appbar.MaterialToolbar>
 
     <androidx.fragment.app.FragmentContainerView
