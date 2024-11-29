@@ -90,7 +90,7 @@
             android:paddingTop="1dp"
             android:paddingBottom="1dp"
             android:text="Location: 6830 Speaker Vista NW, Edmonton, Alberta, Canada"
-            android:textColor="@color/black"
+            android:textColor="@color/white"
             android:textSize="12sp"
             android:ellipsize="none"
             android:singleLine="false"
@@ -121,7 +121,7 @@
             android:paddingBottom="1dp"
             android:layout_marginEnd="8dp"
             android:text="Date: October 19, 2024"
-            android:textColor="@color/black"
+            android:textColor="@color/white"
             android:textSize="12sp"
             android:background="@drawable/rounded_pill_background" />
 
