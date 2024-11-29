@@ -7,6 +7,7 @@ import com.example.tigers_lottery.Admin.AdminDashboardFragment;
 import com.example.tigers_lottery.HostedEvents.OrganizerDashboardFragment;
 import com.example.tigers_lottery.JoinedEvents.EntrantDashboardFragment;
 import com.example.tigers_lottery.Notifications.NotificationDashboardFragment;
+import com.example.tigers_lottery.models.User;
 import com.example.tigers_lottery.utils.DeviceIDHelper;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
@@ -22,6 +23,8 @@ import android.view.View;
 import android.widget.ImageButton;
 
 import com.example.tigers_lottery.ProfileViewsEdit.ProfileDetailsActivity;
+
+import java.util.List;
 
 /**
  * The main activity that acts as a central navigation hub, allowing users to switch between
@@ -50,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
         String deviceId = DeviceIDHelper.getDeviceId(this);
         editProfile = findViewById(R.id.profileButton);
         ImageButton notificationButton = findViewById(R.id.notificationButton);
+        notificationButton.setVisibility(View.GONE);
 
         DatabaseHelper dbHelper = new DatabaseHelper(getApplicationContext());
 
@@ -76,6 +80,26 @@ public class MainActivity extends AppCompatActivity {
         if (adminMenuItem != null) {
             adminMenuItem.setVisible(false);
         }
+
+        dbHelper.fetchUserById(deviceId, new DatabaseHelper.UsersCallback() {
+            @Override
+            public void onUsersFetched(List<User> users) {
+                //Do nothing
+            }
+
+            @Override
+            public void onUserFetched(User user) {
+                if(user.isNotificationFlag()){
+                    notificationButton.setVisibility(View.VISIBLE);
+                }
+            }
+
+            @Override
+            public void onError(Exception e) {
+                //Do nothing
+            }
+        });
+
 
         // Check if the device ID exists in the admins collection
         dbHelper.isAdminUser(deviceId, new DatabaseHelper.VerificationCallback() {

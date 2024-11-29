@@ -26,6 +26,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -71,6 +72,8 @@ public class ProfileEditUserFragment extends Fragment {
 
     // Selected date components for DOB
     private Integer selectedYear, selectedMonth, selectedDay;
+
+    CheckBox enableNotificationsButton;
 
     /**
      * Default constructor for the fragment.
@@ -142,6 +145,7 @@ public class ProfileEditUserFragment extends Fragment {
         editTextEmail = view.findViewById(R.id.editTextUserProfileEmail);
         editTextDOB = view.findViewById(R.id.editTextUserProfileDOB);
         editTextMobile = view.findViewById(R.id.editTextUserProfileMobile);
+        enableNotificationsButton = view.findViewById(R.id.checkboxNotificationsEnabled);
         Button saveChangesButton = view.findViewById(R.id.saveChangesUserProfileButton);
         ImageButton editProfilePhotoButton = view.findViewById(R.id.editUserProfilePhoto);
         ImageButton removeUserProfilePictureButton = view.findViewById(R.id.removeUserProfilePictureButton);
@@ -165,6 +169,7 @@ public class ProfileEditUserFragment extends Fragment {
                 editTextEmail.setText(user.getEmailAddress());
                 editTextDOB.setText(new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(user.getDateOfBirth().toDate()));
                 editTextMobile.setText(user.getPhoneNumber());
+                enableNotificationsButton.setChecked(user.isNotificationFlag());
 
                 Calendar calendar = Calendar.getInstance();
                 calendar.setTime(user.getDateOfBirth().toDate());
@@ -219,7 +224,8 @@ public class ProfileEditUserFragment extends Fragment {
                                 "last_name", editTextLastName.getText().toString(),
                                 "DOB", date,
                                 "phone_number", editTextMobile.getText().toString(),
-                                "email_address", editTextEmail.getText().toString()
+                                "email_address", editTextEmail.getText().toString(),
+                                "notification_flag", enableNotificationsButton.isChecked()
                         )
                         .addOnSuccessListener(aVoid -> Log.d("Firestore Update", "Document updated successfully"))
                         .addOnFailureListener(e -> Log.w("Firestore Update", "Error updating document", e));

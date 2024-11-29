@@ -10,13 +10,12 @@
         android:id="@+id/textView2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Profile"
+        android:text="User Profile"
         android:textSize="25sp"
         android:textColor="@color/white"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.047"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.022" />
@@ -35,8 +34,8 @@
 
     <TextView
         android:id="@+id/userName"
-        android:layout_width="334dp"
-        android:layout_height="56dp"
+        android:layout_width="335dp"
+        android:layout_height="55dp"
         android:text="user name"
         android:textAlignment="center"
         android:textColor="@color/white"
@@ -44,23 +43,21 @@
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.493"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.343" />
+        app:layout_constraintVertical_bias="0.33" />
 
 
     <LinearLayout
         android:id="@+id/linearLayout"
-        android:layout_width="320dp"
-        android:layout_height="273dp"
+        android:layout_width="300dp"
+        android:layout_height="280dp"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.494"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.689">
+        app:layout_constraintTop_toBottomOf="@+id/userName"
+        app:layout_constraintVertical_bias="0.2">
 
         <TextView
             android:id="@+id/textView4"
@@ -118,18 +115,22 @@
             android:textColor="@color/white"
             android:textSize="16sp" />
 
-        <Button
-            android:id="@+id/adminVerifyBtn"
-            android:layout_width="318dp"
-            android:layout_height="45dp"
-            android:layout_marginTop="65dp"
-            android:background="#00FFFFFF"
-            android:text="Are you an Admin ?"
-            android:textColor="@color/admin_text_color"
-            android:visibility="invisible"
-            app:strokeColor="#AA00FF" />
-
     </LinearLayout>
+
+    <Button
+        android:id="@+id/adminVerifyBtn"
+        android:layout_width="276dp"
+        android:layout_height="43dp"
+        android:background="#00FFFFFF"
+        android:text="Are you an Admin ?"
+        android:textColor="@color/white"
+        android:visibility="visible"
+        app:layout_constraintBottom_toTopOf="@id/editUserProfileButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.98"
+        app:strokeColor="#AA00FF" />
 
     <Button
         android:id="@+id/editUserProfileButton"
@@ -141,7 +142,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.893"
-        app:layout_goneMarginBottom="12dp" />
+        app:layout_constraintVertical_bias="0.84"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
