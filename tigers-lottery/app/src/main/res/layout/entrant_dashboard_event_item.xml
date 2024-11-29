@@ -38,9 +38,6 @@
             android:textSize="14sp"
             android:visibility="gone" />
 
-        <!-- Event Icon -->
-
-        <!-- Event Date -->
         <ImageView
             android:id="@+id/eventItemPhoto"
             android:layout_width="70dp"
@@ -102,15 +99,21 @@
 
         <TextView
             android:id="@+id/eventItemStatus"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="event_status"
-            android:textColor="@color/white"
-            android:textSize="14sp"
-            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/rounded_priority_background"
+            android:gravity="center"
+            android:padding="4dp"
+            android:text="Event Status"
+            android:textColor="@android:color/white"
+            android:textSize="12sp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="@id/eventItemName"
-            app:layout_constraintTop_toBottomOf="@id/eventItemTime" />
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="1.0" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

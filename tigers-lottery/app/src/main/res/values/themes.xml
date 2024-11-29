@@ -2,5 +2,6 @@
     <style name="Base.Theme.Tigerslottery" parent="Theme.Material3.DayNight.NoActionBar">
             <item name="android:fontFamily">@font/host_grotesk</item>
             <item name="android:textColor">#FFFFFF</item>
+            <item name="alertDialogTheme">@style/CustomDialogTheme</item>
     </style>
 </resources>

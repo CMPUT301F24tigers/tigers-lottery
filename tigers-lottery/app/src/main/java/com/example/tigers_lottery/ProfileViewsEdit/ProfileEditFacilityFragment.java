@@ -35,6 +35,8 @@ import com.google.firebase.storage.StorageReference;
 
 import java.util.Objects;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Fragment that allows users to edit their facility profile information.
@@ -45,6 +47,7 @@ public class ProfileEditFacilityFragment extends Fragment {
 
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
+    private static final String EMAIL_REGEX = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
 
     private String mParam1;
     private String mParam2;
@@ -285,6 +288,14 @@ public class ProfileEditFacilityFragment extends Fragment {
 
     public boolean validatingFacilityProfileInput(Context context, String name, String email, String location, String mobile) {
         return (!Objects.equals(name, "") && !Objects.equals(email, "") && !Objects.equals(location, "") && mobile != null);
+    }
+    public static boolean validateEmail(String email) {
+        if (email == null) {
+            return false;
+        }
+        Pattern pattern = Pattern.compile(EMAIL_REGEX);
+        Matcher matcher = pattern.matcher(email);
+        return matcher.matches();
     }
 
 }

@@ -3,14 +3,18 @@ package com.example.tigers_lottery.HostedEvents.Adapters;
 import static java.security.AccessController.getContext;
 
 import android.content.Context;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -87,16 +91,22 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
         if (event.getPosterUrl() != null && !event.getPosterUrl().isEmpty()) {
             Glide.with(context)
                     .load(event.getPosterUrl())
-                    .placeholder(R.drawable.placeholder_image_background)
+                    .placeholder(R.drawable.event_poster_placeholder)
                     .into(holder.eventIcon);
         }
         holder.eventGeolocation.setText("Location: " + event.getLocation());
 
-        // Set up the options menu for each item
         holder.optionsMenu.setOnClickListener(view -> {
             PopupMenu popupMenu = new PopupMenu(context, holder.optionsMenu);
             MenuInflater inflater = popupMenu.getMenuInflater();
             inflater.inflate(R.menu.organizer_event_item_menu, popupMenu.getMenu());
+
+            for (int i = 0; i < popupMenu.getMenu().size(); i++) {
+                MenuItem menuItem = popupMenu.getMenu().getItem(i);
+                SpannableString spanString = new SpannableString(menuItem.getTitle());
+                spanString.setSpan(new ForegroundColorSpan(ContextCompat.getColor(context, R.color.black)), 0, spanString.length(), 0);
+                menuItem.setTitle(spanString);
+            }
 
             popupMenu.setOnMenuItemClickListener(item -> {
                 if (item.getItemId() == R.id.action_edit) {
@@ -112,7 +122,6 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
             popupMenu.show();
         });
 
-        // Set up click listener for the entire event item
         holder.itemView.setOnClickListener(v -> eventClickListener.onEventClick(event));
     }
 

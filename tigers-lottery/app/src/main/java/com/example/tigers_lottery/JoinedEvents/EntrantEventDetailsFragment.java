@@ -1,6 +1,7 @@
 package com.example.tigers_lottery.JoinedEvents;
 
 import android.annotation.SuppressLint;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -107,6 +108,7 @@ public class EntrantEventDetailsFragment extends Fragment {
         TextView eventTextViewRegistrationDeadline = view.findViewById(R.id.eventDetailsTextViewRegistrationDeadline);
         TextView eventTextViewStatus = view.findViewById(R.id.eventDetailsTextViewStatus);
         ImageView eventDetailsImageView = view.findViewById(R.id.eventDetailsImageView);
+        eventDetailsButton.setVisibility(View.INVISIBLE);
 
         assert args != null;
         dbHelper.fetchEventById(args.getInt("eventId"), new DatabaseHelper.EventsCallback() {
@@ -115,15 +117,15 @@ public class EntrantEventDetailsFragment extends Fragment {
             public void onEventFetched(Event event) {
 
                 eventTextViewName.setText(event.getEventName());
-                eventTextViewDescription.setText("Description: " + event.getDescription());
+                eventTextViewDescription.setText(event.getDescription());
                 eventTextViewLocation.setText("Location: " + event.getLocation());
-                eventTextViewDate.setText("Date: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(event.getEventDate().toDate()));
-                eventTextViewRegistrationDeadline.setText("Registration Deadline: : " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(event.getWaitlistDeadline().toDate()));
+                eventTextViewDate.setText("Date: " + new SimpleDateFormat("yyyy-MM-dd").format(event.getEventDate().toDate()));
+                eventTextViewRegistrationDeadline.setText("Registration Deadline: : " + new SimpleDateFormat("yyyy-MM-dd").format(event.getWaitlistDeadline().toDate()));
 
                 if (event.getPosterUrl() != null && !event.getPosterUrl().isEmpty()) {
                     Glide.with(getContext())
                             .load(event.getPosterUrl())
-                            .placeholder(R.drawable.placeholder_image_background)
+                            .placeholder(R.drawable.event_poster_placeholder)
                             .into(eventDetailsImageView);
                 }
 
@@ -134,20 +136,26 @@ public class EntrantEventDetailsFragment extends Fragment {
                 }else {
                     eventTextViewWaitingList.setText("Waiting List: " + event.getWaitlistedEntrants().size() + " entrants");
                 }
-
+                GradientDrawable statusBackground = (GradientDrawable) eventTextViewStatus.getBackground();
                 if(event.getRegisteredEntrants().contains(deviceId)) {
+                    statusBackground.setColor(0xFF008080);
                     eventTextViewStatus.setText("Status: Registered");
                     eventDetailsButton.setVisibility(View.INVISIBLE);
                 }else if(event.getInvitedEntrants().contains(deviceId)) {
+                    statusBackground.setColor(0xFFB080B0);
                     eventTextViewStatus.setText("Status: Invited");
                     eventDetailsButton.setText("Accept/Decline Invitation");
+                    eventDetailsButton.setVisibility(View.VISIBLE);
                 }else if(event.getDeclinedEntrants().contains(deviceId)) {
+                    statusBackground.setColor(0xFF8B0000);
                     eventTextViewStatus.setText("Status: Declined");
                     eventDetailsButton.setVisibility(View.INVISIBLE);
                 }else if(event.getWaitlistedEntrants().contains(deviceId)) {
+                    statusBackground.setColor(0xFF696969);
                     eventTextViewStatus.setText("Status: Waitlisted");
                     eventDetailsButton.setText("Leave Waiting List");
-                }
+                    eventDetailsButton.setVisibility(View.VISIBLE);
+                } else{eventDetailsButton.setVisibility(View.VISIBLE);}
 
 
                 Bundle bundle = new Bundle();
@@ -168,6 +176,7 @@ public class EntrantEventDetailsFragment extends Fragment {
                                     @Override
                                     public void onEventFetched(Event updatedEvent) {
                                         // Successfully joined the waitlist, update UI
+                                        eventTextViewStatus.setTextColor(0xFF0000FF);
                                         eventTextViewStatus.setText("Status: Waitlisted");
                                         eventDetailsButton.setText("Leave Waitlist"); // Change button text dynamically
 
@@ -180,6 +189,14 @@ public class EntrantEventDetailsFragment extends Fragment {
                                                 })
                                                 .create()
                                                 .show();
+                                        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+                                        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+                                        Fragment transitionedFragment = new EntrantDashboardFragment();
+
+                                        fragmentTransaction.replace(R.id.main_activity_fragment_container, transitionedFragment);
+                                        fragmentTransaction.addToBackStack(null);
+                                        fragmentTransaction.commit();
                                     }
 
                                     @Override
