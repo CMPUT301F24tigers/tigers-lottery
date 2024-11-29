@@ -63,7 +63,7 @@ public class OrganizerDeclinedEntrantsFragment extends Fragment {
 
         // Set up FAB to open the notification dialog
         fabSendNotifications.setOnClickListener(v -> {
-            SendNotificationDialog notificationDialog = new SendNotificationDialog(requireContext(), eventId, "invited_entrants");
+            SendNotificationDialog notificationDialog = new SendNotificationDialog(requireContext(), eventId, "declined_entrants");
             notificationDialog.showDialog();
         });
 
