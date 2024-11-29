@@ -1,6 +1,7 @@
 package com.example.tigers_lottery.JoinedEvents;
 
 import android.annotation.SuppressLint;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -116,10 +117,10 @@ public class EntrantEventDetailsFragment extends Fragment {
             public void onEventFetched(Event event) {
 
                 eventTextViewName.setText(event.getEventName());
-                eventTextViewDescription.setText("Description: " + event.getDescription());
+                eventTextViewDescription.setText(event.getDescription());
                 eventTextViewLocation.setText("Location: " + event.getLocation());
-                eventTextViewDate.setText("Date: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(event.getEventDate().toDate()));
-                eventTextViewRegistrationDeadline.setText("Registration Deadline: : " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(event.getWaitlistDeadline().toDate()));
+                eventTextViewDate.setText("Date: " + new SimpleDateFormat("yyyy-MM-dd").format(event.getEventDate().toDate()));
+                eventTextViewRegistrationDeadline.setText("Registration Deadline: : " + new SimpleDateFormat("yyyy-MM-dd").format(event.getWaitlistDeadline().toDate()));
 
                 if (event.getPosterUrl() != null && !event.getPosterUrl().isEmpty()) {
                     Glide.with(getContext())
@@ -135,22 +136,22 @@ public class EntrantEventDetailsFragment extends Fragment {
                 }else {
                     eventTextViewWaitingList.setText("Waiting List: " + event.getWaitlistedEntrants().size() + " entrants");
                 }
-
+                GradientDrawable statusBackground = (GradientDrawable) eventTextViewStatus.getBackground();
                 if(event.getRegisteredEntrants().contains(deviceId)) {
-                    eventTextViewStatus.setTextColor(0xFF800080);
+                    statusBackground.setColor(0xFF008080);
                     eventTextViewStatus.setText("Status: Registered");
                     eventDetailsButton.setVisibility(View.INVISIBLE);
                 }else if(event.getInvitedEntrants().contains(deviceId)) {
-                    eventTextViewStatus.setTextColor(0xFF00FF00);
+                    statusBackground.setColor(0xFFB080B0);
                     eventTextViewStatus.setText("Status: Invited");
                     eventDetailsButton.setText("Accept/Decline Invitation");
                     eventDetailsButton.setVisibility(View.VISIBLE);
                 }else if(event.getDeclinedEntrants().contains(deviceId)) {
-                    eventTextViewStatus.setTextColor(0xFFFF0000);
+                    statusBackground.setColor(0xFF8B0000);
                     eventTextViewStatus.setText("Status: Declined");
                     eventDetailsButton.setVisibility(View.INVISIBLE);
                 }else if(event.getWaitlistedEntrants().contains(deviceId)) {
-                    eventTextViewStatus.setTextColor(0xFF0000FF);
+                    statusBackground.setColor(0xFF696969);
                     eventTextViewStatus.setText("Status: Waitlisted");
                     eventDetailsButton.setText("Leave Waiting List");
                     eventDetailsButton.setVisibility(View.VISIBLE);

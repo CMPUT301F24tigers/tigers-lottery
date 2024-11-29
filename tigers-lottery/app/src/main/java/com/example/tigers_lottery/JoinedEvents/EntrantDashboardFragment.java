@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -127,17 +128,19 @@ public class EntrantDashboardFragment extends Fragment {
                                 .into(eventPhoto);
                     }
 
+                    GradientDrawable statusBackground = (GradientDrawable) eventStatusTextView.getBackground();
+
                     if (event.getDeclinedEntrants().contains(deviceId)) {
-                        eventStatusTextView.setTextColor(0xFFFF0000);
+                        statusBackground.setColor(0xFF8B0000);
                         eventStatusTextView.setText("Status: Declined");
                     } else if (event.getInvitedEntrants().contains(deviceId)) {
-                        eventStatusTextView.setTextColor(0xFF00FF00);
+                        statusBackground.setColor(0xFFB080B0);
                         eventStatusTextView.setText("Status: Invited");
                     } else if (event.getWaitlistedEntrants().contains(deviceId)) {
-                        eventStatusTextView.setTextColor(0xFF0000FF);
+                        statusBackground.setColor(0xFF696969);
                         eventStatusTextView.setText("Status: Waitlisted");
                     } else if (event.getRegisteredEntrants().contains(deviceId)) {
-                        eventStatusTextView.setTextColor(0xFF800080);
+                        statusBackground.setColor(0xFF008080);
                         eventStatusTextView.setText("Status: Registered");
                     }
 
@@ -190,24 +193,6 @@ public class EntrantDashboardFragment extends Fragment {
         qrCodeLauncher.launch(intent); // Launch the scanner
     }
 
-    /*private final ActivityResultLauncher<Intent> qrCodeLauncher =
-            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
-                if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
-                    IntentResult intentResult = IntentIntegrator.parseActivityResult(
-                            IntentIntegrator.REQUEST_CODE,
-                            result.getResultCode(),
-                            result.getData()
-                    );
-                    if (intentResult != null && intentResult.getContents() != null) {
-                        String eventId = intentResult.getContents();
-                        Toast.makeText(getContext(), "Scanned Event ID: " + eventId, Toast.LENGTH_SHORT).show();
-                        Log.d("QRScan", "Navigating to event details with eventId: " + eventId);
-                        navigateToEventDetails(eventId);
-                    } else {
-                        Toast.makeText(getContext(), "Scan Cancelled", Toast.LENGTH_SHORT).show();
-                    }
-                }
-            });*/
 
 
     private void navigateToEventDetails(String result) {
@@ -252,10 +237,4 @@ public class EntrantDashboardFragment extends Fragment {
     }
 
 }
-
-    /*@Override
-    public void onPause() {
-        super.onPause();
-        Log.d("EntrantDashboardFragment", "onPause called");
-    }*/
 
