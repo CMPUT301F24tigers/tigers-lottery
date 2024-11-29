@@ -120,7 +120,8 @@ public class EntrantDashboardFragment extends Fragment {
 
                     eventNameTextView.setText(event.getEventName());
                     eventLocationTextView.setText(event.getLocation());
-                    eventDateTextView.setText(new SimpleDateFormat("yyyy-MM-dd").format(event.getEventDate().toDate()));
+                    String dateSplit = event.getFormattedEventDate().split(" - ")[0];
+                    eventDateTextView.setText(dateSplit);
                     if (event.getPosterUrl() != null && !event.getPosterUrl().isEmpty()) {
                         Glide.with(getContext())
                                 .load(event.getPosterUrl())
