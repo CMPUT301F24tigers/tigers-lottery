@@ -245,7 +245,7 @@ public class OrganizerEventDetailsFragment extends Fragment {
         if (event.getPosterUrl() != null && !event.getPosterUrl().isEmpty()) {
             Glide.with(this)
                     .load(event.getPosterUrl())
-                    .placeholder(R.drawable.placeholder_image_background) // find a better background later
+                    .placeholder(R.drawable.event_poster_placeholder) // find a better background later
                     .into(eventPoster);
         }
     }

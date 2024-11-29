@@ -214,7 +214,7 @@ public class AdminEventDetailsFragment extends Fragment {
         entrantLimit.setText("Entrant Limit: " + event.getOccupantLimit());
 
         // Display the placeholder image initially
-        eventPoster.setImageResource(R.drawable.placeholder_image_background);
+        eventPoster.setImageResource(R.drawable.event_poster_placeholder);
         if(event.getQRCode() != null  && !(event.getQRCode().isEmpty())){
             viewQRCode.setVisibility(View.VISIBLE);
             QRCodeGenerator qrCodeGenerator = new QRCodeGenerator(event);
@@ -228,7 +228,7 @@ public class AdminEventDetailsFragment extends Fragment {
         if (posterUrl != null && !posterUrl.isEmpty() && !posterUrl.equals("https://example.com/default-poster.png")) {
             Glide.with(requireContext())
                     .load(posterUrl)
-                    .placeholder(R.drawable.placeholder_image_background)
+                    .placeholder(R.drawable.event_poster_placeholder)
                     .into(eventPoster);
 
             removeEventPoster.setVisibility(View.VISIBLE);

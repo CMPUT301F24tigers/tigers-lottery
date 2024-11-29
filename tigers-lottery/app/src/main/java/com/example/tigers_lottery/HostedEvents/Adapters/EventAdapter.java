@@ -91,7 +91,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
         if (event.getPosterUrl() != null && !event.getPosterUrl().isEmpty()) {
             Glide.with(context)
                     .load(event.getPosterUrl())
-                    .placeholder(R.drawable.placeholder_image_background)
+                    .placeholder(R.drawable.event_poster_placeholder)
                     .into(holder.eventIcon);
         }
         holder.eventGeolocation.setText("Location: " + event.getLocation());

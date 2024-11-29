@@ -125,7 +125,7 @@ public class EntrantEventDetailsFragment extends Fragment {
                 if (event.getPosterUrl() != null && !event.getPosterUrl().isEmpty()) {
                     Glide.with(getContext())
                             .load(event.getPosterUrl())
-                            .placeholder(R.drawable.placeholder_image_background)
+                            .placeholder(R.drawable.event_poster_placeholder)
                             .into(eventDetailsImageView);
                 }
 

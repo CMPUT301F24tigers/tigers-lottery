@@ -55,16 +55,16 @@ public class AdminRecyclerViewAdapter extends RecyclerView.Adapter<AdminRecycler
         String photoUrl = item.getProfilePictureUrl();
 
         if (photoUrl == null || photoUrl.isEmpty()) {
-            if (isEvent) {
-                holder.profileImageView.setImageResource(R.drawable.event); // Event placeholder picture
+            if (!isEvent) {
+                holder.profileImageView.setImageResource(R.drawable.placeholder_user_image); // Event placeholder picture
             } else {
-                holder.profileImageView.setImageResource(R.drawable.placeholder_user_image); // User placeholder picture
+                holder.profileImageView.setImageResource(R.drawable.event_poster_placeholder); // User placeholder picture
             }
         } else {
             // Using Glide to load the actual image
             Glide.with(holder.profileImageView.getContext())
                     .load(photoUrl)
-                    .placeholder(item.isEvent() ? R.drawable.event : R.drawable.placeholder_user_image) // Conditional placeholder
+                    .placeholder(!item.isEvent() ? R.drawable.placeholder_user_image : R.drawable.event_poster_placeholder) // Conditional placeholder
                     .into(holder.profileImageView);
         }
 
