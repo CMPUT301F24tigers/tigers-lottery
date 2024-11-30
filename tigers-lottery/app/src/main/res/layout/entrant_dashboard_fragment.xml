@@ -8,17 +8,14 @@
 
     <ScrollView
         android:id="@+id/scrollViewEntrants"
-        android:layout_width="386dp"
-        android:layout_height="580dp"
-        android:layout_marginTop="64dp"
-        android:layout_marginEnd="24dp"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
         android:padding="8dp"
         app:layout_constraintBottom_toTopOf="@id/join_event_button"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.466"
-        app:layout_constraintStart_toStartOf="@id/textView"
-        app:layout_constraintTop_toBottomOf="@id/textView"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/textView">
 
         <LinearLayout
             android:id="@+id/linear_layout_events_list"
@@ -31,14 +28,14 @@
         android:id="@+id/join_event_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@id/scrollViewEntrants"
-        app:layout_constraintHorizontal_bias="0.942"
+        app:layout_constraintHorizontal_bias="0.952"
         android:backgroundTint="@color/darker_teal"
         app:layout_constraintStart_toStartOf="parent"
-        android:layout_gravity="end|bottom"
         app:layout_constraintTop_toBottomOf="@id/scrollViewEntrants"
+        android:layout_gravity="end|bottom"
+        android:layout_margin="16dp"
         app:tint="@color/white"
         android:src="@drawable/ic_add_event" />
 
@@ -55,8 +52,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.053"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.355" />
+        app:layout_constraintTop_toTopOf="parent" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
