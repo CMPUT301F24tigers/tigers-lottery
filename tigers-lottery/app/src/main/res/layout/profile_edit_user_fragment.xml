@@ -194,7 +194,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:layout_marginBottom="3sp"
-            android:text="Mobile Number"
+            android:text="Mobile Number(Optional)"
             android:textColor="@color/white" />
 
         <com.google.android.material.card.MaterialCardView

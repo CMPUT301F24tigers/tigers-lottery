@@ -2,6 +2,7 @@ package com.example.tigers_lottery.HostedEvents;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +16,7 @@ import com.example.tigers_lottery.DatabaseHelper;
 import com.example.tigers_lottery.HostedEvents.Adapters.EventAdapter;
 import com.example.tigers_lottery.R;
 import com.example.tigers_lottery.models.Event;
+import com.example.tigers_lottery.models.User;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
@@ -78,10 +80,19 @@ public class OrganizerDashboardFragment extends Fragment implements EventAdapter
         loadEvents();
 
         fabCreateEvent.setOnClickListener(v -> {
-            requireActivity().getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.main_activity_fragment_container, new OrganizerCreateEventFragment())
-                    .addToBackStack(null)
-                    .commit();
+           checkFacilityProfileComplete(dbHelper.getCurrentUserId(), new DatabaseHelper.isValidProfileCallback() {
+               @Override
+               public void onProfileCheckComplete(boolean isComplete) {
+                   if(isComplete){
+                       requireActivity().getSupportFragmentManager().beginTransaction()
+                               .replace(R.id.main_activity_fragment_container, new OrganizerCreateEventFragment())
+                               .addToBackStack(null)
+                               .commit();
+                   } else {
+                       Toast.makeText(getContext(), "Complete your facility profile with valid details to host an event", Toast.LENGTH_LONG).show();
+                   }
+               }
+           });
         });
 
         return view;
@@ -220,5 +231,43 @@ public class OrganizerDashboardFragment extends Fragment implements EventAdapter
                 .replace(R.id.main_activity_fragment_container, detailsFragment)
                 .addToBackStack(null)
                 .commit();
+    }
+
+    /**
+     * Fetches a user document by userId and checks if their facility profile is complete.
+     *
+     * @param userId   The ID of the user to validate.
+     */
+    public void checkFacilityProfileComplete(String userId, DatabaseHelper.isValidProfileCallback callback) {
+        dbHelper.fetchUserById(userId, new DatabaseHelper.UsersCallback() {
+            @Override
+            public void onUsersFetched(List<User> users) {
+            }
+
+            @Override
+            public void onUserFetched(User user) {
+                boolean isValid = isValidName(user.getFacilityName())
+                        && isValidName(user.getFacilityLocation())
+                        && isValidEmailAddress(user.getFacilityEmail());
+                callback.onProfileCheckComplete(isValid);
+            }
+
+            @Override
+            public void onError(Exception e) {
+                Log.d("OrganizerDashboardFragment", "Failed to Fetch user to validate profile completion");
+                Toast.makeText(getContext(), "Error Validating Facility Profile", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    public static boolean isValidEmailAddress(String email) {
+        if (email == null || email.trim().isEmpty()) {
+            return false;
+        }
+        return Patterns.EMAIL_ADDRESS.matcher(email).matches();
+    }
+
+    public static boolean isValidName(String name) {
+        return name != null && !name.trim().isEmpty();
     }
 }

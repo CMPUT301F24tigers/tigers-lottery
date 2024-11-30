@@ -19,7 +19,6 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
-import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -30,12 +29,12 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.tigers_lottery.DatabaseHelper;
 import com.example.tigers_lottery.R;
 import com.example.tigers_lottery.models.User;
+import com.example.tigers_lottery.utils.Validator;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
@@ -72,6 +71,7 @@ public class ProfileEditUserFragment extends Fragment {
 
     // Selected date components for DOB
     private Integer selectedYear, selectedMonth, selectedDay;
+    private Validator validator = new Validator();
 
     CheckBox enableNotificationsButton;
 
@@ -211,53 +211,51 @@ public class ProfileEditUserFragment extends Fragment {
                     date = calendar.getTime();
                 }
 
-                if(validatingUserProfileInput(editTextFirstName.getText().toString(), editTextLastName.getText().toString(), editTextEmail.getText().toString(), date)) {
-                    Toast.makeText(getContext(), "Every field except for Phone Number must be filled!", Toast.LENGTH_LONG).show();
-                    return;
-                }
-                
-                // Update user information in Firestore
-                assert deviceId != null;
-                db.collection("users").document(deviceId)
-                        .update(
-                                "first_name", editTextFirstName.getText().toString(),
-                                "last_name", editTextLastName.getText().toString(),
-                                "DOB", date,
-                                "phone_number", editTextMobile.getText().toString(),
-                                "email_address", editTextEmail.getText().toString(),
-                                "notification_flag", enableNotificationsButton.isChecked()
-                        )
-                        .addOnSuccessListener(aVoid -> Log.d("Firestore Update", "Document updated successfully"))
-                        .addOnFailureListener(e -> Log.w("Firestore Update", "Error updating document", e));
+                if(validator.validatingUserProfileInput(editTextFirstName.getText().toString(), editTextLastName.getText().toString(), editTextEmail.getText().toString(), date, editTextMobile.getText().toString(),requireContext())) {
 
-                if(profilePhotoDelete.get() && imageUri == null) {
-                    Bitmap imageBitmap = generateProfilePicture(editTextFirstName.getText().toString(), editTextLastName.getText().toString(), 300);
-                    imageUri = saveBitmapToUri(getContext(), imageBitmap);
-                }
-
-                // Upload image to Firebase Storage if a new image is selected
-                if (imageUri != null) {
-                    imageRef.putFile(imageUri)
-                            .addOnSuccessListener(taskSnapshot -> {
-                                imageRef.getDownloadUrl().addOnSuccessListener(downloadUri -> {
-                                    String downloadUrl = downloadUri.toString();
-                                    DocumentReference docRef = db.collection("users").document(deviceId);
-                                    docRef.update("user_photo", downloadUrl)
-                                            .addOnSuccessListener(aVoid -> Log.d("Firestore Update", "Document updated successfully"))
-                                            .addOnFailureListener(e -> Log.w("Firestore Update", "Error updating document", e));
-                                });
-                            })
+                    // Update user information in Firestore
+                    assert deviceId != null;
+                    db.collection("users").document(deviceId)
+                            .update(
+                                    "first_name", editTextFirstName.getText().toString(),
+                                    "last_name", editTextLastName.getText().toString(),
+                                    "DOB", date,
+                                    "phone_number", editTextMobile.getText().toString(),
+                                    "email_address", editTextEmail.getText().toString(),
+                                    "notification_flag", enableNotificationsButton.isChecked()
+                            )
+                            .addOnSuccessListener(aVoid -> Log.d("Firestore Update", "Document updated successfully"))
                             .addOnFailureListener(e -> Log.w("Firestore Update", "Error updating document", e));
+
+                    if (profilePhotoDelete.get() && imageUri == null) {
+                        Bitmap imageBitmap = generateProfilePicture(editTextFirstName.getText().toString(), editTextLastName.getText().toString(), 300);
+                        imageUri = saveBitmapToUri(getContext(), imageBitmap);
+                    }
+
+                    // Upload image to Firebase Storage if a new image is selected
+                    if (imageUri != null) {
+                        imageRef.putFile(imageUri)
+                                .addOnSuccessListener(taskSnapshot -> {
+                                    imageRef.getDownloadUrl().addOnSuccessListener(downloadUri -> {
+                                        String downloadUrl = downloadUri.toString();
+                                        DocumentReference docRef = db.collection("users").document(deviceId);
+                                        docRef.update("user_photo", downloadUrl)
+                                                .addOnSuccessListener(aVoid -> Log.d("Firestore Update", "Document updated successfully"))
+                                                .addOnFailureListener(e -> Log.w("Firestore Update", "Error updating document", e));
+                                    });
+                                })
+                                .addOnFailureListener(e -> Log.w("Firestore Update", "Error updating document", e));
+                    }
+
+                    // Navigate back to ProfileDetailsUserFragment after saving
+                    FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+                    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                    Fragment transitionedFragment = new ProfileDetailsUserFragment();
+
+                    fragmentTransaction.replace(R.id.profileDetailsActivityFragment, transitionedFragment);
+                    fragmentTransaction.addToBackStack(null);
+                    fragmentTransaction.commit();
                 }
-
-                // Navigate back to ProfileDetailsUserFragment after saving
-                FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                Fragment transitionedFragment = new ProfileDetailsUserFragment();
-
-                fragmentTransaction.replace(R.id.profileDetailsActivityFragment, transitionedFragment);
-                fragmentTransaction.addToBackStack(null);
-                fragmentTransaction.commit();
             }
 
         });
@@ -369,10 +367,6 @@ public class ProfileEditUserFragment extends Fragment {
 
         datePickerDialog.getDatePicker().setMaxDate(calendar.getTimeInMillis());
         datePickerDialog.show();
-    }
-
-    public boolean validatingUserProfileInput(String firstName, String lastName, String email, Date date) {
-        return (Objects.equals(firstName, "") || Objects.equals(lastName, "") || Objects.equals(email, "") || date == null);
     }
 
     public static Bitmap generateProfilePicture(String firstName, String lastName, int size) {

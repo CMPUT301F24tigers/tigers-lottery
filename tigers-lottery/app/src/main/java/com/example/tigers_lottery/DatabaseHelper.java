@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.util.Log;
+import android.util.Patterns;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -32,6 +33,8 @@ import com.google.firebase.storage.UploadTask;
 import com.google.firestore.admin.v1.Index;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -217,6 +220,10 @@ public class DatabaseHelper {
     public interface NotificationCallback {
         void onSuccess(String message);
         void onFailure(String errorMessage);
+    }
+
+    public interface isValidProfileCallback {
+        void onProfileCheckComplete(boolean isComplete);
     }
 
 
@@ -531,6 +538,61 @@ public class DatabaseHelper {
                     callback.onUsersFetched(users);
                 })
                 .addOnFailureListener(callback::onError);
+    }
+
+    private static boolean isValidDateOfBirth(Timestamp dob) {
+        if (dob == null) {
+            return false;
+        }
+
+        Date dateOfBirth = dob.toDate();
+        Calendar calendar = Calendar.getInstance();
+
+        // DOB the user is at least 14 years old
+        calendar.add(Calendar.YEAR, -14);
+        Date minAdultDob = calendar.getTime();
+        return dateOfBirth.before(minAdultDob);
+    }
+
+    public static boolean isValidEmailAddress(String email) {
+        if (email == null || email.trim().isEmpty()) {
+            return false;
+        }
+        return Patterns.EMAIL_ADDRESS.matcher(email).matches();
+    }
+
+    public static boolean isValidName(String name) {
+        return name != null && !name.trim().isEmpty() && !"Unknown User".equals(name);
+    }
+
+    /**
+     * Fetches a user document by userId and checks if their profile is complete.
+     *
+     * @param userId   The ID of the user to validate.
+     * @param callback A callback to handle the result of the validation.
+     */
+    public void checkUserProfileComplete(String userId, Callback callback) {
+        fetchUserById(userId, new UsersCallback() {
+            @Override
+            public void onUsersFetched(List<User> users) {}
+
+            @Override
+            public void onUserFetched(User user) {
+                if(
+                        isValidName(user.getFirstName())
+                        && isValidName(user.getLastName())
+                        && isValidEmailAddress(user.getEmailAddress())
+                        && isValidDateOfBirth(user.getDateOfBirth())
+                ) {
+                    callback.onSuccess("valid");
+                } else {
+                    callback.onSuccess("invalid");
+                }
+            }
+
+            @Override
+            public void onError(Exception e) {}
+        });
     }
 
 
@@ -1735,7 +1797,7 @@ public class DatabaseHelper {
             }
         });
 
-        //Remove user profile photo from storage
+        //Remove facility profile photo from storage
         removeImage("facility", userId, new Callback() {
             @Override
             public void onSuccess(String message) {

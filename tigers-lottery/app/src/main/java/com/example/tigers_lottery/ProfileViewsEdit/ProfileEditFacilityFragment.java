@@ -28,6 +28,7 @@ import com.bumptech.glide.Glide;
 import com.example.tigers_lottery.DatabaseHelper;
 import com.example.tigers_lottery.R;
 import com.example.tigers_lottery.models.User;
+import com.example.tigers_lottery.utils.Validator;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
@@ -57,6 +58,7 @@ public class ProfileEditFacilityFragment extends Fragment {
 
     private Uri imageUri;
     private ActivityResultLauncher<Intent> activityResultLauncher;
+    private Validator validator = new Validator();
 
     /**
      * Default constructor for the fragment.
@@ -165,51 +167,49 @@ public class ProfileEditFacilityFragment extends Fragment {
             @Override
             public void onClick(View view) {
 
-                if(!validatingFacilityProfileInput(getContext(), nameEditText.getText().toString(), emailEditText.getText().toString(), locationEditText.getText().toString(), mobileEditText.getText().toString())) {
-                    Toast.makeText(getContext(), "Every field must be filled!", Toast.LENGTH_LONG).show();
-                    return;
-                }
+                if(validator.validatingFacilityProfileInput(nameEditText.getText().toString(), emailEditText.getText().toString(), locationEditText.getText().toString(), mobileEditText.getText().toString(), requireContext())) {
 
-                // Update user information in Firestore
-                db.collection("users").document(deviceId)
-                        .update(
-                                "facility_name", nameEditText.getText().toString(),
-                                "facility_phone", mobileEditText.getText().toString(),
-                                "facility_email", emailEditText.getText().toString(),
-                                "facility_location", locationEditText.getText().toString()
+                    // Update user information in Firestore
+                    db.collection("users").document(deviceId)
+                            .update(
+                                    "facility_name", nameEditText.getText().toString(),
+                                    "facility_phone", mobileEditText.getText().toString(),
+                                    "facility_email", emailEditText.getText().toString(),
+                                    "facility_location", locationEditText.getText().toString()
 //                                "facility_photo", imageUri
-                        )
-                        .addOnSuccessListener(aVoid -> Log.d("Firestore Update", "Document updated successfully"))
-                        .addOnFailureListener(e -> Log.w("Firestore Update", "Error updating document", e));
+                            )
+                            .addOnSuccessListener(aVoid -> Log.d("Firestore Update", "Document updated successfully"))
+                            .addOnFailureListener(e -> Log.w("Firestore Update", "Error updating document", e));
 
-                // Upload image to Firebase Storage if a new image is selected
-                if (imageUri != null) {
-                    imageRef.putFile(imageUri).addOnSuccessListener(taskSnapshot -> {
-                        // Get the download URL after the image upload
-                        imageRef.getDownloadUrl().addOnSuccessListener(downloadUri -> {
-                            String downloadUrl = downloadUri.toString();
+                    // Upload image to Firebase Storage if a new image is selected
+                    if (imageUri != null) {
+                        imageRef.putFile(imageUri).addOnSuccessListener(taskSnapshot -> {
+                            // Get the download URL after the image upload
+                            imageRef.getDownloadUrl().addOnSuccessListener(downloadUri -> {
+                                String downloadUrl = downloadUri.toString();
 
-                            // Save download URL to Firestore
-                            DocumentReference docRef = db.collection("users").document(deviceId);
-                            docRef.update("facility_photo", downloadUrl).addOnSuccessListener(aVoid -> {
+                                // Save download URL to Firestore
+                                DocumentReference docRef = db.collection("users").document(deviceId);
+                                docRef.update("facility_photo", downloadUrl).addOnSuccessListener(aVoid -> {
 //                                Toast.makeText(getContext(), "Image uploaded and URL saved to Firestore", Toast.LENGTH_SHORT).show();
-                            }).addOnFailureListener(e -> {
+                                }).addOnFailureListener(e -> {
 //                                Toast.makeText(getContext(), "Failed to save URL to Firestore: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                });
                             });
-                        });
-                    }).addOnFailureListener(e -> {
+                        }).addOnFailureListener(e -> {
 //                        Toast.makeText(getContext(), "Failed to upload image: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    });
+                        });
+                    }
+
+                    // Navigate back to ProfileDetailsFacilityFragment after saving
+                    FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+                    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                    Fragment transitionedFragment = new ProfileDetailsFacilityFragment();
+
+                    fragmentTransaction.replace(R.id.profileDetailsActivityFragment, transitionedFragment);
+                    fragmentTransaction.addToBackStack(null);
+                    fragmentTransaction.commit();
                 }
-
-                // Navigate back to ProfileDetailsFacilityFragment after saving
-                FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                Fragment transitionedFragment = new ProfileDetailsFacilityFragment();
-
-                fragmentTransaction.replace(R.id.profileDetailsActivityFragment, transitionedFragment);
-                fragmentTransaction.addToBackStack(null);
-                fragmentTransaction.commit();
             }
 
         });
