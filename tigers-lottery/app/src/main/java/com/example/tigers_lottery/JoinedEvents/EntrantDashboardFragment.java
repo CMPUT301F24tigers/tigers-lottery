@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Patterns;
@@ -139,21 +140,23 @@ public class EntrantDashboardFragment extends Fragment {
                     if (event.getPosterUrl() != null && !event.getPosterUrl().isEmpty()) {
                         Glide.with(getContext())
                                 .load(event.getPosterUrl())
-                                .placeholder(R.drawable.placeholder_image_background)
+                                .placeholder(R.drawable.event_poster_placeholder)
                                 .into(eventPhoto);
                     }
 
+                    GradientDrawable statusBackground = (GradientDrawable) eventStatusTextView.getBackground();
+
                     if (event.getDeclinedEntrants().contains(deviceId)) {
-                        eventStatusTextView.setTextColor(0xFFFF0000);
+                        statusBackground.setColor(0xFF8B0000);
                         eventStatusTextView.setText("Status: Declined");
                     } else if (event.getInvitedEntrants().contains(deviceId)) {
-                        eventStatusTextView.setTextColor(0xFF00FF00);
+                        statusBackground.setColor(0xFFB080B0);
                         eventStatusTextView.setText("Status: Invited");
                     } else if (event.getWaitlistedEntrants().contains(deviceId)) {
-                        eventStatusTextView.setTextColor(0xFF0000FF);
+                        statusBackground.setColor(0xFF696969);
                         eventStatusTextView.setText("Status: Waitlisted");
                     } else if (event.getRegisteredEntrants().contains(deviceId)) {
-                        eventStatusTextView.setTextColor(0xFF800080);
+                        statusBackground.setColor(0xFF008080);
                         eventStatusTextView.setText("Status: Registered");
                     }
 

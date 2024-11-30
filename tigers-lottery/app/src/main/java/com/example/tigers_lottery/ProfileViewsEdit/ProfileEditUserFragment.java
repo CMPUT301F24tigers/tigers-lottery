@@ -50,6 +50,8 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Fragment that allows users to edit their personal profile information,
@@ -60,6 +62,7 @@ public class ProfileEditUserFragment extends Fragment {
 
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
+    private static final String EMAIL_REGEX = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
 
     private String mParam2;
 
@@ -225,6 +228,24 @@ public class ProfileEditUserFragment extends Fragment {
                                     "notification_flag", enableNotificationsButton.isChecked()
                             )
                             .addOnSuccessListener(aVoid -> Log.d("Firestore Update", "Document updated successfully"))
+
+                if(profilePhotoDelete.get() && imageUri == null) {
+                    Bitmap imageBitmap = generateProfilePicture(editTextFirstName.getText().toString(), editTextLastName.getText().toString(), 300);
+                    imageUri = saveBitmapToUri(getContext(), imageBitmap);
+                }
+
+                // Upload image to Firebase Storage if a new image is selected
+                if (imageUri != null) {
+                    imageRef.putFile(imageUri)
+                            .addOnSuccessListener(taskSnapshot -> {
+                                imageRef.getDownloadUrl().addOnSuccessListener(downloadUri -> {
+                                    String downloadUrl = downloadUri.toString();
+                                    DocumentReference docRef = db.collection("users").document(deviceId);
+                                    docRef.update("user_photo", downloadUrl)
+                                            .addOnSuccessListener(aVoid -> Log.d("Firestore Update", "Document updated successfully"))
+                                            .addOnFailureListener(e -> Log.w("Firestore Update", "Error updating document", e));
+                                });
+                            })
                             .addOnFailureListener(e -> Log.w("Firestore Update", "Error updating document", e));
 
                     if (profilePhotoDelete.get() && imageUri == null) {
@@ -435,5 +456,13 @@ public class ProfileEditUserFragment extends Fragment {
             e.printStackTrace();
             return null;
         }
+    }
+    public static boolean validateEmail(String email) {
+        if (email == null) {
+            return false;
+        }
+        Pattern pattern = Pattern.compile(EMAIL_REGEX);
+        Matcher matcher = pattern.matcher(email);
+        return matcher.matches();
     }
 }

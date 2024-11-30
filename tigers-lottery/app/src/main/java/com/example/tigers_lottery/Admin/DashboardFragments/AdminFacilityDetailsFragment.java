@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -44,8 +45,9 @@ public class AdminFacilityDetailsFragment extends Fragment {
     private TextView facilityPhone;
     private TextView facilityLocation;
     private TextView facilityOwner;
-    private ImageView facilityPhoto;
-    private Button removeFacilityPhoto;
+    private ImageView facilityPhoto, removeFacilityPhotoImage;
+    private LinearLayout removeFacilityPhoto;
+    private TextView removeFacilityPhotoText;
 
     /**
      * Factory method to create a new instance of this fragment.
@@ -98,6 +100,8 @@ public class AdminFacilityDetailsFragment extends Fragment {
         facilityOwner = view.findViewById(R.id.eventDate);
         facilityPhoto = view.findViewById(R.id.eventPoster);
         removeFacilityPhoto = view.findViewById(R.id.runLotteryButton);
+        removeFacilityPhotoText =view.findViewById(R.id.runLotteryText);
+        removeFacilityPhotoImage = view.findViewById(R.id.runLotteryImage);
 
         // Hide unrelated UI components
         TextView description = view.findViewById(R.id.eventDescription);
@@ -105,9 +109,9 @@ public class AdminFacilityDetailsFragment extends Fragment {
         Button viewDeclined = view.findViewById(R.id.viewDeclinedEntrants);
         Button viewWaitlisted = view.findViewById(R.id.viewWaitlistedEntrants);
         Button viewInvited = view.findViewById(R.id.viewInvitedEntrants);
-        Button clearLists = view.findViewById(R.id.clearListsButton);
-        Button viewQRCode = view.findViewById(R.id.viewQRCodeButton);
-        Button viewMap = view.findViewById(R.id.viewMapButton);
+        LinearLayout clearLists = view.findViewById(R.id.clearListsButton);
+        LinearLayout viewQRCode = view.findViewById(R.id.viewQRCodeButton);
+        LinearLayout viewMap = view.findViewById(R.id.viewMapButton);
 
         clearLists.setVisibility(View.GONE);
         viewInvited.setVisibility(View.GONE);
@@ -119,7 +123,7 @@ public class AdminFacilityDetailsFragment extends Fragment {
         viewMap.setVisibility(View.GONE);
         removeFacilityPhoto.setVisibility(View.GONE);
 
-        removeFacilityPhoto.setText("Remove Facility Profile Photo");
+        removeFacilityPhotoText.setText("Remove Facility Profile Photo");
 
         // Load facility details
         loadFacilityDetails();
@@ -190,6 +194,7 @@ public class AdminFacilityDetailsFragment extends Fragment {
                     .into(facilityPhoto);
 
             removeFacilityPhoto.setVisibility(View.VISIBLE);
+            removeFacilityPhotoImage.setImageResource(R.drawable.placeholder_user_image);
             facilityPhoto.setOnClickListener(v -> showImagePreviewDialog(facilityUrl));
         }
     }

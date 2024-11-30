@@ -11,6 +11,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/secondary_background_cards"
         android:orientation="vertical"
         android:padding="16dp">
 
@@ -19,18 +20,19 @@
             android:id="@+id/entrantNameTextView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
             android:text="John Doe"
             android:textSize="18sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="4dp" />
+            android:textStyle="bold" />
 
         <!-- Entrant's Email -->
         <TextView
             android:id="@+id/entrantEmailTextView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@color/secondary_background_cards"
             android:text="john.doe@example.com"
-            android:textSize="14sp"
-            android:textColor="@android:color/darker_gray" />
+            android:textColor="@color/white"
+            android:textSize="14sp" />
     </LinearLayout>
 </androidx.cardview.widget.CardView>

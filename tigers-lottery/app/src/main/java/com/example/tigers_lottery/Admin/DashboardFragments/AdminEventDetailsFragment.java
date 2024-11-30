@@ -1,11 +1,13 @@
 package com.example.tigers_lottery.Admin.DashboardFragments;
 
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -18,7 +20,9 @@ import com.example.tigers_lottery.DatabaseHelper;
 import com.example.tigers_lottery.R;
 import com.example.tigers_lottery.models.Event;
 import com.example.tigers_lottery.models.User;
+import com.example.tigers_lottery.utils.QRCodeGenerator;
 import com.google.firebase.Timestamp;
+import com.google.zxing.qrcode.encoder.QRCode;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -47,8 +51,9 @@ public class AdminEventDetailsFragment extends Fragment {
     private TextView waitlistLimit;
     private TextView entrantLimit;
     private TextView organizerNameTv;
-    private ImageView eventPoster;
-    private Button removeEventPoster;
+    private ImageView eventPoster, removeEventImage, removeQRImage;
+    private LinearLayout removeEventPoster, viewQRCode;
+    private TextView removeEventText, removeQRCodeText;
 
     /**
      * Factory method to create a new instance of this fragment.
@@ -108,26 +113,33 @@ public class AdminEventDetailsFragment extends Fragment {
         waitlistLimit = view.findViewById(R.id.waitlistLimit);
         entrantLimit = view.findViewById(R.id.entrantLimit);
         organizerNameTv = view.findViewById(R.id.organizerName);
+        removeEventText = view.findViewById(R.id.runLotteryText);
+        removeQRCodeText = view.findViewById(R.id.viewQRCodeText);
+        removeQRImage = view.findViewById(R.id.viewQRCodeButtonImage);
+        removeEventImage = view.findViewById(R.id.runLotteryImage);
 
         removeEventPoster = view.findViewById(R.id.runLotteryButton);
         Button viewRegistered = view.findViewById(R.id.viewRegisteredEntrants);
         Button viewDeclined = view.findViewById(R.id.viewDeclinedEntrants);
         Button viewWaitlisted = view.findViewById(R.id.viewWaitlistedEntrants);
         Button viewInvited = view.findViewById(R.id.viewInvitedEntrants);
-        Button clearLists = view.findViewById(R.id.clearListsButton);
-        Button viewQRCode = view.findViewById(R.id.viewQRCodeButton);
-        Button viewMap = view.findViewById(R.id.viewMapButton);
+        LinearLayout clearLists = view.findViewById(R.id.clearListsButton);
+        viewQRCode = view.findViewById(R.id.viewQRCodeButton);
+        LinearLayout viewMap = view.findViewById(R.id.viewMapButton);
 
         clearLists.setVisibility(View.GONE);
         viewInvited.setVisibility(View.GONE);
         viewDeclined.setVisibility(View.GONE);
         viewRegistered.setVisibility(View.GONE);
         viewWaitlisted.setVisibility(View.GONE);
-        viewQRCode.setVisibility(View.GONE);
         viewMap.setVisibility(View.GONE);
 
-        removeEventPoster.setText("Remove Event Poster");
+        removeEventText.setText("Remove Event Poster");
         removeEventPoster.setVisibility(View.GONE);
+
+        removeQRCodeText.setText("Delete QR Code");
+        viewQRCode.setVisibility(View.GONE);
+
 
         // Load event details
         loadEventDetails();
@@ -183,7 +195,7 @@ public class AdminEventDetailsFragment extends Fragment {
         dbHelper.getUser(event.getOrganizerId(), new DatabaseHelper.UserCallback() {
             @Override
             public void onUserFetched(User user) {
-                organizerNameTv.setText("Organizer Name: " + user.getFirstName() + " " + user.getLastName());
+                organizerNameTv.setText("Organizer Name: " + user.getFacilityName());
             }
 
             @Override
@@ -202,17 +214,25 @@ public class AdminEventDetailsFragment extends Fragment {
         entrantLimit.setText("Entrant Limit: " + event.getOccupantLimit());
 
         // Display the placeholder image initially
-        eventPoster.setImageResource(R.drawable.placeholder_image_background);
+        eventPoster.setImageResource(R.drawable.event_poster_placeholder);
+        if(event.getQRCode() != null  && !(event.getQRCode().isEmpty())){
+            viewQRCode.setVisibility(View.VISIBLE);
+            QRCodeGenerator qrCodeGenerator = new QRCodeGenerator(event);
+            qrCodeGenerator.setHashData();
+            Bitmap QRCode = qrCodeGenerator.generateQRCodeFromHashData();
+            removeQRImage.setImageBitmap(QRCode);
+        }
 
         // Fetch and display the event poster
         String posterUrl = event.getPosterUrl();
         if (posterUrl != null && !posterUrl.isEmpty() && !posterUrl.equals("https://example.com/default-poster.png")) {
             Glide.with(requireContext())
                     .load(posterUrl)
-                    .placeholder(R.drawable.placeholder_image_background)
+                    .placeholder(R.drawable.event_poster_placeholder)
                     .into(eventPoster);
 
             removeEventPoster.setVisibility(View.VISIBLE);
+            removeEventImage.setImageResource(R.drawable.placeholder_user_image);
             eventPoster.setOnClickListener(v -> showImagePreviewDialog(posterUrl));
         }
     }
@@ -238,6 +258,40 @@ public class AdminEventDetailsFragment extends Fragment {
                 }
             });
         });
+        viewQRCode.setOnClickListener(v ->{
+            event.setQRCode(null);
+            dbHelper.updateEvent(event, new DatabaseHelper.EventsCallback() {
+                /**
+                 *
+                 * @param events list of events from the organizer.
+                 */
+                @Override
+                public void onEventsFetched(List<Event> events) {
+                    Toast.makeText(getContext(), "You have deleted this event's QR Code", Toast.LENGTH_SHORT).show();
+                    viewQRCode.setVisibility(View.GONE);
+                }
+
+                /**
+                 * Unused in this fragment.
+                 * @param event single event.
+                 */
+
+                @Override
+                public void onEventFetched(Event event) {
+                }
+
+                /**
+                 * Handles error during event updating.
+                 * @param e exception catcher for event updating.
+                 */
+
+                @Override
+                public void onError(Exception e) {
+                    Toast.makeText(getContext(), "Failed to update event", Toast.LENGTH_SHORT).show();
+                }
+            });
+        });
+
     }
 
     /**

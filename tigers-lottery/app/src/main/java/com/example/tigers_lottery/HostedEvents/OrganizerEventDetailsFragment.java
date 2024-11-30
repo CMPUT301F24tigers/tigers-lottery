@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,6 +29,7 @@ import com.example.tigers_lottery.R;
 import com.example.tigers_lottery.models.Event;
 import com.example.tigers_lottery.utils.QRCodeGenerator;
 import com.google.firebase.Timestamp;
+import com.google.zxing.qrcode.encoder.QRCode;
 
 import java.util.ArrayList;
 import java.util.Base64;
@@ -50,9 +52,9 @@ public class OrganizerEventDetailsFragment extends Fragment {
 
     // UI Components
     private TextView eventTitle, eventDescription, eventLocation, waitlistOpenDate, waitlistCloseDate, eventDate, waitlistLimit, entrantLimit;
-    private ImageView eventPoster;
-    private Button viewRegisteredEntrants, viewWaitlistedEntrants, viewInvitedEntrants, viewDeclinedEntrants, runLotteryButton, clearListsButton, viewMapButton, viewQRCode;
-
+    private ImageView eventPoster, viewQRCodeImage;
+    private Button viewRegisteredEntrants, viewWaitlistedEntrants, viewInvitedEntrants, viewDeclinedEntrants;
+    private LinearLayout runLotteryButton, viewQRCode, viewMapButton, clearListsButton;
     /**
      * Required empty public constructor.
      */
@@ -130,6 +132,7 @@ public class OrganizerEventDetailsFragment extends Fragment {
         clearListsButton = view.findViewById(R.id.clearListsButton);
         viewQRCode = view.findViewById(R.id.viewQRCodeButton);
         viewMapButton = view.findViewById(R.id.viewMapButton);
+        viewQRCodeImage = view.findViewById(R.id.viewQRCodeButtonImage);
 
         // Fetch and display event details
         loadEventDetails();
@@ -157,6 +160,14 @@ public class OrganizerEventDetailsFragment extends Fragment {
                 if (fetchedEvent != null) {
                     event = fetchedEvent;
                     displayEventDetails(event);
+                    if(event.getQRCode() != null && !(event.getQRCode().isEmpty())){
+                        QRCodeGenerator qrCodeGenerator = new QRCodeGenerator(event);
+                        qrCodeGenerator.setHashData();
+                        Bitmap QRcode = qrCodeGenerator.generateQRCodeFromHashData();
+                        viewQRCodeImage.setImageBitmap(QRcode);
+                    }else{
+                        viewQRCodeImage.setImageResource(R.drawable.default_qr_code);
+                    }
                     setupLotteryButton();
                     setupDeclineListener();
                     setupClearListsButton();
@@ -234,7 +245,7 @@ public class OrganizerEventDetailsFragment extends Fragment {
         if (event.getPosterUrl() != null && !event.getPosterUrl().isEmpty()) {
             Glide.with(this)
                     .load(event.getPosterUrl())
-                    .placeholder(R.drawable.placeholder_image_background) // find a better background later
+                    .placeholder(R.drawable.event_poster_placeholder) // find a better background later
                     .into(eventPoster);
         }
     }
@@ -321,17 +332,20 @@ public class OrganizerEventDetailsFragment extends Fragment {
 
             // Alternatively, if manual triggering is also intended, keep button enabled
             runLotteryButton.setEnabled(false);
+            runLotteryButton.setBackgroundResource(R.drawable.square_button_background_disabled);
             runLotteryButton.setOnClickListener(null);
 
         } else if (event.getWaitlistDeadline().compareTo(currentTimestamp) <= 0 && !event.isLotteryRan()) {
             // Enable the button if it's past the waitlist deadline and before the event date
             Log.d("LotteryDebug", "Lottery button enabled.");
             runLotteryButton.setEnabled(true);
+            runLotteryButton.setBackgroundResource(R.drawable.square_button_background);
             runLotteryButton.setOnClickListener(v -> runLottery());
         } else {
             // Disable button and remove listener if conditions don't allow the lottery to be run
             Log.d("LotteryDebug", "Lottery button disabled.");
             runLotteryButton.setEnabled(false);
+            runLotteryButton.setBackgroundResource(R.drawable.square_button_background_disabled);
             runLotteryButton.setOnClickListener(null);
         }
     }
@@ -384,6 +398,7 @@ public class OrganizerEventDetailsFragment extends Fragment {
                         Log.d("LotteryDebug", "Lottery successfully updated in Firestore.");
                         Toast.makeText(getContext(), "Lottery run successfully!", Toast.LENGTH_SHORT).show();
                         runLotteryButton.setEnabled(false); // Disable button after running
+                        runLotteryButton.setBackgroundResource(R.drawable.square_button_background_disabled);
                         event.setLotteryRan(true); // Mark the event's lottery as run
 
                         // Send notifications to new invitees
