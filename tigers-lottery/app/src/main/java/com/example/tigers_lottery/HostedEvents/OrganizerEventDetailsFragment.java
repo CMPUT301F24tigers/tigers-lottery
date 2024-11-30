@@ -255,9 +255,11 @@ public class OrganizerEventDetailsFragment extends Fragment {
 
         // Enable the button only if the event date has passed
         if (currentTimestamp.compareTo(event.getEventDate()) >= 0) {
+            clearListsButton.setBackgroundResource(R.drawable.square_button_background);
             clearListsButton.setEnabled(true);
             clearListsButton.setOnClickListener(v -> clearEntrantLists());
         } else {
+            clearListsButton.setBackgroundResource(R.drawable.square_button_background_disabled);
             clearListsButton.setEnabled(false);
         }
     }

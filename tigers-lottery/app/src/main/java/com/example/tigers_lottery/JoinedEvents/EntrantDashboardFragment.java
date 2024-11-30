@@ -135,8 +135,9 @@ public class EntrantDashboardFragment extends Fragment {
                     ImageView eventPhoto = eventView.findViewById(R.id.eventItemPhoto);
 
                     eventNameTextView.setText(event.getEventName());
-                    eventLocationTextView.setText("Location: " + event.getLocation());
-                    eventDateTextView.setText("Date: " + new SimpleDateFormat("yyyy-MM-dd").format(event.getEventDate().toDate()));
+                    eventLocationTextView.setText(event.getLocation());
+                    String dateSplit = event.getFormattedEventDate().split(" - ")[0];
+                    eventDateTextView.setText(dateSplit);
                     if (event.getPosterUrl() != null && !event.getPosterUrl().isEmpty()) {
                         Glide.with(getContext())
                                 .load(event.getPosterUrl())

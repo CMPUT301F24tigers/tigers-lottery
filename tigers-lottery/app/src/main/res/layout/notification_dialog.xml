@@ -84,16 +84,5 @@
         android:layout_marginBottom="6dp"
         android:background="@android:color/darker_gray" />
 
-    <!-- Action URL Button -->
-    <Button
-        android:id="@+id/btnActionUrl"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="16dp"
-        android:backgroundTint="@android:color/holo_blue_dark"
-        android:text="Take action"
-        android:textAllCaps="false"
-        android:textColor="@android:color/white" />
 
 </LinearLayout>

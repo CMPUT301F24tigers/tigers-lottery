@@ -119,8 +119,10 @@ public class EntrantEventDetailsFragment extends Fragment {
                 eventTextViewName.setText(event.getEventName());
                 eventTextViewDescription.setText(event.getDescription());
                 eventTextViewLocation.setText("Location: " + event.getLocation());
-                eventTextViewDate.setText("Date: " + new SimpleDateFormat("yyyy-MM-dd").format(event.getEventDate().toDate()));
-                eventTextViewRegistrationDeadline.setText("Registration Deadline: : " + new SimpleDateFormat("yyyy-MM-dd").format(event.getWaitlistDeadline().toDate()));
+                String dateSplit = event.getFormattedEventDate().split(" - ")[0];
+                eventTextViewDate.setText("Date: " + dateSplit);
+                String dateSplitWaitlistDeadline = event.getFormattedWaitlistDeadline().split(" - ")[0];
+                eventTextViewRegistrationDeadline.setText("Registration Deadline: : " + dateSplitWaitlistDeadline);
 
                 if (event.getPosterUrl() != null && !event.getPosterUrl().isEmpty()) {
                     Glide.with(getContext())
