@@ -29,6 +29,7 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.tigers_lottery.DatabaseHelper;
@@ -215,7 +216,6 @@ public class ProfileEditUserFragment extends Fragment {
                 }
 
                 if(validator.validatingUserProfileInput(editTextFirstName.getText().toString(), editTextLastName.getText().toString(), editTextEmail.getText().toString(), date, editTextMobile.getText().toString(),requireContext())) {
-
                     // Update user information in Firestore
                     assert deviceId != null;
                     db.collection("users").document(deviceId)
@@ -227,58 +227,38 @@ public class ProfileEditUserFragment extends Fragment {
                                     "email_address", editTextEmail.getText().toString(),
                                     "notification_flag", enableNotificationsButton.isChecked()
                             )
-                            .addOnSuccessListener(aVoid -> Log.d("Firestore Update", "Document updated successfully"))
+                            .addOnSuccessListener(aVoid -> Log.d("Firestore Update", "Document updated successfully"));
 
-                if(profilePhotoDelete.get() && imageUri == null) {
-                    Bitmap imageBitmap = generateProfilePicture(editTextFirstName.getText().toString(), editTextLastName.getText().toString(), 300);
-                    imageUri = saveBitmapToUri(getContext(), imageBitmap);
-                }
+                        if (profilePhotoDelete.get() && imageUri == null) {
+                            Bitmap imageBitmap = generateProfilePicture(editTextFirstName.getText().toString(), editTextLastName.getText().toString(), 300);
+                            imageUri = saveBitmapToUri(getContext(), imageBitmap);
+                        }
 
-                // Upload image to Firebase Storage if a new image is selected
-                if (imageUri != null) {
-                    imageRef.putFile(imageUri)
-                            .addOnSuccessListener(taskSnapshot -> {
-                                imageRef.getDownloadUrl().addOnSuccessListener(downloadUri -> {
-                                    String downloadUrl = downloadUri.toString();
-                                    DocumentReference docRef = db.collection("users").document(deviceId);
-                                    docRef.update("user_photo", downloadUrl)
-                                            .addOnSuccessListener(aVoid -> Log.d("Firestore Update", "Document updated successfully"))
-                                            .addOnFailureListener(e -> Log.w("Firestore Update", "Error updating document", e));
-                                });
-                            })
-                            .addOnFailureListener(e -> Log.w("Firestore Update", "Error updating document", e));
+                        // Upload image to Firebase Storage if a new image is selected
+                        if (imageUri != null) {
+                            imageRef.putFile(imageUri)
+                                    .addOnSuccessListener(taskSnapshot -> {
+                                        imageRef.getDownloadUrl().addOnSuccessListener(downloadUri -> {
+                                            String downloadUrl = downloadUri.toString();
+                                            DocumentReference docRef = db.collection("users").document(deviceId);
+                                            docRef.update("user_photo", downloadUrl)
+                                                    .addOnSuccessListener(aVoid -> Log.d("Firestore Update", "Document updated successfully"))
+                                                    .addOnFailureListener(e -> Log.w("Firestore Update", "Error updating document", e));
+                                        });
+                                    })
+                                    .addOnFailureListener(e -> Log.w("Firestore Update", "Error updating document", e));
+                        }
 
-                    if (profilePhotoDelete.get() && imageUri == null) {
-                        Bitmap imageBitmap = generateProfilePicture(editTextFirstName.getText().toString(), editTextLastName.getText().toString(), 300);
-                        imageUri = saveBitmapToUri(getContext(), imageBitmap);
+                        // Navigate back to ProfileDetailsUserFragment after saving
+                        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+                        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                        Fragment transitionedFragment = new ProfileDetailsUserFragment();
+
+                        fragmentTransaction.replace(R.id.profileDetailsActivityFragment, transitionedFragment);
+                        fragmentTransaction.addToBackStack(null);
+                        fragmentTransaction.commit();
                     }
-
-                    // Upload image to Firebase Storage if a new image is selected
-                    if (imageUri != null) {
-                        imageRef.putFile(imageUri)
-                                .addOnSuccessListener(taskSnapshot -> {
-                                    imageRef.getDownloadUrl().addOnSuccessListener(downloadUri -> {
-                                        String downloadUrl = downloadUri.toString();
-                                        DocumentReference docRef = db.collection("users").document(deviceId);
-                                        docRef.update("user_photo", downloadUrl)
-                                                .addOnSuccessListener(aVoid -> Log.d("Firestore Update", "Document updated successfully"))
-                                                .addOnFailureListener(e -> Log.w("Firestore Update", "Error updating document", e));
-                                    });
-                                })
-                                .addOnFailureListener(e -> Log.w("Firestore Update", "Error updating document", e));
-                    }
-
-                    // Navigate back to ProfileDetailsUserFragment after saving
-                    FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-                    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                    Fragment transitionedFragment = new ProfileDetailsUserFragment();
-
-                    fragmentTransaction.replace(R.id.profileDetailsActivityFragment, transitionedFragment);
-                    fragmentTransaction.addToBackStack(null);
-                    fragmentTransaction.commit();
                 }
-            }
-
         });
 
         // Listener to open DatePickerDialog when clicking on DOB field
