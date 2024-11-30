@@ -25,6 +25,10 @@ import com.example.tigers_lottery.models.Event;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
+/**
+ *Fragment used by the entrant to view an event's details.
+ */
+
 public class EntrantEventDetailsFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -36,8 +40,10 @@ public class EntrantEventDetailsFragment extends Fragment {
     private String mParam2;
     private DatabaseHelper dbHelper;
 
+    /**
+     * Required empty public constructor.
+     */
     public EntrantEventDetailsFragment() {
-        // Required empty public constructor
     }
 
     /**
@@ -112,6 +118,10 @@ public class EntrantEventDetailsFragment extends Fragment {
 
         assert args != null;
         dbHelper.fetchEventById(args.getInt("eventId"), new DatabaseHelper.EventsCallback() {
+            /**
+             * Finds the event by its id and populates its fields accordingly.
+             * @param event whose details are to be displayed.
+             */
             @SuppressLint({"SetTextI18n", "SimpleDateFormat"})
             @Override
             public void onEventFetched(Event event) {
@@ -331,6 +341,9 @@ public class EntrantEventDetailsFragment extends Fragment {
 
             }
         });
+        /**
+         * Back button for the entrant event details screen.
+         */
 
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override

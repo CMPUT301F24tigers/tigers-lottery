@@ -91,10 +91,20 @@ public class AdminEntrantsProfilesFragment extends Fragment implements OnActionL
                 userAdapter.notifyDataSetChanged();
             }
 
+            /***
+             *
+             * @param user item from the database
+             */
+
             @Override
             public void onUserFetched(User user) {
                 // Not implemented as it is not needed in this context.
             }
+
+            /***
+             *  error handling for the database call.
+             * @param e exception catcher
+             */
 
             @Override
             public void onError(Exception e) {
@@ -131,10 +141,19 @@ public class AdminEntrantsProfilesFragment extends Fragment implements OnActionL
 
         DatabaseHelper dbHelper = new DatabaseHelper(requireContext());
         dbHelper.getUser(userId, new DatabaseHelper.UserCallback() {
+            /***
+             * Handling actions for when a user is
+             * @param user item from the database
+             */
             @Override
             public void onUserFetched(User user) {
                 Toast.makeText(getContext(), "Removing user:  " + user.getFirstName() + " " + user.getLastName(), Toast.LENGTH_SHORT).show();
             }
+
+            /***
+             * error handling for the database call.
+             * @param e exception catcher
+             */
 
             @Override
             public void onError(Exception e) {

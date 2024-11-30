@@ -22,7 +22,7 @@ public class AdminListItemModel {
          * @param profilePictureUrl URL for the user's profile picture.
          * @param option1Text       Label for the first action option.
          * @param option2Text       Label for the second action option.
-         * @param isEvent
+         * @param isEvent           Check for if the passed in model is an event or a user.
          */
         public AdminListItemModel(String uniqueIdentifier, String displayName, String secondaryText,
                                   String profilePictureUrl, String option1Text, String option2Text, boolean isEvent) {

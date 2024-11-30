@@ -83,17 +83,27 @@ public class OrganizerWaitingListFragment extends Fragment {
                 } else {
                     // Fetch user details for all entrant IDs
                     dbHelper.fetchUsersByIds(entrantIds, new DatabaseHelper.UsersCallback() {
+                        /**
+                         * Handles actions on finding details of all entrants.
+                         * @param users in the list
+                         */
                         @Override
                         public void onUsersFetched(List<User> users) {
                             noEntrantsMessage.setVisibility(View.GONE);
                             recyclerView.setVisibility(View.VISIBLE);
                             setupRecyclerView(users);
                         }
-
+                        /**
+                         * Handles actions on finding user, required dbHelper method, unused.
+                         * @param user user.
+                         */
                         @Override
                         public void onUserFetched(User user) {
                         }
-
+                        /**
+                         * Handles error on list finding.
+                         * @param e exception catcher.
+                         */
                         @Override
                         public void onError(Exception e) {
                             noEntrantsMessage.setVisibility(View.VISIBLE);
@@ -103,6 +113,10 @@ public class OrganizerWaitingListFragment extends Fragment {
                     });
                 }
             }
+            /**
+             * Handles error on finding the entrants corresponding to the list.
+             * @param e exception catcher.
+             */
 
             @Override
             public void onError(Exception e) {

@@ -78,6 +78,10 @@ public class OrganizerRegisteredEntrantsFragment extends Fragment {
 
     private void fetchRegisteredEntrants() {
         dbHelper.fetchRegisteredEntrants(eventId, new DatabaseHelper.EntrantsCallback() {
+            /**
+             * Handles actions on finding the entrants corresponding to the list.
+             * @param entrantIds ids of the entrants.
+             */
             @Override
             public void onEntrantsFetched(List<String> entrantIds) {
                 if (entrantIds.isEmpty()) {
@@ -86,16 +90,27 @@ public class OrganizerRegisteredEntrantsFragment extends Fragment {
                 } else {
                     // Fetch user details for all entrant IDs
                     dbHelper.fetchUsersByIds(entrantIds, new DatabaseHelper.UsersCallback() {
+                        /**
+                         * Handles actions on finding details of all entrants.
+                         * @param users in the list
+                         */
                         @Override
                         public void onUsersFetched(List<User> users) {
                             noEntrantsMessage.setVisibility(View.GONE);
                             recyclerView.setVisibility(View.VISIBLE);
                             setupRecyclerView(users);
                         }
-
+                        /**
+                         * Handles actions on finding user, required dbHelper method, unused.
+                         * @param user user.
+                         */
                         @Override
                         public void onUserFetched(User user) {
                         }
+                        /**
+                         * Handles error on list finding.
+                         * @param e exception catcher.
+                         */
 
                         @Override
                         public void onError(Exception e) {
@@ -106,7 +121,10 @@ public class OrganizerRegisteredEntrantsFragment extends Fragment {
                     });
                 }
             }
-
+            /**
+             * Handles error on finding the entrants corresponding to the list.
+             * @param e exception catcher.
+             */
             @Override
             public void onError(Exception e) {
                 noEntrantsMessage.setVisibility(View.VISIBLE);

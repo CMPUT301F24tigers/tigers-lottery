@@ -37,6 +37,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ *
+ */
 public class OrganizerMapFragment extends Fragment implements OnMapReadyCallback {
 
     private static final String ARG_EVENT_ID = "event_id";

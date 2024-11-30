@@ -67,6 +67,10 @@ public class AdminFacilitiesFragment extends Fragment implements OnActionListene
         DatabaseHelper dbHelper = new DatabaseHelper(requireContext());
 
         dbHelper.fetchAllUsers(new DatabaseHelper.UsersCallback() {
+            /**
+             * Handles actions on finding all users.
+             * @param users the app's users.
+             */
             @Override
             public void onUsersFetched(List<User> users) {
                 itemList.clear();
@@ -89,10 +93,20 @@ public class AdminFacilitiesFragment extends Fragment implements OnActionListene
                 facilityAdapter.notifyDataSetChanged();
             }
 
+            /**
+             * Handles actions on finding a specific user, required db helper method, unused.
+             * @param user user found.
+             */
+
             @Override
             public void onUserFetched(User user) {
                 // Not implemented as it is not needed in this context.
             }
+
+            /**
+             * Handles error on retrieving all facilities.
+             * @param e exception catcher.
+             */
 
             @Override
             public void onError(Exception e) {
@@ -130,16 +144,29 @@ public class AdminFacilitiesFragment extends Fragment implements OnActionListene
         DatabaseHelper dbHelper = new DatabaseHelper(requireContext());
 
         dbHelper.getUser(userId, new DatabaseHelper.UserCallback() {
+            /**
+             * Handles action on finding specific user, deletes the facility.
+             * @param user user associated with the facility.
+             */
             @Override
             public void onUserFetched(User user) {
                 Toast.makeText(getContext(), "Removing Facility:  " + user.getFacilityName(), Toast.LENGTH_SHORT).show();
 
                 // Update the user in the database
                 dbHelper.removeFacility(user, new DatabaseHelper.Callback() {
+                    /**
+                     * Handles success of the remove facility action
+                     * @param message pushed to logs.
+                     */
                     @Override
                     public void onSuccess(String message) {
                         Log.d("AdminFacilityFragment", "The Facility profile has been deleted successfully");
                     }
+
+                    /**
+                     * Handles failure of the remove facility action.
+                     * @param e pushed to logs.
+                     */
 
                     @Override
                     public void onFailure(Exception e) {
@@ -147,6 +174,11 @@ public class AdminFacilitiesFragment extends Fragment implements OnActionListene
                     }
                 });
             }
+
+            /**
+             * Handles error on finding user.
+             * @param e exception catcher.
+             */
 
             @Override
             public void onError(Exception e) {
