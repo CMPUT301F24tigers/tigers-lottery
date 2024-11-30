@@ -16,7 +16,6 @@
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.069"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.022" />
@@ -32,7 +31,7 @@
         app:layout_constraintHorizontal_bias="0.72"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.22"
+        app:layout_constraintVertical_bias="0.2"
         app:srcCompat="@android:drawable/ic_menu_edit" />
 
     <ImageButton
@@ -46,7 +45,7 @@
         app:layout_constraintHorizontal_bias="0.72"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.109"
+        app:layout_constraintVertical_bias="0.110"
         app:srcCompat="@android:drawable/ic_delete" />
 
     <ImageView
@@ -56,21 +55,20 @@
         android:background="@drawable/rounded_image"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.513"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.123"
+        app:layout_constraintVertical_bias="0.120"
         app:srcCompat="@drawable/baseline_account_circle_24" />
 
     <LinearLayout
-        android:layout_width="339dp"
-        android:layout_height="378dp"
+        android:layout_width="300dp"
+        android:layout_height="400dp"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.764">
+        app:layout_constraintVertical_bias="0.6">
 
         <TextView
             android:layout_width="match_parent"
@@ -90,13 +88,13 @@
                 android:id="@+id/editTextName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="@null"
                 android:hint="facility name"
                 android:inputType="textEmailAddress"
-                android:background="@null"
                 android:paddingLeft="16dp"
-                android:paddingRight="16dp"
                 android:paddingTop="10dp"
-                android:paddingBottom="10dp"/>
+                android:paddingRight="16dp"
+                android:paddingBottom="10dp" />
 
         </com.google.android.material.card.MaterialCardView>
 
@@ -118,13 +116,13 @@
                 android:id="@+id/editTextEmail"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="@null"
                 android:hint="facility email"
                 android:inputType="textEmailAddress"
-                android:background="@null"
                 android:paddingLeft="16dp"
-                android:paddingRight="16dp"
                 android:paddingTop="10dp"
-                android:paddingBottom="10dp"/>
+                android:paddingRight="16dp"
+                android:paddingBottom="10dp" />
 
         </com.google.android.material.card.MaterialCardView>
 
@@ -148,13 +146,13 @@
                 android:id="@+id/editTextMobile"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="@null"
                 android:hint="facility mobile"
                 android:inputType="phone"
-                android:background="@null"
                 android:paddingLeft="16dp"
-                android:paddingRight="16dp"
                 android:paddingTop="10dp"
-                android:paddingBottom="10dp"/>
+                android:paddingRight="16dp"
+                android:paddingBottom="10dp" />
 
         </com.google.android.material.card.MaterialCardView>
 
@@ -172,17 +170,18 @@
             android:layout_marginTop="8dp"
             app:cardCornerRadius="16dp"
             app:cardElevation="4dp">
+
             <EditText
                 android:id="@+id/editTextLocation"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="@null"
                 android:hint="facility location"
                 android:inputType="text"
-                android:background="@null"
                 android:paddingLeft="16dp"
-                android:paddingRight="16dp"
                 android:paddingTop="10dp"
-                android:paddingBottom="10dp"/>
+                android:paddingRight="16dp"
+                android:paddingBottom="10dp" />
         </com.google.android.material.card.MaterialCardView>
 
     </LinearLayout>
@@ -191,15 +190,13 @@
         android:id="@+id/saveChangesButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:backgroundTint="@color/darker_teal"
         android:text="Save Changes"
-        android:textColorLink="#245750"
-        app:rippleColor="@color/accent_1_teal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+        android:backgroundTint="@color/darker_teal"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.948" />
+        app:layout_constraintVertical_bias="0.84000003" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

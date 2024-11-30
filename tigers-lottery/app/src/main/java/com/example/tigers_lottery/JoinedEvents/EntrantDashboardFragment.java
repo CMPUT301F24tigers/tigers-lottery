@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,12 +31,17 @@ import android.Manifest; // Add this
 import com.example.tigers_lottery.HostedEvents.OrganizerEventDetailsFragment;
 import com.example.tigers_lottery.R;
 import com.example.tigers_lottery.models.Event;
+import com.example.tigers_lottery.models.User;
+import com.example.tigers_lottery.utils.DeviceIDHelper;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.Timestamp;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 public class EntrantDashboardFragment extends Fragment {
@@ -90,15 +96,25 @@ public class EntrantDashboardFragment extends Fragment {
         joinEventButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.CAMERA)
-                        != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(getActivity(),
-                            new String[]{Manifest.permission.CAMERA},
-                            CAMERA_PERMISSION_REQUEST_CODE);
-                } else {
-                    // Permission already granted
-                    initiateQRScanner();
-                }
+                checkUserProfileComplete(dbHelper.getCurrentUserId(), new DatabaseHelper.isValidProfileCallback() {
+                    @Override
+                    public void onProfileCheckComplete(boolean isComplete) {
+                        if(isComplete){
+                            if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.CAMERA)
+                                    != PackageManager.PERMISSION_GRANTED) {
+                                ActivityCompat.requestPermissions(getActivity(),
+                                        new String[]{Manifest.permission.CAMERA},
+                                        CAMERA_PERMISSION_REQUEST_CODE);
+                            } else {
+                                // Permission already granted
+                                initiateQRScanner();
+                            }
+                        } else {
+                            Toast.makeText(getContext(), "Complete your profile with valid details to join the event", Toast.LENGTH_LONG).show();
+                        }
+                    }
+                });
+
             }
         });
 
@@ -179,6 +195,59 @@ public class EntrantDashboardFragment extends Fragment {
         return view;
     }
 
+    private static boolean isValidDateOfBirth(Timestamp dob) {
+        if (dob == null) {
+            return false;
+        }
+
+        Date dateOfBirth = dob.toDate();
+        Calendar calendar = Calendar.getInstance();
+
+        // DOB the user is at least 14 years old
+        calendar.add(Calendar.YEAR, -14);
+        Date minAdultDob = calendar.getTime();
+        return dateOfBirth.before(minAdultDob);
+    }
+
+    public static boolean isValidEmailAddress(String email) {
+        if (email == null || email.trim().isEmpty()) {
+            return false;
+        }
+        return Patterns.EMAIL_ADDRESS.matcher(email).matches();
+    }
+
+    public static boolean isValidName(String name) {
+        return name != null && !name.trim().isEmpty() && !"Unknown User".equals(name);
+    }
+
+    /**
+     * Fetches a user document by userId and checks if their profile is complete.
+     *
+     * @param userId   The ID of the user to validate.
+     */
+    public void checkUserProfileComplete(String userId, DatabaseHelper.isValidProfileCallback callback) {
+        dbHelper.fetchUserById(userId, new DatabaseHelper.UsersCallback() {
+            @Override
+            public void onUsersFetched(List<User> users) {
+            }
+
+            @Override
+            public void onUserFetched(User user) {
+                boolean isValid = isValidName(user.getFirstName())
+                        && isValidName(user.getLastName())
+                        && isValidEmailAddress(user.getEmailAddress())
+                        && isValidDateOfBirth(user.getDateOfBirth());
+                callback.onProfileCheckComplete(isValid);
+            }
+
+            @Override
+            public void onError(Exception e) {
+                Log.d("EntrantDashboardFragment", "Failed to Fetch user to validate profile completion");
+                Toast.makeText(getContext(), "Error Validating User Profile", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
     /**
      * Initiates the QR code scanner for joining events.
      */
@@ -193,8 +262,6 @@ public class EntrantDashboardFragment extends Fragment {
         Intent intent = integrator.createScanIntent();
         qrCodeLauncher.launch(intent); // Launch the scanner
     }
-
-
 
     private void navigateToEventDetails(String result) {
 
@@ -238,4 +305,3 @@ public class EntrantDashboardFragment extends Fragment {
     }
 
 }
-

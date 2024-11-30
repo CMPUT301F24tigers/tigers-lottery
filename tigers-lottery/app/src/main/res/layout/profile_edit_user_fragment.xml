@@ -16,7 +16,6 @@
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.085"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.022" />
@@ -62,15 +61,14 @@
         app:srcCompat="@drawable/baseline_account_circle_24" />
 
     <LinearLayout
-        android:layout_width="350dp"
-        android:layout_height="393dp"
+        android:layout_width="300dp"
+        android:layout_height="450dp"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.491"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.588">
+        app:layout_constraintVertical_bias="0.6">
 
         <TextView
             android:id="@+id/textView3"
@@ -196,7 +194,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:layout_marginBottom="3sp"
-            android:text="Mobile Number"
+            android:text="Mobile Number(Optional)"
             android:textColor="@color/white" />
 
         <com.google.android.material.card.MaterialCardView
@@ -220,22 +218,31 @@
                 android:paddingBottom="10dp"/>
         </com.google.android.material.card.MaterialCardView>
 
+        <CheckBox
+            android:id="@+id/checkboxNotificationsEnabled"
+            android:layout_width="298dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="10dp"
+            android:backgroundTint="@color/white"
+            android:buttonTint="#FFFFFF"
+            android:text="Enable Notifications?"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            app:layout_constraintVertical_bias="0.864" />
+
     </LinearLayout>
 
     <Button
         android:id="@+id/saveChangesUserProfileButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Save Changes"
-        android:textColor="@color/white"
-        app:iconTint="@color/white"
         android:backgroundTint="@color/darker_teal"
+        android:text="Save Changes"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.934"
-        app:rippleColor="@color/accent_1_teal" />
+        app:layout_constraintVertical_bias="0.911" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
