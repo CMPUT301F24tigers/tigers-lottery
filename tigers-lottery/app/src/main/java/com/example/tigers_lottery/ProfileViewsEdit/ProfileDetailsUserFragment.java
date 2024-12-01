@@ -124,6 +124,11 @@ public class ProfileDetailsUserFragment extends Fragment {
         db.collection("users").document(deviceId)
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    /**
+                     * Populates the database with the inputted fields upon completion of the profile.
+                     *
+                     * @param task task.
+                     */
                     @Override
                     public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                         if (task.isSuccessful()) {
@@ -148,9 +153,7 @@ public class ProfileDetailsUserFragment extends Fragment {
                 });
 
         // Set listener for the edit profile button to navigate to edit profile fragment
-        editProfileButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        editProfileButton.setOnClickListener(v-> {
                 Bundle bundle = new Bundle();
                 bundle.putString("deviceId", deviceId);
 
@@ -163,10 +166,14 @@ public class ProfileDetailsUserFragment extends Fragment {
                 fragmentTransaction.replace(R.id.profileDetailsActivityFragment, transitionedFragment);
                 fragmentTransaction.addToBackStack(null);
                 fragmentTransaction.commit();
-            }
         });
 
         dbHelper.isAdminUser(deviceId, new DatabaseHelper.VerificationCallback() {
+            /**
+             * Checks if the user is an admin.
+             *
+             * @param exists true or false for if the user is an admin.
+             */
             @Override
             public void onResult(boolean exists) {
                 if(exists){
@@ -175,6 +182,12 @@ public class ProfileDetailsUserFragment extends Fragment {
                     adminVerifyBtn.setVisibility(View.VISIBLE);
                 }
             }
+
+            /**
+             * Handles error on checking admin capabilities.
+             *
+             * @param e exception catcher.
+             */
 
             @Override
             public void onError(Exception e) {
@@ -212,14 +225,21 @@ public class ProfileDetailsUserFragment extends Fragment {
     private void showAdminVerificationDialog() {
         authCode = generateAdminCode();
         dbHelper.storeAdminAuthCode(authCode, new DatabaseHelper.Callback() {
+            /**
+             * Code stored successfully, no action needed here
+             * @param message unused
+             */
             @Override
             public void onSuccess(String message) {
-                // Code stored successfully, no action needed here
             }
+
+            /**
+             * Handle failure if needed
+             * @param e exception catcher.
+             */
 
             @Override
             public void onFailure(Exception e) {
-                // Handle failure if needed
             }
         });
 
@@ -246,10 +266,19 @@ public class ProfileDetailsUserFragment extends Fragment {
         builder.setNegativeButton("Cancel", (dialog, which) -> {
             // Delete the generated code from the database if the user cancels
             dbHelper.deleteAdminAuthCode(authCode, new DatabaseHelper.Callback() {
+                /**
+                 * Handles success on deleting the admin authentication code.
+                 * @param message to be logged.
+                 */
                 @Override
                 public void onSuccess(String message) {
                     Log.d("ProfileDetailsUserFragment", "Admin code deleted upon cancel");
                 }
+
+                /**
+                 * Handles failure on deleting the admin authentication code.
+                 * @param e exception catcher.
+                 */
 
                 @Override
                 public void onFailure(Exception e) {
@@ -276,9 +305,17 @@ public class ProfileDetailsUserFragment extends Fragment {
 
             // Delete the incorrect code from the database
             dbHelper.deleteAdminAuthCode(authCode, new DatabaseHelper.Callback() {
+                /**
+                 * Handles success on deleting the incorrect code.
+                 * @param message unused
+                 */
                 @Override
                 public void onSuccess(String message) {}
 
+                /**
+                 * Handles failure on deleting the incorrect code.
+                 * @param e exception catcher.
+                 */
                 @Override
                 public void onFailure(Exception e) {}
             });
@@ -299,12 +336,21 @@ public class ProfileDetailsUserFragment extends Fragment {
         String deviceId = DeviceIDHelper.getDeviceId(requireContext());
 
         dbHelper.addUserToAdmins(deviceId, enteredCode, new DatabaseHelper.Callback() {
+            /**
+             * Handles success on registering a user as an admin.
+             * @param message to be logged.
+             */
             @Override
             public void onSuccess(String message) {
                 Log.e("ProfileDetailsUserFragment", "Adding to admins");
                 Toast.makeText(getContext(), "You are now registered as an Admin", Toast.LENGTH_SHORT).show();
                 adminVerifyBtn.setVisibility(View.GONE); // Hide the button upon successful verification
             }
+
+            /**
+             * Handles failure on registering a user as an admin.
+             * @param e exception catcher.
+             */
 
             @Override
             public void onFailure(Exception e) {

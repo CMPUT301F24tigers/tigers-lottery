@@ -166,6 +166,11 @@ public class ProfileEditUserFragment extends Fragment {
         String deviceId = getArguments().getString("deviceId");
 
         dbHelper.getUser(deviceId, new DatabaseHelper.UserCallback() {
+            /**
+             * Handles actions on finding user, populates the required fields with their parameters.
+             *
+             * @param user current user.
+             */
             @Override
             public void onUserFetched(User user) {
                 editTextFirstName.setText(user.getFirstName());
@@ -189,6 +194,11 @@ public class ProfileEditUserFragment extends Fragment {
                 }
             }
 
+            /**
+             * Handles error in finding user.
+             * @param e exception catcher.
+             */
+
             @Override
             public void onError(Exception e) {
 
@@ -197,6 +207,11 @@ public class ProfileEditUserFragment extends Fragment {
 
         // Listener to save changes to Firestore and Firebase Storage
         saveChangesButton.setOnClickListener(new View.OnClickListener() {
+            /**
+             * Upon saving changes to the user profile, populates the database.
+             *
+             * @param view view.
+             */
             @Override
             public void onClick(View view) {
                 Date date = null;
@@ -262,24 +277,23 @@ public class ProfileEditUserFragment extends Fragment {
         });
 
         // Listener to open DatePickerDialog when clicking on DOB field
-        editTextDOB.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        editTextDOB.setOnClickListener(v->{
                 openDatePicker();
-            }
         });
 
         // Listener to open image picker for selecting a new profile photo
-        editProfilePhotoButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        editProfilePhotoButton.setOnClickListener(v->{
                 Intent intent = new Intent(Intent.ACTION_PICK);
                 intent.setType("image/*");
                 activityResultLauncher.launch(intent);
-            }
         });
 
         removeUserProfilePictureButton.setOnClickListener(new View.OnClickListener() {
+            /**
+             * Upon clicking removes the entrant's profile picture after a dialog check.
+             *
+             * @param view view
+             */
             @Override
             public void onClick(View view) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
@@ -370,6 +384,15 @@ public class ProfileEditUserFragment extends Fragment {
         datePickerDialog.show();
     }
 
+    /**
+     * Generates a profile picture from the user's initials if an image isnt inputted.
+     *
+     * @param firstName first name
+     * @param lastName last name
+     * @param size Bitmap's size.
+     * @return bitmap generated profile picture.
+     */
+
     public static Bitmap generateProfilePicture(String firstName, String lastName, int size) {
         // Extract initials
         String initials = "";
@@ -421,6 +444,14 @@ public class ProfileEditUserFragment extends Fragment {
         return Color.HSVToColor(hsv);
     }
 
+    /**
+     * Saves the bitmap for the profile image to URI format.
+     *
+     * @param context current context.
+     * @param bitmap profile image.
+     * @return uri
+     */
+
     private static Uri saveBitmapToUri(Context context, Bitmap bitmap) {
         File cacheDir = context.getCacheDir();
         File file = new File(cacheDir, "profile_image_" + System.currentTimeMillis() + ".png");
@@ -437,12 +468,5 @@ public class ProfileEditUserFragment extends Fragment {
             return null;
         }
     }
-    public static boolean validateEmail(String email) {
-        if (email == null) {
-            return false;
-        }
-        Pattern pattern = Pattern.compile(EMAIL_REGEX);
-        Matcher matcher = pattern.matcher(email);
-        return matcher.matches();
-    }
+
 }
