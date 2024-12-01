@@ -173,9 +173,7 @@ public class EntrantEventDetailsFragment extends Fragment {
                 Bundle bundle = new Bundle();
                 bundle.putInt("eventId", event.getEventId());
 
-                eventDetailsButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
+                eventDetailsButton.setOnClickListener(v->{
                         if (!event.getWaitlistedEntrants().contains(deviceId) && !event.getRegisteredEntrants().contains(deviceId) && !event.getInvitedEntrants().contains(deviceId) && !event.getDeclinedEntrants().contains(deviceId)) {
                             // User is NOT on the waitlist, Join Waitlist functionality
                             AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
@@ -185,6 +183,10 @@ public class EntrantEventDetailsFragment extends Fragment {
                             // Confirm joining
                             builder.setPositiveButton("Join", (dialog, which) -> {
                                 dbHelper.addEntrantWaitlist(event.getEventId(), deviceId, new DatabaseHelper.EventsCallback() {
+                                    /**
+                                     * Finds the event to be joined, and adds the user to its waiting list.
+                                     * @param updatedEvent event to be joined.
+                                     */
                                     @Override
                                     public void onEventFetched(Event updatedEvent) {
                                         // Successfully joined the waitlist, update UI
@@ -211,10 +213,20 @@ public class EntrantEventDetailsFragment extends Fragment {
                                         fragmentTransaction.commit();
                                     }
 
+                                    /**
+                                     * Required dbHelper method, unused.
+                                     * @param events events.
+                                     */
+
                                     @Override
                                     public void onEventsFetched(List<Event> events) {
                                         // Not used here
                                     }
+
+                                    /**
+                                     * Handles error on joining the waiting list for the event.
+                                     * @param e exception catcher.
+                                     */
 
                                     @Override
                                     public void onError(Exception e) {
@@ -241,6 +253,9 @@ public class EntrantEventDetailsFragment extends Fragment {
                             // Set the Proceed button
                             builder.setPositiveButton("Proceed", (dialog, which) -> {
                                 dbHelper.entrantLeaveWaitingList(event.getEventId(), new DatabaseHelper.StatusCallback() {
+                                    /**
+                                     * On updating the user to leave the waiting list, pops back into the entrant dashboard.
+                                     */
                                     @Override
                                     public void onStatusUpdated() {
                                         eventDetailsButton.setVisibility(View.INVISIBLE);
@@ -253,6 +268,11 @@ public class EntrantEventDetailsFragment extends Fragment {
                                         fragmentTransaction.addToBackStack(null);
                                         fragmentTransaction.commit();
                                     }
+
+                                    /**
+                                     * Handles error on leaving the waiting list.
+                                     * @param e exception catcher.
+                                     */
 
                                     @Override
                                     public void onError(Exception e) {
@@ -279,6 +299,9 @@ public class EntrantEventDetailsFragment extends Fragment {
                             // Set the Proceed button
                             builder.setPositiveButton("Yes", (dialog, which) -> {
                                 dbHelper.entrantAcceptDeclineInvitation(event.getEventId(), "accept", new DatabaseHelper.StatusCallback() {
+                                    /**
+                                     * Sends the user back to the entrant dashboard upon accepting an invitation.
+                                     */
                                     @Override
                                     public void onStatusUpdated() {
                                         FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
@@ -291,6 +314,11 @@ public class EntrantEventDetailsFragment extends Fragment {
                                         fragmentTransaction.addToBackStack(null);
                                         fragmentTransaction.commit();
                                     }
+
+                                    /**
+                                     * Handles error on accepting an invitation.
+                                     * @param e exception catcher.
+                                     */
 
                                     @Override
                                     public void onError(Exception e) {
@@ -302,6 +330,9 @@ public class EntrantEventDetailsFragment extends Fragment {
                             // Set the Cancel button
                             builder.setNegativeButton("No", (dialog, which) -> {
                                 dbHelper.entrantAcceptDeclineInvitation(event.getEventId(), "decline", new DatabaseHelper.StatusCallback() {
+                                    /**
+                                     * Sends user back to the entrant dashboard on declining the invitation.
+                                     */
                                     @Override
                                     public void onStatusUpdated() {
                                         FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
@@ -314,6 +345,11 @@ public class EntrantEventDetailsFragment extends Fragment {
                                         fragmentTransaction.addToBackStack(null);
                                         fragmentTransaction.commit();
                                     }
+
+                                    /**
+                                     * Handles error on declining the invitation.
+                                     * @param e exception catcher.
+                                     */
 
                                     @Override
                                     public void onError(Exception e) {
@@ -326,15 +362,23 @@ public class EntrantEventDetailsFragment extends Fragment {
                             AlertDialog dialog = builder.create();
                             dialog.show();
                         }
-                    }
                 });
 
             }
 
+            /**
+             * Required dbHelper method, unused.
+             * @param events
+             */
+
             @Override
             public void onEventsFetched(List<Event> events) {
-
             }
+
+            /**
+             * Handles error on finding the event.
+             * @param e exception catcher.
+             */
 
             @Override
             public void onError(Exception e) {

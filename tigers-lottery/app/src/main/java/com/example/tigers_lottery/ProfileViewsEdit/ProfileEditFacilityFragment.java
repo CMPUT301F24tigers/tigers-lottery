@@ -145,6 +145,11 @@ public class ProfileEditFacilityFragment extends Fragment {
         String deviceId = getArguments().getString("deviceId");
 
         dbHelper.getUser(deviceId, new DatabaseHelper.UserCallback() {
+            /**
+             * Populates the user's required fields on finding them in the database.
+             *
+             * @param user current user.
+             */
             @Override
             public void onUserFetched(User user) {
                 nameEditText.setText(user.getFacilityName());
@@ -159,6 +164,11 @@ public class ProfileEditFacilityFragment extends Fragment {
                 }
             }
 
+            /**
+             * Handles error on finding the user.
+             * @param e exception catcher.
+             */
+
             @Override
             public void onError(Exception e) {
 
@@ -166,9 +176,7 @@ public class ProfileEditFacilityFragment extends Fragment {
         });
 
         // Listener to save changes to Firestore and Firebase Storage
-        saveChangesButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        saveChangesButton.setOnClickListener(v->{
 
                 if(validator.validatingFacilityProfileInput(nameEditText.getText().toString(), emailEditText.getText().toString(), locationEditText.getText().toString(), mobileEditText.getText().toString(), requireContext())) {
 
@@ -213,21 +221,22 @@ public class ProfileEditFacilityFragment extends Fragment {
                     fragmentTransaction.addToBackStack(null);
                     fragmentTransaction.commit();
                 }
-            }
 
         });
 
         // Listener to open image picker for selecting a new profile photo
-        editProfilePhotoButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        editProfilePhotoButton.setOnClickListener(v->{
                 Intent intent = new Intent(Intent.ACTION_PICK);
                 intent.setType("image/*");
                 activityResultLauncher.launch(intent);
-            }
         });
 
         removeFacilityProfilePictureButton.setOnClickListener(new View.OnClickListener() {
+            /**
+             * On clicking remove button creates a dialog to confirm deletion.
+             *
+             * @param view view.
+             */
             @Override
             public void onClick(View view) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
@@ -286,16 +295,5 @@ public class ProfileEditFacilityFragment extends Fragment {
         return view;
     }
 
-    public boolean validatingFacilityProfileInput(Context context, String name, String email, String location, String mobile) {
-        return (!Objects.equals(name, "") && !Objects.equals(email, "") && !Objects.equals(location, "") && mobile != null);
-    }
-    public static boolean validateEmail(String email) {
-        if (email == null) {
-            return false;
-        }
-        Pattern pattern = Pattern.compile(EMAIL_REGEX);
-        Matcher matcher = pattern.matcher(email);
-        return matcher.matches();
-    }
 
 }

@@ -41,6 +41,7 @@ public class PlaceholderContent {
         return new PlaceholderItem(String.valueOf(position), "Item " + position, makeDetails(position));
     }
 
+
     private static String makeDetails(int position) {
         StringBuilder builder = new StringBuilder();
         builder.append("Details about Item: ").append(position);
@@ -58,11 +59,23 @@ public class PlaceholderContent {
         public final String content;
         public final String details;
 
+        /**
+         * Constructor for the placeholder item.
+         *
+         * @param id id.
+         * @param content content of the placeholder.
+         * @param details details of the placeholder.
+         */
+
         public PlaceholderItem(String id, String content, String details) {
             this.id = id;
             this.content = content;
             this.details = details;
         }
+
+        /**
+         * @return content of the placeholder.
+         */
 
         @Override
         public String toString() {
