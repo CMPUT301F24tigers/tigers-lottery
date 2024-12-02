@@ -42,6 +42,7 @@ dependencies {
     implementation(libs.gridlayout)
     annotationProcessor("com.github.bumptech.glide:compiler:4.15.0")
     implementation ("commons-validator:commons-validator:1.9.0")
+    implementation("com.google.android.gms:play-services-location:21.0.1")
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.constraintlayout)

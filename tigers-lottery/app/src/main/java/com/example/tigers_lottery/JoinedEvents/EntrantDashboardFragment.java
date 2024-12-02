@@ -170,7 +170,7 @@ public class EntrantDashboardFragment extends Fragment {
                     String dateSplit = event.getFormattedEventDate().split(" - ")[0];
                     eventDateTextView.setText(dateSplit);
                     if (event.getPosterUrl() != null && !event.getPosterUrl().isEmpty()) {
-                        Glide.with(getContext())
+                        Glide.with(requireContext())
                                 .load(event.getPosterUrl())
                                 .placeholder(R.drawable.event_poster_placeholder)
                                 .into(eventPhoto);
