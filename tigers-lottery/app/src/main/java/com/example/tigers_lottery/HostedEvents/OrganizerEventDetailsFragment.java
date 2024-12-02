@@ -531,11 +531,10 @@ public class OrganizerEventDetailsFragment extends Fragment {
              */
             @Override
             public void onDeclineDetected(List<String> declinedEntrants) {
-                // Skip handling during the initial listener sync
                 if (isInitialDeclineSync) {
                     Log.d("DeclineDebug", "Initial sync detected. Skipping decline handling.");
-                    isInitialDeclineSync = false; // Set flag to false after the first sync
-                    lastKnownDeclinedEntrantsSize = declinedEntrants.size(); // Update known size
+                    isInitialDeclineSync = false;
+                    lastKnownDeclinedEntrantsSize = declinedEntrants.size();
                     return;
                 }
 
@@ -545,10 +544,13 @@ public class OrganizerEventDetailsFragment extends Fragment {
 
                 if (!isHandlingDecline && declinedEntrants.size() > lastKnownDeclinedEntrantsSize) {
                     isHandlingDecline = true;
-                    lastKnownDeclinedEntrantsSize = declinedEntrants.size(); // Update the known size
+                    lastKnownDeclinedEntrantsSize = declinedEntrants.size();
+
+                    Log.d("DeclineDebug", "Fetching event details for decline handling...");
                     fetchEventDetails(); // Proceed to handle the actual decline
                 }
             }
+
 
             /**
              * Handles error on handling the decline.
@@ -575,7 +577,11 @@ public class OrganizerEventDetailsFragment extends Fragment {
             @Override
             public void onEventFetched(Event event) {
                 if (event != null) {
-                    handleDeclineLogic(event);
+                    Log.d("DeclineDebug", "Event details fetched successfully: " + event.getEventName());
+                    handleDeclineLogic(event); // Proceed with decline logic
+                } else {
+                    Log.d("DeclineDebug", "Failed to fetch event details. Event is null.");
+                    isHandlingDecline = false; // Reset flag
                 }
             }
 
@@ -606,48 +612,43 @@ public class OrganizerEventDetailsFragment extends Fragment {
      * @param event to be declined.
      */
 
-
     private void handleDeclineLogic(Event event) {
         Log.d("DeclineDebug", "Handling decline for event: " + event.getEventName());
 
-        // Prevent re-entry into the decline handling logic
         if (isHandlingDecline) {
             Log.d("DeclineDebug", "Decline logic is already in process. Skipping.");
             return;
         }
-        isHandlingDecline = true; // Lock the flag to prevent re-entry
 
         try {
-            // Prevent further action if the invited list already meets the occupant limit
+            // Check occupant limit
             if (event.getInvitedEntrants().size() >= event.getOccupantLimit()) {
                 Log.d("DeclineDebug", "Occupant limit reached, no action needed.");
                 return;
             }
 
-            // Get the current waitlisted entrants
+            // Log waitlist and invitee status
             List<String> waitlistedEntrants = event.getWaitlistedEntrants();
+            Log.d("DeclineDebug", "Waitlisted entrants: " + waitlistedEntrants);
+            Log.d("DeclineDebug", "Invited entrants: " + event.getInvitedEntrants());
 
-            // Check if there are any waitlisted entrants to invite
             if (waitlistedEntrants == null || waitlistedEntrants.isEmpty()) {
                 Log.d("DeclineDebug", "No waitlisted entrants to invite.");
                 return;
             }
 
-            // Select a new invitee from the waitlist
+            // Select a new invitee
             String newInvitee = selectRandomEntrant(waitlistedEntrants);
 
             if (newInvitee != null) {
-                // Update the event's lists
+                Log.d("DeclineDebug", "New invitee selected: " + newInvitee);
                 event.getInvitedEntrants().add(newInvitee);
                 waitlistedEntrants.remove(newInvitee);
 
-                // Update the database with the modified lists
                 dbHelper.updateEntrantsAfterDecline(eventId, event.getInvitedEntrants(), waitlistedEntrants, new DatabaseHelper.EventsCallback() {
                     @Override
                     public void onEventsFetched(List<Event> events) {
                         Log.d("DeclineDebug", "Entrants updated successfully after decline.");
-
-                        // Send a notification to the new invitee
                         dbHelper.sendLotteryWinNotification(
                                 newInvitee, eventId, event.getOrganizerId(), event.getEventName(),
                                 new DatabaseHelper.NotificationCallback() {
@@ -662,16 +663,18 @@ public class OrganizerEventDetailsFragment extends Fragment {
                                     }
                                 }
                         );
+                        isHandlingDecline = false; // Reset flag
                     }
 
                     @Override
                     public void onEventFetched(Event event) {
-                        // No action needed for this callback
+                        // No action needed
                     }
 
                     @Override
                     public void onError(Exception e) {
                         Log.e("DeclineDebug", "Failed to update entrants after decline.", e);
+                        isHandlingDecline = false; // Reset flag
                     }
                 });
             } else {
@@ -680,10 +683,10 @@ public class OrganizerEventDetailsFragment extends Fragment {
         } catch (Exception e) {
             Log.e("DeclineDebug", "Error while handling decline.", e);
         } finally {
-            // Mark the decline handling process as complete
-            isHandlingDecline = false;
+            isHandlingDecline = false; // Ensure flag reset
         }
     }
+
 
 
 
