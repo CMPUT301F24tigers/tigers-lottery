@@ -49,7 +49,8 @@ import java.util.Locale;
  */
 public class OrganizerEditEventFragment extends Fragment {
 
-    private EditText inputEventName, inputEventLocation, inputRegistrationOpens, inputRegistrationDeadline, inputEventDate, inputEventDescription, inputWaitlistLimit, inputOccupantLimit;
+    private EditText inputEventName, inputEventLocation, inputEventDescription, inputWaitlistLimit, inputOccupantLimit;
+    private TextView inputRegistrationOpens, inputRegistrationDeadline, inputEventDate;
     private CheckBox checkboxWaitlistLimit, checkboxGeolocationRequired;
     private Button btnSaveEvent;
     private DatabaseHelper dbHelper;
