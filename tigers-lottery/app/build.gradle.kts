@@ -55,9 +55,11 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
+    androidTestImplementation("androidx.test:core:1.5.0")
     implementation("com.journeyapps:zxing-android-embedded:4.3.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.5.1")
     implementation("com.google.zxing:core:3.5.2")
+    implementation("com.google.android.gms:play-services-tasks:18.0.2")
 
 
 }
