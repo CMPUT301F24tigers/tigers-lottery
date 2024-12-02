@@ -25,6 +25,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
@@ -233,6 +234,37 @@ public class DatabaseHelper {
     public interface isValidProfileCallback {
         void onProfileCheckComplete(boolean isComplete);
     }
+
+
+    /**
+     * Updates the user's geolocation in the Firestore database.
+     *
+     * @param geoPoint The user's geolocation as a GeoPoint (latitude and longitude).
+     * @param callback Callback to handle success or failure of the update operation.
+     */
+    public void updateUserGeolocation(GeoPoint geoPoint, StatusCallback callback) {
+       // String userId = getCurrentUserId(); // Use the helper method to fetch currentUserId
+
+        // Check if userId is valid
+        if (currentUserId == null || currentUserId.isEmpty()) {
+            callback.onError(new Exception("User ID is not available."));
+            return;
+        }
+
+        // Update the user_geolocation field in Firestore
+        usersRef.document(currentUserId)
+                .update("user_geolocation", geoPoint)
+                .addOnSuccessListener(unused -> {
+                    Log.d(TAG, "User geolocation updated successfully.");
+                    callback.onStatusUpdated(); // Notify success
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Failed to update user geolocation: " + e.getMessage());
+                    callback.onError(e); // Notify failure
+                });
+    }
+
+
 
     /**
      * Fetches the count of unread notifications for the current user.

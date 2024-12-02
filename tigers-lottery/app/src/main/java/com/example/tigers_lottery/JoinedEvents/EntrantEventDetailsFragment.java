@@ -1,17 +1,25 @@
 package com.example.tigers_lottery.JoinedEvents;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.pm.PackageManager;
 import android.graphics.drawable.GradientDrawable;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -21,10 +29,18 @@ import com.example.tigers_lottery.DatabaseHelper;
 import com.example.tigers_lottery.JoinedEvents.EntrantDashboardFragment;
 import com.example.tigers_lottery.R;
 import com.example.tigers_lottery.models.Event;
+
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.firebase.firestore.GeoPoint;
+
 import com.example.tigers_lottery.models.User;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.List;
+
+import java.util.Locale;
 import java.util.Objects;
 
 /**
@@ -41,6 +57,8 @@ public class EntrantEventDetailsFragment extends Fragment {
     private String mParam1;
     private String mParam2;
     private DatabaseHelper dbHelper;
+    private FusedLocationProviderClient fusedLocationClient;
+    private String userLocation;
 
     /**
      * Required empty public constructor.
@@ -103,8 +121,9 @@ public class EntrantEventDetailsFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.entrant_event_details_fragment, container, false);
-        DatabaseHelper dbHelper = new DatabaseHelper(getContext());
+        //DatabaseHelper dbHelper = new DatabaseHelper(getContext());
         Bundle args = getArguments();
+        dbHelper = new DatabaseHelper(requireContext());
         String deviceId = dbHelper.getCurrentUserId();
         ImageButton backButton = view.findViewById(R.id.eventDetailsBackButton);
         Button eventDetailsButton = view.findViewById(R.id.eventDetailsButton);
@@ -121,6 +140,8 @@ public class EntrantEventDetailsFragment extends Fragment {
         TextView eventOrganizerEmail = view.findViewById(R.id.eventDetailsFacilityEmail);
         TextView eventOrganizerNumber = view.findViewById(R.id.eventDetailsFacilityNumber);
         eventDetailsButton.setVisibility(View.INVISIBLE);
+
+
 
         assert args != null;
         dbHelper.fetchEventById(args.getInt("eventId"), new DatabaseHelper.EventsCallback() {
@@ -210,6 +231,14 @@ public class EntrantEventDetailsFragment extends Fragment {
                     eventDetailsButton.setVisibility(View.VISIBLE);
                 } else{eventDetailsButton.setVisibility(View.VISIBLE);}
 
+                if(event.isGeolocationRequired()) {
+                    fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext());
+                    if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        ActivityCompat.requestPermissions(requireActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+                    }else {
+                        getCurrentLocation();
+                    }
+                }
 
                 Bundle bundle = new Bundle();
                 bundle.putInt("eventId", event.getEventId());
@@ -217,8 +246,32 @@ public class EntrantEventDetailsFragment extends Fragment {
                 eventDetailsButton.setOnClickListener(v->{
                         if (!event.getWaitlistedEntrants().contains(deviceId) && !event.getRegisteredEntrants().contains(deviceId) && !event.getInvitedEntrants().contains(deviceId) && !event.getDeclinedEntrants().contains(deviceId)) {
                             // User is NOT on the waitlist, Join Waitlist functionality
-                            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                            builder.setTitle("Join Waitlist");
+                            AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+
+                            if(!event.isGeolocationRequired()) {
+                                builder.setTitle("Join Waitlist");
+                                builder.setMessage("Are you sure you want to join the waitlist for this event?");
+                            }else {
+                                if(userLocation == null) {
+                                    Toast.makeText(requireContext(), "Still getting location...", Toast.LENGTH_SHORT).show();
+                                    getCurrentLocation();
+                                    return;
+                                }
+
+                                builder.setTitle("Warning! Geolocation required!");
+                                TextView messageTextView = new TextView(getContext());
+                                messageTextView.setText("You are joining event from " + userLocation + ". Event is in " + event.getLocation() + ". Do you want to join the event?");
+                                messageTextView.setPadding(50, 30, 50, 30);
+                                messageTextView.setVerticalScrollBarEnabled(true);
+
+                                // Wrap the TextView in a ScrollView
+                                ScrollView scrollView = new ScrollView(getContext());
+                                scrollView.addView(messageTextView);
+
+                                // Set the ScrollView as the dialog content
+                                builder.setView(scrollView);
+                            }
+
                             builder.setMessage("Are you sure you want to join the waitlist for this event?");
 
                             // Confirm joining
@@ -238,7 +291,7 @@ public class EntrantEventDetailsFragment extends Fragment {
                                         // Notify the user
                                         new AlertDialog.Builder(getContext())
                                                 .setTitle("Success")
-                                                .setMessage("You have successfully joined the waitlist!")
+                                                .setMessage("You have successfully joined waitlist!")
                                                 .setPositiveButton("OK", (dialog1, which1)->{
 
                                                 })
@@ -446,4 +499,81 @@ public class EntrantEventDetailsFragment extends Fragment {
 
         return view;
     }
+
+
+    @SuppressLint("MissingPermission")
+    private void getCurrentLocation() {
+        // Check if permissions are granted
+        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+
+            // Permissions are granted, proceed with fetching location
+            fusedLocationClient.getLastLocation()
+                    .addOnSuccessListener(location -> {
+                        if (location != null) {
+                            // Get latitude and longitude
+                            double latitude = location.getLatitude();
+                            double longitude = location.getLongitude();
+
+                            // Convert to GeoPoint
+                            GeoPoint geoPoint = new GeoPoint(latitude, longitude);
+
+                            // Update the geolocation in the database
+                            dbHelper.updateUserGeolocation(geoPoint, new DatabaseHelper.StatusCallback() {
+                                @Override
+                                public void onStatusUpdated() {
+                                    Log.d("GeolocationUpdate", "Geolocation updated successfully in Firestore.");
+                                    Toast.makeText(requireContext(), "Geolocation updated successfully!", Toast.LENGTH_SHORT).show();
+
+                                    // Optionally convert latitude and longitude to an address
+                                    getAddressFromLatLng(latitude, longitude);
+                                }
+
+                                @Override
+                                public void onError(Exception e) {
+                                    Log.e("GeolocationUpdateError", "Failed to update geolocation: " + e.getMessage());
+                                    Toast.makeText(requireContext(), "Failed to update geolocation!", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+
+                            // Convert to address
+                            getAddressFromLatLng(latitude, longitude);
+                        } else {
+                            Log.e("LocationError", "Location is null");
+                        }
+                    });
+        } else {
+            // Permissions are not granted, request permissions
+            ActivityCompat.requestPermissions(requireActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+        }
+    }
+
+
+    private void getAddressFromLatLng(double latitude, double longitude) {
+        Geocoder geocoder = new Geocoder(requireContext(), Locale.getDefault());
+        try {
+            // Get address list from Geocoder
+            List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
+            if (addresses != null && !addresses.isEmpty()) {
+                Address address = addresses.get(0);
+
+                // Construct the address string
+                String fullAddress = address.getAddressLine(0); // Full address
+                String city = address.getLocality();           // City
+                String state = address.getAdminArea();         // State
+                String country = address.getCountryName();     // Country
+                String postalCode = address.getPostalCode();   // Postal code
+
+                userLocation = city + ", " + state + ", " + country;
+                // Log or use the address
+                Log.d("Address", "User Full Address: " + fullAddress);
+                Log.d("Address", "User City: " + city + ", State: " + state + ", Country: " + country + ", Postal Code: " + postalCode);
+            } else {
+                Log.e("GeocoderError", "No address found for the location");
+            }
+        } catch (IOException e) {
+            Log.e("GeocoderException", "Error getting address from latitude/longitude", e);
+        }
+    }
+
 }

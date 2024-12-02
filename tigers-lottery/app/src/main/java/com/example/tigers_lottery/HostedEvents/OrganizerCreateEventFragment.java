@@ -241,9 +241,17 @@ public class OrganizerCreateEventFragment extends Fragment {
         Timestamp eventDateTimestamp = convertToTimestamp(eventDate);
         Timestamp currentTimestamp = Timestamp.now();
 
+        Calendar registrationOpensCalendar = Calendar.getInstance();
+        registrationOpensCalendar.setTime(registrationOpensTimestamp.toDate());
+
+        // Get current date as Calendar
+        Calendar currentCalendar = Calendar.getInstance();
+
         // Date-based validations
-        if (registrationOpensTimestamp.compareTo(currentTimestamp) <= 0) {
-            Toast.makeText(getContext(),"Registration Open Date must be in the future", Toast.LENGTH_SHORT).show();
+        if (currentCalendar.get(Calendar.YEAR) >= registrationOpensCalendar.get(Calendar.YEAR) &&
+                currentCalendar.get(Calendar.MONTH) >= registrationOpensCalendar.get(Calendar.MONTH) &&
+                currentCalendar.get(Calendar.DAY_OF_MONTH) > registrationOpensCalendar.get(Calendar.DAY_OF_MONTH)) {
+            Toast.makeText(getContext(),"Registration Open Date must be now or in the future", Toast.LENGTH_SHORT).show();
             return;
         }
 
