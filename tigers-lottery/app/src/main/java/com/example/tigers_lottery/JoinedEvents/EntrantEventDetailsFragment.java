@@ -31,6 +31,7 @@ import com.example.tigers_lottery.R;
 import com.example.tigers_lottery.models.Event;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.firebase.firestore.GeoPoint;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -467,6 +468,27 @@ public class EntrantEventDetailsFragment extends Fragment {
                             // Get latitude and longitude
                             double latitude = location.getLatitude();
                             double longitude = location.getLongitude();
+
+                            // Convert to GeoPoint
+                            GeoPoint geoPoint = new GeoPoint(latitude, longitude);
+
+                            // Update the geolocation in the database
+                            dbHelper.updateUserGeolocation(geoPoint, new DatabaseHelper.StatusCallback() {
+                                @Override
+                                public void onStatusUpdated() {
+                                    Log.d("GeolocationUpdate", "Geolocation updated successfully in Firestore.");
+                                    Toast.makeText(requireContext(), "Geolocation updated successfully!", Toast.LENGTH_SHORT).show();
+
+                                    // Optionally convert latitude and longitude to an address
+                                    getAddressFromLatLng(latitude, longitude);
+                                }
+
+                                @Override
+                                public void onError(Exception e) {
+                                    Log.e("GeolocationUpdateError", "Failed to update geolocation: " + e.getMessage());
+                                    Toast.makeText(requireContext(), "Failed to update geolocation!", Toast.LENGTH_SHORT).show();
+                                }
+                            });
 
                             // Convert to address
                             getAddressFromLatLng(latitude, longitude);
