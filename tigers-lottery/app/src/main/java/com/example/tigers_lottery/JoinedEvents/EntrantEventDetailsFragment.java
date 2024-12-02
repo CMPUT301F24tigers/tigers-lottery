@@ -105,6 +105,7 @@ public class EntrantEventDetailsFragment extends Fragment {
         TextView eventTextViewWaitingList = view.findViewById(R.id.eventDetailsTextViewWaitingList);
         TextView eventTextViewLocation = view.findViewById(R.id.eventDetailsTextViewLocation);
         TextView eventTextViewDate = view.findViewById(R.id.eventDetailsTextViewDate);
+        TextView eventTextViewRegistrationOpenDate = view.findViewById(R.id.eventDetailsTextViewRegistrationOpenDate);
         TextView eventTextViewRegistrationDeadline = view.findViewById(R.id.eventDetailsTextViewRegistrationDeadline);
         TextView eventTextViewStatus = view.findViewById(R.id.eventDetailsTextViewStatus);
         ImageView eventDetailsImageView = view.findViewById(R.id.eventDetailsImageView);
@@ -117,12 +118,11 @@ public class EntrantEventDetailsFragment extends Fragment {
             public void onEventFetched(Event event) {
 
                 eventTextViewName.setText(event.getEventName());
-                eventTextViewDescription.setText(event.getDescription());
+                eventTextViewDescription.setText("Description: " + event.getDescription());
                 eventTextViewLocation.setText("Location: " + event.getLocation());
-                String dateSplit = event.getFormattedEventDate().split(" - ")[0];
-                eventTextViewDate.setText("Date: " + dateSplit);
-                String dateSplitWaitlistDeadline = event.getFormattedWaitlistDeadline().split(" - ")[0];
-                eventTextViewRegistrationDeadline.setText("Registration Deadline: : " + dateSplitWaitlistDeadline);
+                eventTextViewDate.setText("Date: " + new SimpleDateFormat("yyyy-MM-dd").format(event.getEventDate().toDate()));
+                eventTextViewRegistrationDeadline.setText("Registration Deadline: " + new SimpleDateFormat("yyyy-MM-dd").format(event.getWaitlistDeadline().toDate()));
+                eventTextViewRegistrationOpenDate.setText("Registration Opens: " + new SimpleDateFormat("yyyy-MM-dd").format(event.getWaitlistOpenDate().toDate()));
 
                 if (event.getPosterUrl() != null && !event.getPosterUrl().isEmpty()) {
                     Glide.with(getContext())
@@ -138,6 +138,7 @@ public class EntrantEventDetailsFragment extends Fragment {
                 }else {
                     eventTextViewWaitingList.setText("Waiting List: " + event.getWaitlistedEntrants().size() + " entrants");
                 }
+
                 GradientDrawable statusBackground = (GradientDrawable) eventTextViewStatus.getBackground();
                 if(event.getRegisteredEntrants().contains(deviceId)) {
                     statusBackground.setColor(0xFF008080);

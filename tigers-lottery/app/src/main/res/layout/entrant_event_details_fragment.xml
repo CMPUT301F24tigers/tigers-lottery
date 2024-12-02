@@ -84,27 +84,35 @@
             android:id="@+id/eventDetailsTextViewLocation"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
             android:textColor="@color/white"
-            android:textSize="16sp"
-            android:layout_marginBottom="8dp" />
+            android:textSize="16sp" />
 
-        <!-- Waitlist Open Date -->
         <TextView
             android:id="@+id/eventDetailsTextViewWaitingList"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
             android:textColor="@color/white"
-            android:textSize="16sp"
-            android:layout_marginBottom="8dp" />
+            android:textSize="16sp" />
+
+        <!-- Waitlist Open Date -->
+        <TextView
+            android:id="@+id/eventDetailsTextViewRegistrationOpenDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:textColor="@color/white"
+            android:textSize="16sp" />
 
         <!-- Waitlist Close Date -->
         <TextView
             android:id="@+id/eventDetailsTextViewRegistrationDeadline"
             android:layout_width="wrap_content"
-            android:textColor="@color/white"
             android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:layout_marginBottom="8dp" />
+            android:layout_marginBottom="8dp"
+            android:textColor="@color/white"
+            android:textSize="16sp" />
 
         <TextView
             android:id="@+id/eventDetailsTextViewDate"
