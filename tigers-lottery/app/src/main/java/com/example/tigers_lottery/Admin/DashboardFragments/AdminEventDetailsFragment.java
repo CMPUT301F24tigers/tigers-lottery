@@ -303,7 +303,7 @@ public class AdminEventDetailsFragment extends Fragment {
 
                     Notification notification = new Notification();
                     notification.setMessage("The QR code for your event has been removed by the admin due to a violation of our app’s policies. You can regenerate a new QR code on the event details page in accordance with the guidelines of Tigers Lottery");
-                    notification.setType("Event Poster Removal");
+                    notification.setType("Event QR code Removal");
                     notification.setUserId(organizerID); // Use the stored organizer ID
                     notification.setMetadata(new HashMap<>() {{
                         put("event_name", "admin");
