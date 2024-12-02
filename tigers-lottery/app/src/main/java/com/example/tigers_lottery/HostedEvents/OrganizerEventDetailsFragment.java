@@ -609,89 +609,59 @@ public class OrganizerEventDetailsFragment extends Fragment {
 
     private void handleDeclineLogic(Event event) {
         Log.d("DeclineDebug", "Handling decline for event: " + event.getEventName());
-        Log.d("DeclineDebug", "Current invited entrants: " + event.getInvitedEntrants());
-        Log.d("DeclineDebug", "Current waitlisted entrants: " + event.getWaitlistedEntrants());
-        Log.d("DeclineDebug", "Occupant limit: " + event.getOccupantLimit());
-        if (event.getInvitedEntrants().size() < event.getOccupantLimit()) {
-            List<String> waitlistedEntrants = event.getWaitlistedEntrants();
 
-            if (!waitlistedEntrants.isEmpty()) {
-                String newInvitee = selectRandomEntrant(waitlistedEntrants);
-                Log.d("DeclineDebug", "Selected new invitee: " + newInvitee);
-                event.getInvitedEntrants().add(newInvitee);
-                waitlistedEntrants.remove(newInvitee);
-
-                // Update Firestore with the modified lists
-                dbHelper.updateEntrantsAfterDecline(eventId, event.getInvitedEntrants(), waitlistedEntrants, new DatabaseHelper.EventsCallback() {
-                    /**
-                     * Handles the events to be updated
-                     * @param events
-                     */
-                    @Override
-                    public void onEventsFetched(List<Event> events) {
-                        Log.d("DeclineDebug", "Entrants updated after handling decline.");
-                        isHandlingDecline = false; // Reset the flag once the update is complete
-
-                        // Send notification to the new invitee
-                        dbHelper.sendLotteryWinNotification(
-                                newInvitee,
-                                eventId,
-                                event.getOrganizerId(),
-                                event.getEventName(),
-                                new DatabaseHelper.NotificationCallback() {
-                                    /**
-                                     * Handles success on sending notifications to new entrants.
-                                     * @param responseMessage to be logged.
-                                     */
-                                    @Override
-                                    public void onSuccess(String responseMessage) {
-                                        Log.d("NotificationDebug", "Notification sent successfully: " + responseMessage);
-                                    }
-
-                                    /**
-                                     * Handles error on sending notifications to new entrants.
-                                     * @param errorMessage to be logged.
-                                     */
-
-                                    @Override
-                                    public void onFailure(String errorMessage) {
-                                        Log.e("NotificationDebug", "Failed to send notification: " + errorMessage);
-                                    }
-                                }
-                        );
-
-                    }
-
-                    /**
-                     * Required dbHelper method, unused.
-                     * @param event event
-                     */
-
-                    @Override
-                    public void onEventFetched(Event event) {
-                        // Not needed
-                    }
-
-                    /**
-                     * Handles error on updating events.
-                     * @param e exception catcher.
-                     */
-
-                    @Override
-                    public void onError(Exception e) {
-                        Log.e("EventUpdate", "Failed to update entrants.", e);
-                        isHandlingDecline = false; // Ensure flag is reset even if an error occurs
-                    }
-                });
-            } else {
-                Log.d("DeclineDebug", "No waitlisted entrants to invite.");
-                isHandlingDecline = false; // No more waitlisted entrants to add, reset the flag
-            }
-        } else {
+        if (event.getInvitedEntrants().size() >= event.getOccupantLimit()) {
             Log.d("DeclineDebug", "Occupant limit reached, no action needed.");
-            isHandlingDecline = false; // Occupant limit is met, reset the flag
+            isHandlingDecline = false;
+            return;
+        }
+
+        List<String> waitlistedEntrants = event.getWaitlistedEntrants();
+        if (waitlistedEntrants.isEmpty()) {
+            Log.d("DeclineDebug", "No waitlisted entrants to invite.");
+            isHandlingDecline = false;
+            return;
+        }
+
+        String newInvitee = selectRandomEntrant(waitlistedEntrants);
+        if (newInvitee != null) {
+            event.getInvitedEntrants().add(newInvitee);
+            waitlistedEntrants.remove(newInvitee);
+
+            dbHelper.updateEntrantsAfterDecline(eventId, event.getInvitedEntrants(), waitlistedEntrants, new DatabaseHelper.EventsCallback() {
+                @Override
+                public void onEventsFetched(List<Event> events) {
+                    dbHelper.sendLotteryWinNotification(
+                            newInvitee, eventId, event.getOrganizerId(), event.getEventName(),
+                            new DatabaseHelper.NotificationCallback() {
+                                @Override
+                                public void onSuccess(String responseMessage) {
+                                    Log.d("NotificationDebug", "Notification sent successfully to: " + newInvitee);
+                                }
+                                @Override
+                                public void onFailure(String errorMessage) {
+                                    Log.e("NotificationDebug", "Failed to send notification: " + errorMessage);
+                                }
+                            }
+                    );
+                    isHandlingDecline = false; // Reset flag
+                }
+
+                @Override
+                public void onEventFetched(Event event) {
+                    // Do nothing
+                }
+
+                @Override
+                public void onError(Exception e) {
+                    Log.e("DeclineDebug", "Failed to update entrants.", e);
+                    isHandlingDecline = false;
+                }
+            });
+
         }
     }
+
 
 
     /**
