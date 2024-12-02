@@ -25,6 +25,7 @@ import com.example.tigers_lottery.models.User;
 
 import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.Objects;
 
 /**
  *Fragment used by the entrant to view an event's details.
@@ -158,8 +159,8 @@ public class EntrantEventDetailsFragment extends Fragment {
                     @Override
                     public void onUserFetched(User user) {
                         eventOrganizerName.setText("Hosted by: "+ user.getFacilityName());
-                        eventOrganizerEmail.setText("Email: " + user.getFacilityEmail());
-                        eventOrganizerNumber.setText("Phone number: "+ user.getFacilityPhone());
+                        eventOrganizerEmail.setText("Facility Email: " + user.getFacilityEmail());
+                        eventOrganizerNumber.setText("Phone number: "+ (Objects.equals(user.getFacilityPhone(), "") ? "N/A" : user.getFacilityPhone()));
                     }
 
                     /**
