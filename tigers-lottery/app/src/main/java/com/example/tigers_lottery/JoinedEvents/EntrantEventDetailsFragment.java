@@ -17,6 +17,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -209,6 +210,11 @@ public class EntrantEventDetailsFragment extends Fragment {
                                 builder.setTitle("Join Waitlist");
                                 builder.setMessage("Are you sure you want to join the waitlist for this event?");
                             }else {
+                                if(userLocation == null) {
+                                    Toast.makeText(requireContext(), "Still getting location...", Toast.LENGTH_SHORT).show();
+                                    getCurrentLocation();
+                                    return;
+                                }
                                 builder.setTitle("Warning! Geolocation required!");
                                 TextView messageTextView = new TextView(getContext());
                                 messageTextView.setText("You are joining event from " + userLocation + ". Event is in " + event.getLocation() + ". Do you want to join the event?");
