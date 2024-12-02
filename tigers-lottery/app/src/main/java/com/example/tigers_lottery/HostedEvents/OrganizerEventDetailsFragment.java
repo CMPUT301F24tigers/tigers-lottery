@@ -610,73 +610,81 @@ public class OrganizerEventDetailsFragment extends Fragment {
     private void handleDeclineLogic(Event event) {
         Log.d("DeclineDebug", "Handling decline for event: " + event.getEventName());
 
-        // Prevent further action if the invited list already meets the occupant limit
-        if (event.getInvitedEntrants().size() >= event.getOccupantLimit()) {
-            Log.d("DeclineDebug", "Occupant limit reached, no action needed.");
-            isHandlingDecline = false;
+        // Prevent re-entry into the decline handling logic
+        if (isHandlingDecline) {
+            Log.d("DeclineDebug", "Decline logic is already in process. Skipping.");
             return;
         }
+        isHandlingDecline = true; // Lock the flag to prevent re-entry
 
-        // Get the current waitlisted entrants
-        List<String> waitlistedEntrants = event.getWaitlistedEntrants();
+        try {
+            // Prevent further action if the invited list already meets the occupant limit
+            if (event.getInvitedEntrants().size() >= event.getOccupantLimit()) {
+                Log.d("DeclineDebug", "Occupant limit reached, no action needed.");
+                return;
+            }
 
-        // Check if there are any waitlisted entrants to invite
-        if (waitlistedEntrants == null || waitlistedEntrants.isEmpty()) {
-            Log.d("DeclineDebug", "No waitlisted entrants to invite.");
-            isHandlingDecline = false;
-            return;
-        }
+            // Get the current waitlisted entrants
+            List<String> waitlistedEntrants = event.getWaitlistedEntrants();
 
-        // Select a new invitee from the waitlist
-        String newInvitee = selectRandomEntrant(waitlistedEntrants);
+            // Check if there are any waitlisted entrants to invite
+            if (waitlistedEntrants == null || waitlistedEntrants.isEmpty()) {
+                Log.d("DeclineDebug", "No waitlisted entrants to invite.");
+                return;
+            }
 
-        if (newInvitee != null) {
-            // Update the event's lists
-            event.getInvitedEntrants().add(newInvitee);
-            waitlistedEntrants.remove(newInvitee);
+            // Select a new invitee from the waitlist
+            String newInvitee = selectRandomEntrant(waitlistedEntrants);
 
-            // Update the database with the modified lists
-            dbHelper.updateEntrantsAfterDecline(eventId, event.getInvitedEntrants(), waitlistedEntrants, new DatabaseHelper.EventsCallback() {
-                @Override
-                public void onEventsFetched(List<Event> events) {
-                    Log.d("DeclineDebug", "Entrants updated successfully after decline.");
+            if (newInvitee != null) {
+                // Update the event's lists
+                event.getInvitedEntrants().add(newInvitee);
+                waitlistedEntrants.remove(newInvitee);
 
-                    // Send a notification to the new invitee
-                    dbHelper.sendLotteryWinNotification(
-                            newInvitee, eventId, event.getOrganizerId(), event.getEventName(),
-                            new DatabaseHelper.NotificationCallback() {
-                                @Override
-                                public void onSuccess(String responseMessage) {
-                                    Log.d("NotificationDebug", "Notification sent successfully to: " + newInvitee);
+                // Update the database with the modified lists
+                dbHelper.updateEntrantsAfterDecline(eventId, event.getInvitedEntrants(), waitlistedEntrants, new DatabaseHelper.EventsCallback() {
+                    @Override
+                    public void onEventsFetched(List<Event> events) {
+                        Log.d("DeclineDebug", "Entrants updated successfully after decline.");
+
+                        // Send a notification to the new invitee
+                        dbHelper.sendLotteryWinNotification(
+                                newInvitee, eventId, event.getOrganizerId(), event.getEventName(),
+                                new DatabaseHelper.NotificationCallback() {
+                                    @Override
+                                    public void onSuccess(String responseMessage) {
+                                        Log.d("NotificationDebug", "Notification sent successfully to: " + newInvitee);
+                                    }
+
+                                    @Override
+                                    public void onFailure(String errorMessage) {
+                                        Log.e("NotificationDebug", "Failed to send notification: " + errorMessage);
+                                    }
                                 }
+                        );
+                    }
 
-                                @Override
-                                public void onFailure(String errorMessage) {
-                                    Log.e("NotificationDebug", "Failed to send notification: " + errorMessage);
-                                }
-                            }
-                    );
+                    @Override
+                    public void onEventFetched(Event event) {
+                        // No action needed for this callback
+                    }
 
-                    // Mark the decline handling process as complete
-                    isHandlingDecline = false;
-                }
-
-                @Override
-                public void onEventFetched(Event event) {
-                    // No action needed for this callback
-                }
-
-                @Override
-                public void onError(Exception e) {
-                    Log.e("DeclineDebug", "Failed to update entrants after decline.", e);
-                    isHandlingDecline = false; // Ensure the flag is reset even if an error occurs
-                }
-            });
-        } else {
-            Log.d("DeclineDebug", "No valid invitee could be selected from the waitlist.");
+                    @Override
+                    public void onError(Exception e) {
+                        Log.e("DeclineDebug", "Failed to update entrants after decline.", e);
+                    }
+                });
+            } else {
+                Log.d("DeclineDebug", "No valid invitee could be selected from the waitlist.");
+            }
+        } catch (Exception e) {
+            Log.e("DeclineDebug", "Error while handling decline.", e);
+        } finally {
+            // Mark the decline handling process as complete
             isHandlingDecline = false;
         }
     }
+
 
 
 
