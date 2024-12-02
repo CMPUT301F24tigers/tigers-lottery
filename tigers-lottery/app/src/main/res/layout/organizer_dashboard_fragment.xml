@@ -23,14 +23,6 @@
             android:textStyle="bold" />
 
         <!-- Search bar below the title -->
-        <androidx.appcompat.widget.SearchView
-            android:id="@+id/searchView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:backgroundTint="@color/white"
-            android:layout_marginBottom="8dp"
-            android:background="@drawable/search_bar_background"
-            android:queryHint="Search events" />
 
         <!-- RecyclerView to display the list of events -->
         <androidx.recyclerview.widget.RecyclerView
