@@ -2,17 +2,6 @@ package com.example.tigers_lottery;
 
 import static org.junit.Assert.*;
 
-/*
-
-    IN ORDER TO RUN THESE TESTS, YOU MUST USE THE FIREBASE EMULATOR.
-
-    1.) INSTALL THE FIREBASE CLI: npm install -g firebase-tools
-
-    2.) TO START THE FIREBASE EMULATOR: "firebase emulators:start"
-
-    3.) YOU SHOULD BE GOOD TO RUN THE TESTS NOW - A NEW WINDOW WITH THE EMULATOR SHOULD OPEN
-
-*/
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.example.tigers_lottery.models.Event;
@@ -43,6 +32,18 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+
+/*
+
+    IN ORDER TO RUN THESE TESTS, YOU MUST USE THE FIREBASE EMULATOR.
+
+    1.) INSTALL THE FIREBASE CLI: npm install -g firebase-tools
+
+    2.) TO START THE FIREBASE EMULATOR: "firebase emulators:start"
+
+    3.) YOU SHOULD BE GOOD TO RUN THE TESTS NOW - A NEW WINDOW WITH THE EMULATOR SHOULD OPEN
+
+*/
 
 @RunWith(AndroidJUnit4.class)
 public class DatabaseHelperTest {
