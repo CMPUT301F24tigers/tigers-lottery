@@ -103,7 +103,7 @@
             android:layout_height="wrap_content"
             android:textColor="@color/white"
             android:text="Registration Opens (YYYY-MM-DD)" />
-        <EditText
+        <TextView
             android:id="@+id/inputRegistrationOpens"
             android:layout_width="match_parent"
             android:textColor="@color/white"
@@ -111,7 +111,8 @@
             android:layout_height="wrap_content"
             android:hint="Select registration open date"
             android:layout_marginBottom="12dp"
-            android:inputType="date" />
+            android:layout_marginTop="5sp"
+            android:textSize="19sp"/>
 
         <!-- Registration Deadline Label and Input -->
         <TextView
@@ -119,7 +120,7 @@
             android:layout_height="wrap_content"
             android:textColor="@color/white"
             android:text="Registration Deadline (YYYY-MM-DD)" />
-        <EditText
+        <TextView
             android:id="@+id/inputRegistrationDeadline"
             android:layout_width="match_parent"
             android:textColorHint="@color/hint_text_color"
@@ -127,7 +128,8 @@
             android:layout_height="wrap_content"
             android:hint="Select registration deadline"
             android:layout_marginBottom="12dp"
-            android:inputType="date" />
+            android:layout_marginTop="5sp"
+            android:textSize="19sp"/>
 
         <!-- Event Date Label and Input -->
         <TextView
@@ -135,7 +137,7 @@
             android:layout_height="wrap_content"
             android:textColor="@color/white"
             android:text="Event Date (YYYY-MM-DD)" />
-        <EditText
+        <TextView
             android:id="@+id/inputEventDate"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -143,7 +145,8 @@
             android:textColorHint="@color/hint_text_color"
             android:hint="Select event date"
             android:layout_marginBottom="12dp"
-            android:inputType="date" />
+            android:layout_marginTop="5sp"
+            android:textSize="19sp" />
 
         <!-- Description Label and Input -->
         <TextView

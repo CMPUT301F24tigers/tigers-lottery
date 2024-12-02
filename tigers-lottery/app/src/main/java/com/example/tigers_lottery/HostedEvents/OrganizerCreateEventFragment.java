@@ -1,6 +1,7 @@
 package com.example.tigers_lottery.HostedEvents;
 
 import android.app.Activity;
+import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.location.Address;
 import android.location.Geocoder;
@@ -37,9 +38,11 @@ import com.google.firebase.storage.StorageReference;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 /**
  * Fragment used by the organizer to create a new event.
@@ -47,7 +50,8 @@ import java.util.Locale;
 
 public class OrganizerCreateEventFragment extends Fragment {
 
-    private EditText inputEventName, inputEventLocation, inputRegistrationOpens, inputRegistrationDeadline, inputEventDate, inputEventDescription, inputWaitlistLimit, inputOccupantLimit;
+    private EditText inputEventName, inputEventLocation, inputEventDescription, inputWaitlistLimit, inputOccupantLimit;
+    private TextView inputRegistrationOpens, inputRegistrationDeadline, inputEventDate;
     private CheckBox checkboxWaitlistLimit, checkboxGeolocationRequired;
     private Button btnCreateEvent;
     private DatabaseHelper dbHelper;
@@ -132,6 +136,27 @@ public class OrganizerCreateEventFragment extends Fragment {
 
         );
 
+        inputRegistrationOpens.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                openDatePicker(inputRegistrationOpens);
+            }
+        });
+
+        inputRegistrationDeadline.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                openDatePicker(inputRegistrationDeadline);
+            }
+        });
+
+        inputEventDate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                openDatePicker(inputEventDate);
+            }
+        });
+
         return view;
     }
 
@@ -169,17 +194,17 @@ public class OrganizerCreateEventFragment extends Fragment {
         }
 
         if (registrationOpens.isEmpty() || !isValidDateFormat(registrationOpens)) {
-            inputRegistrationOpens.setError("Enter a valid date (YYYY-MM-DD)");
+            Toast.makeText(getContext(), "Registration open date is empty!", Toast.LENGTH_SHORT).show();
             isValid = false;
         }
 
         if (registrationDeadline.isEmpty() || !isValidDateFormat(registrationDeadline)) {
-            inputRegistrationDeadline.setError("Enter a valid date (YYYY-MM-DD)");
+            Toast.makeText(getContext(),"Registration deadline date is empty!", Toast.LENGTH_SHORT).show();
             isValid = false;
         }
 
         if (eventDate.isEmpty() || !isValidDateFormat(eventDate)) {
-            inputEventDate.setError("Enter a valid date (YYYY-MM-DD)");
+            Toast.makeText(getContext(), "Event date is empty!", Toast.LENGTH_SHORT).show();
             isValid = false;
         }
 
@@ -218,25 +243,25 @@ public class OrganizerCreateEventFragment extends Fragment {
 
         // Date-based validations
         if (registrationOpensTimestamp.compareTo(currentTimestamp) <= 0) {
-            inputRegistrationOpens.setError("Registration Open Date must be in the future");
+            Toast.makeText(getContext(),"Registration Open Date must be in the future", Toast.LENGTH_SHORT).show();
             return;
         }
 
         if (registrationOpensTimestamp.compareTo(registrationDeadlineTimestamp) >= 0) {
-            inputRegistrationOpens.setError("Registration Open Date must be before Registration Deadline");
-            inputRegistrationDeadline.setError("Registration Deadline must be after Registration Open Date");
+            Toast.makeText(getContext(), "Registration Open Date must be before Registration Deadline",
+                    Toast.LENGTH_SHORT).show();
             return;
         }
 
         if (registrationDeadlineTimestamp.compareTo(eventDateTimestamp) >= 0) {
-            inputRegistrationDeadline.setError("Registration Deadline must be before Event Date");
-            inputEventDate.setError("Event Date must be after Registration Deadline");
+            Toast.makeText(getContext(), "Registration Deadline must be before Event Date",
+                    Toast.LENGTH_SHORT).show();
             return;
         }
 
         if (registrationOpensTimestamp.compareTo(eventDateTimestamp) >= 0) {
-            inputRegistrationOpens.setError("Registration Open Date must be before Event Date");
-            inputEventDate.setError("Event Date must be after Waitlist Open Date");
+            Toast.makeText(getContext(), "Registration Open Date must be before Event Date",
+                    Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -402,10 +427,27 @@ public class OrganizerCreateEventFragment extends Fragment {
         return null;
     }
 
+    private void openDatePicker(TextView dateField) {
+        // Use the current date as the default date in the picker
+        final Calendar calendar = Calendar.getInstance();
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH);
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
 
+        // Show the DatePickerDialog
+        DatePickerDialog datePickerDialog = new DatePickerDialog(requireContext(),
+                (view, selectedYear, selectedMonth, selectedDay) -> {
+                    // Save selected day, month, and year
+//                    this.selectedYear = selectedYear;
+//                    this.selectedMonth = selectedMonth + 1; // Month is 0-indexed in Calendar
+//                    this.selectedDay = selectedDay;
+                    String dateText = String.format(Locale.getDefault(), "%d-%02d-%02d", selectedYear, selectedMonth+1, selectedDay);
+                    dateField.setText(dateText);
+                }, year, month, day);
 
-
-
+        datePickerDialog.getDatePicker().setMinDate(calendar.getTimeInMillis());
+        datePickerDialog.show();
+    }
 
 }
 
