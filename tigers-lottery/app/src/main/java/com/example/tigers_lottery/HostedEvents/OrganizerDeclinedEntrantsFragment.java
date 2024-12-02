@@ -35,7 +35,7 @@ public class OrganizerDeclinedEntrantsFragment extends Fragment {
 
     /**
      * Inflates the layout for the list displaying the entrants that have been
-     * cancelled for a specific event. Initializes the databseHelper.
+     * cancelled for a specific event. Initializes the database Helper.
      *
      * @param inflater The LayoutInflater object that can be used to inflate
      * any views in the fragment,
