@@ -1,6 +1,7 @@
 package com.example.tigers_lottery.Admin.DashboardFragments;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +18,7 @@ import androidx.fragment.app.Fragment;
 import com.bumptech.glide.Glide;
 import com.example.tigers_lottery.DatabaseHelper;
 import com.example.tigers_lottery.R;
+import com.example.tigers_lottery.models.Notification;
 import com.example.tigers_lottery.models.User;
 import com.google.firebase.Timestamp;
 
@@ -211,6 +213,25 @@ public class AdminFacilityDetailsFragment extends Fragment {
                     // Dispatch a notification to the admin if necessary
                     Toast.makeText(getContext(), user.getFacilityName() + "'s facility profile photo has been removed", Toast.LENGTH_SHORT).show();
                     removeFacilityPhoto.setVisibility(View.GONE);
+
+                    Notification notification = new Notification();
+
+                    notification.setMessage("Your facility profile photo has been removed by the admin due to a violation of our app’s policies. Please upload a new photo that complies with the guidelines of Tigers Lottery.");
+                    notification.setType("Facility Profile Photo Removal");
+                    notification.setUserId(userId);
+
+                    dbHelper.sendAdminUserNotification(notification, new DatabaseHelper.NotificationCallback() {
+                        @Override
+                        public void onSuccess(String message) {
+                            Log.d("AdminFacilityDetailsFragment", "User has been notified of the facility profile image removal");
+                        }
+
+                        @Override
+                        public void onFailure(String errorMessage) {
+                            Log.d("AdminFacilityDetailsFragment", "Failed to notify user of the facility profile image removal: " + errorMessage);
+                        }
+                    });
+
                     facilityPhoto.setOnClickListener(null);
                     loadFacilityDetails();
                 }

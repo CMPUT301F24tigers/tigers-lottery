@@ -40,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
     ImageButton editProfile;
     private DatabaseHelper dbHelper;
     private TextView notificationBadge;
+    private boolean isNotificationsEnabled;
 
     /**
      * Called when the activity is first created. Sets up the UI components,
@@ -58,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
         ImageButton notificationButton = findViewById(R.id.notificationButton);
         notificationBadge = findViewById(R.id.notificationBadge);
         notificationButton.setVisibility(View.GONE);
+        notificationBadge.setVisibility(View.GONE);
 
         dbHelper = new DatabaseHelper(this);
 
@@ -65,6 +67,28 @@ public class MainActivity extends AppCompatActivity {
         BottomNavigationView bottomNav = findViewById(R.id.nav_view);
         MenuItem adminMenuItem = bottomNav.getMenu().findItem(R.id.navigation_admin);
         getWindow().setStatusBarColor(0xFF2A334C);
+
+        dbHelper.fetchUserById(deviceId, new DatabaseHelper.UsersCallback() {
+            @Override
+            public void onUsersFetched(List<User> users) {
+                //Do nothing
+            }
+
+            @Override
+            public void onUserFetched(User user) {
+                if(user.isNotificationFlag()){
+                    setupNotificationBadgeListener();
+                    notificationButton.setVisibility(View.VISIBLE);
+                    notificationBadge.setVisibility(View.VISIBLE);
+                    isNotificationsEnabled = user.isNotificationFlag();
+                }
+            }
+
+            @Override
+            public void onError(Exception e) {
+                //Do nothing
+            }
+        });
 
 
         // Check if the user profile exists; if not, navigate to CreateEntrantProfileActivity
@@ -85,25 +109,6 @@ public class MainActivity extends AppCompatActivity {
         if (adminMenuItem != null) {
             adminMenuItem.setVisible(false);
         }
-
-        dbHelper.fetchUserById(deviceId, new DatabaseHelper.UsersCallback() {
-            @Override
-            public void onUsersFetched(List<User> users) {
-                //Do nothing
-            }
-
-            @Override
-            public void onUserFetched(User user) {
-                if(user.isNotificationFlag()){
-                    notificationButton.setVisibility(View.VISIBLE);
-                }
-            }
-
-            @Override
-            public void onError(Exception e) {
-                //Do nothing
-            }
-        });
 
 
         // Check if the device ID exists in the admins collection
@@ -183,7 +188,7 @@ public class MainActivity extends AppCompatActivity {
      * @param count The number of unread notifications.
      */
     private void updateNotificationBadge(int count) {
-        if (count > 0) {
+        if (count > 0 && isNotificationsEnabled) {
             notificationBadge.setVisibility(View.VISIBLE);
             notificationBadge.setText(String.valueOf(count));
         } else {

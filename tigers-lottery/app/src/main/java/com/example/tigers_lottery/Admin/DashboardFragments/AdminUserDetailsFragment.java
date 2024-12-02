@@ -1,6 +1,7 @@
 package com.example.tigers_lottery.Admin.DashboardFragments;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +18,7 @@ import androidx.fragment.app.Fragment;
 import com.bumptech.glide.Glide;
 import com.example.tigers_lottery.DatabaseHelper;
 import com.example.tigers_lottery.R;
+import com.example.tigers_lottery.models.Notification;
 import com.example.tigers_lottery.models.User;
 import com.google.firebase.Timestamp;
 
@@ -209,6 +211,24 @@ public class AdminUserDetailsFragment extends Fragment {
                     //TODO: Dispatch notification to the user
                     Toast.makeText(getContext(), user.getFirstName() + " " + user.getLastName() + "'s profile picture has been removed", Toast.LENGTH_SHORT).show();
                     removeUserProfilePhoto.setVisibility(View.GONE);
+
+                    Notification notification = new Notification();
+                    notification.setMessage("Your profile photo has been removed by the admin due to a violation of our app’s policies. Please upload a new photo that complies with the guidelines of Tigers Lottery.");
+                    notification.setType("Profile Photo Removal");
+                    notification.setUserId(userId);
+
+                    dbHelper.sendAdminUserNotification(notification, new DatabaseHelper.NotificationCallback() {
+                        @Override
+                        public void onSuccess(String message) {
+                            Log.d("AdminUserDetailsFragment", "User has been notified of the profile image removal");
+                        }
+
+                        @Override
+                        public void onFailure(String errorMessage) {
+                            Log.d("AdminUserDetailsFragment", "Failed to notify user of the profile image removal: " + errorMessage);
+                        }
+                    });
+
                     userPhoto.setOnClickListener(null);
                     loadUserDetails();
                 }
