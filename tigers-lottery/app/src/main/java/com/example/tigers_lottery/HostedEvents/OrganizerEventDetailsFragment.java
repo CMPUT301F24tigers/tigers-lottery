@@ -540,10 +540,8 @@ public class OrganizerEventDetailsFragment extends Fragment {
 
                 Log.d("DeclineDebug", "Decline detected. Declined entrants: " + declinedEntrants);
                 Log.d("DeclineDebug", "Previous size: " + lastKnownDeclinedEntrantsSize + ", Current size: " + declinedEntrants.size());
-                Log.d("DeclineDebug", "isHandlingDecline flag: " + isHandlingDecline);
 
-                if (!isHandlingDecline && declinedEntrants.size() > lastKnownDeclinedEntrantsSize) {
-                    isHandlingDecline = true;
+                if (declinedEntrants.size() > lastKnownDeclinedEntrantsSize) {
                     lastKnownDeclinedEntrantsSize = declinedEntrants.size();
 
                     Log.d("DeclineDebug", "Fetching event details for decline handling...");
@@ -570,10 +568,6 @@ public class OrganizerEventDetailsFragment extends Fragment {
      */
     private void fetchEventDetails() {
         dbHelper.fetchEventById(eventId, new DatabaseHelper.EventsCallback() {
-            /**
-             * Handles actions on finding the event's details.
-             * @param event found
-             */
             @Override
             public void onEventFetched(Event event) {
                 if (event != null) {
@@ -581,31 +575,21 @@ public class OrganizerEventDetailsFragment extends Fragment {
                     handleDeclineLogic(event); // Proceed with decline logic
                 } else {
                     Log.d("DeclineDebug", "Failed to fetch event details. Event is null.");
-                    isHandlingDecline = false; // Reset flag
                 }
             }
 
-            /**
-             * Handles actions on finding the events, required dbHelper method, unused.
-             * @param events to be fetched.
-             */
-
             @Override
             public void onEventsFetched(List<Event> events) {
-                // Not needed here
+                // Not used
             }
-
-            /**
-             * Handles error on finding event details.
-             * @param e exception catcher.
-             */
 
             @Override
             public void onError(Exception e) {
-                Log.e("EventDetails", "Error fetching updated event details", e);
+                Log.e("DeclineDebug", "Error fetching event details: ", e);
             }
         });
     }
+
 
     /**
      * Handles the decline logic for entrants.
@@ -620,26 +604,23 @@ public class OrganizerEventDetailsFragment extends Fragment {
             return;
         }
 
+        isHandlingDecline = true; // Lock the flag for processing
+
         try {
-            // Check occupant limit
             if (event.getInvitedEntrants().size() >= event.getOccupantLimit()) {
                 Log.d("DeclineDebug", "Occupant limit reached, no action needed.");
                 return;
             }
 
-            // Log waitlist and invitee status
             List<String> waitlistedEntrants = event.getWaitlistedEntrants();
             Log.d("DeclineDebug", "Waitlisted entrants: " + waitlistedEntrants);
-            Log.d("DeclineDebug", "Invited entrants: " + event.getInvitedEntrants());
 
             if (waitlistedEntrants == null || waitlistedEntrants.isEmpty()) {
                 Log.d("DeclineDebug", "No waitlisted entrants to invite.");
                 return;
             }
 
-            // Select a new invitee
             String newInvitee = selectRandomEntrant(waitlistedEntrants);
-
             if (newInvitee != null) {
                 Log.d("DeclineDebug", "New invitee selected: " + newInvitee);
                 event.getInvitedEntrants().add(newInvitee);
@@ -663,7 +644,6 @@ public class OrganizerEventDetailsFragment extends Fragment {
                                     }
                                 }
                         );
-                        isHandlingDecline = false; // Reset flag
                     }
 
                     @Override
@@ -674,7 +654,6 @@ public class OrganizerEventDetailsFragment extends Fragment {
                     @Override
                     public void onError(Exception e) {
                         Log.e("DeclineDebug", "Failed to update entrants after decline.", e);
-                        isHandlingDecline = false; // Reset flag
                     }
                 });
             } else {
@@ -683,10 +662,9 @@ public class OrganizerEventDetailsFragment extends Fragment {
         } catch (Exception e) {
             Log.e("DeclineDebug", "Error while handling decline.", e);
         } finally {
-            isHandlingDecline = false; // Ensure flag reset
+            isHandlingDecline = false; // Reset the flag
         }
     }
-
 
 
 
