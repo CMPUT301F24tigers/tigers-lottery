@@ -21,9 +21,11 @@ import com.example.tigers_lottery.DatabaseHelper;
 import com.example.tigers_lottery.JoinedEvents.EntrantDashboardFragment;
 import com.example.tigers_lottery.R;
 import com.example.tigers_lottery.models.Event;
+import com.example.tigers_lottery.models.User;
 
 import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.Objects;
 
 /**
  *Fragment used by the entrant to view an event's details.
@@ -115,6 +117,9 @@ public class EntrantEventDetailsFragment extends Fragment {
         TextView eventTextViewRegistrationDeadline = view.findViewById(R.id.eventDetailsTextViewRegistrationDeadline);
         TextView eventTextViewStatus = view.findViewById(R.id.eventDetailsTextViewStatus);
         ImageView eventDetailsImageView = view.findViewById(R.id.eventDetailsImageView);
+        TextView eventOrganizerName = view.findViewById(R.id.eventDetailsOrganizerName);
+        TextView eventOrganizerEmail = view.findViewById(R.id.eventDetailsFacilityEmail);
+        TextView eventOrganizerNumber = view.findViewById(R.id.eventDetailsFacilityNumber);
         eventDetailsButton.setVisibility(View.INVISIBLE);
 
         assert args != null;
@@ -133,6 +138,41 @@ public class EntrantEventDetailsFragment extends Fragment {
                 eventTextViewDate.setText("Date: " + new SimpleDateFormat("yyyy-MM-dd").format(event.getEventDate().toDate()));
                 eventTextViewRegistrationDeadline.setText("Registration Deadline: " + new SimpleDateFormat("yyyy-MM-dd").format(event.getWaitlistDeadline().toDate()));
                 eventTextViewRegistrationOpenDate.setText("Registration Opens: " + new SimpleDateFormat("yyyy-MM-dd").format(event.getWaitlistOpenDate().toDate()));
+                String organizerId = event.getOrganizerId();
+                dbHelper.fetchUserById(organizerId, new DatabaseHelper.UsersCallback() {
+                    /**
+                     * Required dbHelper method, unused.
+                     * @param users users.
+                     */
+                    @Override
+                    public void onUsersFetched(List<User> users) {
+                        // do nothing.
+                    }
+
+                    /**
+                     * On finding the organizer using their id, populates the facility name, email,
+                     * and phone number of the event.
+                     *
+                     * @param user organizer for the event.
+                     */
+
+                    @Override
+                    public void onUserFetched(User user) {
+                        eventOrganizerName.setText("Hosted by: "+ user.getFacilityName());
+                        eventOrganizerEmail.setText("Facility Email: " + user.getFacilityEmail());
+                        eventOrganizerNumber.setText("Phone number: "+ (Objects.equals(user.getFacilityPhone(), "") ? "N/A" : user.getFacilityPhone()));
+                    }
+
+                    /**
+                     * Required dbHelper method, unused.
+                     * @param e exception catcher.
+                     */
+
+                    @Override
+                    public void onError(Exception e) {
+                        // do nothing.
+                    }
+                });
 
                 if (event.getPosterUrl() != null && !event.getPosterUrl().isEmpty()) {
                     Glide.with(getContext())
