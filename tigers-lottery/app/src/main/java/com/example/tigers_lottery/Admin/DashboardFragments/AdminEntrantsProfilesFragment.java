@@ -5,6 +5,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
@@ -17,6 +18,7 @@ import com.example.tigers_lottery.Admin.DashboardFragments.ListItems.OnActionLis
 import com.example.tigers_lottery.DatabaseHelper;
 import com.example.tigers_lottery.R;
 import com.example.tigers_lottery.models.User;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -38,9 +40,13 @@ public class AdminEntrantsProfilesFragment extends Fragment implements OnActionL
      * @param savedInstanceState If non-null, this fragment is being re-created from a previous saved state.
      * @return The View for the fragment's UI.
      */
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.admin_list_fragment, container, false);
+
+        TextView title = view.findViewById(R.id.adminListTile);
+        title.setText("All Entrants");
 
         RecyclerView recyclerView = view.findViewById(R.id.adminRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -63,23 +69,42 @@ public class AdminEntrantsProfilesFragment extends Fragment implements OnActionL
                 itemList.clear();
                 for (User user : users) {
                     if (!Objects.equals(user.getUserId(), dbHelper.getCurrentUserId())) {
+                        String userPhoto = user.getUserPhoto();
+
+                        // Use placeholder if photo is null or empty
+                        if (userPhoto == null || userPhoto.isEmpty()) {
+                            userPhoto = "placeholder_user_image";
+                        }
+
+                        // Add the user to the list and set isEvent to false
                         itemList.add(new AdminListItemModel(
                                 user.getUserId(),
                                 user.getFirstName() + " " + user.getLastName(),
                                 user.getEmailAddress(),
-                                "Remove Profile Photo",
+                                userPhoto,
                                 "View User Profile",
-                                "Remove User"
+                                "Remove User Profile",
+                                 false
                         ));
                     }
                 }
                 userAdapter.notifyDataSetChanged();
             }
 
+            /***
+             *
+             * @param user item from the database
+             */
+
             @Override
             public void onUserFetched(User user) {
                 // Not implemented as it is not needed in this context.
             }
+
+            /***
+             *  error handling for the database call.
+             * @param e exception catcher
+             */
 
             @Override
             public void onError(Exception e) {
@@ -97,9 +122,12 @@ public class AdminEntrantsProfilesFragment extends Fragment implements OnActionL
      */
     @Override
     public void onOptionOneClick(String userId) {
-        DatabaseHelper dbHelper = new DatabaseHelper(requireContext());
-        Toast.makeText(getContext(), "Removing profile photo for user " + userId, Toast.LENGTH_SHORT).show();
-        // Add further logic to remove the profile photo from the database or storage if required.
+        AdminUserDetailsFragment userDetailsFragment = AdminUserDetailsFragment.newInstance(userId);
+
+        requireActivity().getSupportFragmentManager().beginTransaction()
+                .replace(R.id.main_activity_fragment_container, userDetailsFragment)
+                .addToBackStack(null)
+                .commit();
     }
 
     /**
@@ -110,24 +138,31 @@ public class AdminEntrantsProfilesFragment extends Fragment implements OnActionL
      */
     @Override
     public void onOptionTwoClick(String userId) {
-        DatabaseHelper dbHelper = new DatabaseHelper(requireContext());
-        Toast.makeText(getContext(), "Viewing profile for user " + userId, Toast.LENGTH_SHORT).show();
-        // Add logic to navigate to the user's profile details if required.
-    }
 
-    /**
-     * Handles the action to remove a specific user from the database.
-     * This method is triggered when the "Remove User" option is selected.
-     *
-     * @param userId The ID of the user who will be removed.
-     */
-    @Override
-    public void onOptionThreeClick(String userId) {
         DatabaseHelper dbHelper = new DatabaseHelper(requireContext());
+        dbHelper.getUser(userId, new DatabaseHelper.UserCallback() {
+            /***
+             * Handling actions for when a user is
+             * @param user item from the database
+             */
+            @Override
+            public void onUserFetched(User user) {
+                Toast.makeText(getContext(), "Removing user:  " + user.getFirstName() + " " + user.getLastName(), Toast.LENGTH_SHORT).show();
+            }
+
+            /***
+             * error handling for the database call.
+             * @param e exception catcher
+             */
+
+            @Override
+            public void onError(Exception e) {
+                //do nothing
+            }
+        });
         dbHelper.removeUser(userId);
         userAdapter.setExpandedPosition(-1);
         userAdapter.notifyDataSetChanged();
-        Toast.makeText(getContext(), "Removing user " + userId, Toast.LENGTH_SHORT).show();
     }
 
     /**

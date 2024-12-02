@@ -6,20 +6,26 @@ import android.os.Bundle;
 import com.example.tigers_lottery.Admin.AdminDashboardFragment;
 import com.example.tigers_lottery.HostedEvents.OrganizerDashboardFragment;
 import com.example.tigers_lottery.JoinedEvents.EntrantDashboardFragment;
+import com.example.tigers_lottery.Notifications.NotificationDashboardFragment;
+import com.example.tigers_lottery.models.User;
 import com.example.tigers_lottery.utils.DeviceIDHelper;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.TextView;
 
 import com.example.tigers_lottery.ProfileViewsEdit.ProfileDetailsActivity;
+
+import java.util.List;
 
 /**
  * The main activity that acts as a central navigation hub, allowing users to switch between
@@ -32,6 +38,9 @@ public class MainActivity extends AppCompatActivity {
      * Button to open the Profile Details Activity.
      */
     ImageButton editProfile;
+    private DatabaseHelper dbHelper;
+    private TextView notificationBadge;
+    private boolean isNotificationsEnabled;
 
     /**
      * Called when the activity is first created. Sets up the UI components,
@@ -47,19 +56,53 @@ public class MainActivity extends AppCompatActivity {
 
         String deviceId = DeviceIDHelper.getDeviceId(this);
         editProfile = findViewById(R.id.profileButton);
-        DatabaseHelper dbHelper = new DatabaseHelper(getApplicationContext());
+        ImageButton notificationButton = findViewById(R.id.notificationButton);
+        notificationBadge = findViewById(R.id.notificationBadge);
+        notificationButton.setVisibility(View.GONE);
+        notificationBadge.setVisibility(View.GONE);
+
+        dbHelper = new DatabaseHelper(this);
 
         // BottomNavigationView setup
         BottomNavigationView bottomNav = findViewById(R.id.nav_view);
         MenuItem adminMenuItem = bottomNav.getMenu().findItem(R.id.navigation_admin);
+        getWindow().setStatusBarColor(0xFF2A334C);
+
+        dbHelper.fetchUserById(deviceId, new DatabaseHelper.UsersCallback() {
+            @Override
+            public void onUsersFetched(List<User> users) {
+                //Do nothing
+            }
+
+            @Override
+            public void onUserFetched(User user) {
+                if(user.isNotificationFlag()){
+                    setupNotificationBadgeListener();
+                    notificationButton.setVisibility(View.VISIBLE);
+                    notificationBadge.setVisibility(View.VISIBLE);
+                    isNotificationsEnabled = user.isNotificationFlag();
+                }
+            }
+
+            @Override
+            public void onError(Exception e) {
+                //Do nothing
+            }
+        });
+
 
         // Check if the user profile exists; if not, navigate to CreateEntrantProfileActivity
         dbHelper.checkUserExists(new DatabaseHelper.ProfileCallback() {
+            /**
+             * On finding if the profile exists, no action needed.
+             */
             @Override
             public void onProfileExists() {
-                // Profile exists; no action needed
             }
 
+            /**
+             * On not finding the profile, navigate to the create entrant profile activity.
+             */
             @Override
             public void onProfileNotExists() {
                 Intent createEntrantProfileActivity = new Intent(getApplicationContext(), CreateEntrantProfileActivity.class);
@@ -72,8 +115,47 @@ public class MainActivity extends AppCompatActivity {
             adminMenuItem.setVisible(false);
         }
 
+
+        dbHelper.fetchUserById(deviceId, new DatabaseHelper.UsersCallback() {
+            /**
+             * Required database helper method, unused.
+             * @param users users.
+             */
+            @Override
+            public void onUsersFetched(List<User> users) {
+            }
+
+            /**
+             * On finding the user, sets up the notification icon, if they have notifications
+             * turned on.
+             * @param user current user.
+             */
+
+            @Override
+            public void onUserFetched(User user) {
+                if(user.isNotificationFlag()){
+                    notificationButton.setVisibility(View.VISIBLE);
+                }
+            }
+
+            /**
+             * Error handling for finding the user.
+             * @param e exception catcher.
+             */
+
+            @Override
+            public void onError(Exception e) {
+                //Do nothing
+            }
+        });
+
+
         // Check if the device ID exists in the admins collection
         dbHelper.isAdminUser(deviceId, new DatabaseHelper.VerificationCallback() {
+            /**
+             * Handles actions on finding the user's admin status.
+             * @param exists true if the user is an admin, false if not.
+             */
             @Override
             public void onResult(boolean exists) {
                 Log.e("DatabaseHelper", "Is Admin User: " + exists);
@@ -85,6 +167,10 @@ public class MainActivity extends AppCompatActivity {
                 Log.e("DatabaseHelper", "Admin status verification complete.");
             }
 
+            /**
+             * Handles error on not finding user's admin status.
+             * @param e exception catcher.
+             */
             @Override
             public void onError(Exception e) {
                 Log.e("DatabaseHelper", "Error verifying Admin Status", e);
@@ -95,6 +181,13 @@ public class MainActivity extends AppCompatActivity {
 
         // Set up listener for bottom navigation to switch between fragments
         bottomNav.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
+            /**
+             * Handles navigation choices in the bottom navigation, taking the user to organizer,
+             * admin, or entrant dashboard on click.
+             *
+             * @param item The selected item
+             * @return fragment.
+             */
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 Fragment selectedFragment = null;
@@ -110,13 +203,58 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // Set listener for profile edit button to navigate to ProfileDetailsActivity
-        editProfile.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        editProfile.setOnClickListener(v-> {
                 Intent profileDetailsActivity = new Intent(getApplicationContext(), ProfileDetailsActivity.class);
                 startActivity(profileDetailsActivity);
+        });
+
+        // Handle notification button click
+        notificationButton.setOnClickListener(view -> loadFragment(new NotificationDashboardFragment()));
+
+        setupNotificationBadgeListener();
+
+    }
+
+    /**
+     * Sets up a real-time listener for unread notification count updates.
+     */
+    private void setupNotificationBadgeListener() {
+        String userId = dbHelper.getCurrentUserId();
+        dbHelper.listenForUnreadNotifications(userId, new DatabaseHelper.NotificationCountCallback() {
+            /**
+             * On finding the count of the notifications, updates the badge.
+             *
+             * @param count user's notification count.
+             */
+            @Override
+            public void onCountFetched(int count) {
+                runOnUiThread(() -> updateNotificationBadge(count));
+            }
+
+            /**
+             * Handles error on finding unread notification count.
+             * @param e exception catcher.
+             */
+
+            @Override
+            public void onError(Exception e) {
+                //Log.e("Error listening for unread notifications");
             }
         });
+    }
+
+    /**
+     * Updates the notification badge with the unread notification count.
+     *
+     * @param count The number of unread notifications.
+     */
+    private void updateNotificationBadge(int count) {
+        if (count > 0 && isNotificationsEnabled) {
+            notificationBadge.setVisibility(View.VISIBLE);
+            notificationBadge.setText(String.valueOf(count));
+        } else {
+            notificationBadge.setVisibility(View.GONE);
+        }
     }
 
     /**
@@ -130,10 +268,12 @@ public class MainActivity extends AppCompatActivity {
             getSupportFragmentManager()
                     .beginTransaction()
                     .replace(R.id.main_activity_fragment_container, fragment)
+                    .addToBackStack(null) // Add this line to manage the back stack
                     .commit();
             return true;
         }
         return false;
     }
+
 
 }

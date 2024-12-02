@@ -1,0 +1,88 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/secondary_background_cards"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- Notification Type (Title) -->
+    <TextView
+        android:id="@+id/notificationDialogTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:gravity="center"
+        android:text="Notification Type"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="12dp"
+        android:background="@android:color/darker_gray" />
+
+    <!-- Priority Label -->
+    <TextView
+        android:id="@+id/notificationDialogPriority"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/rounded_priority_background"
+        android:gravity="center"
+        android:padding="4dp"
+        android:text="High Priority"
+        android:textColor="@android:color/white"
+        android:textSize="14sp" />
+
+    <!-- Notification Details -->
+    <TextView
+        android:id="@+id/notificationDialogMessage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:text="Notification Message"
+        android:textSize="14sp" />
+
+    <!-- Event Name (From Metadata) -->
+    <TextView
+        android:id="@+id/notificationDialogEventName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:text="Event Name: Sample Event"
+        android:textSize="14sp" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="6dp"
+        android:layout_marginBottom="8dp"
+        android:background="@android:color/darker_gray" />
+
+    <TextView
+        android:id="@+id/notificationDialogTimestamp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:text="Sent: Nov 25, 2024 - 10:00 AM"
+        android:textSize="12sp" />
+
+    <TextView
+        android:id="@+id/notificationDialogCategory"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:text="Category: System"
+        android:textSize="12sp" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="6dp"
+        android:layout_marginBottom="6dp"
+        android:background="@android:color/darker_gray" />
+
+
+</LinearLayout>

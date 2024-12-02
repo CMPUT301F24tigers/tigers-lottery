@@ -1,7 +1,10 @@
 package com.example.tigers_lottery.HostedEvents;
 
 import android.app.Activity;
+import android.app.DatePickerDialog;
 import android.content.Intent;
+import android.location.Address;
+import android.location.Geocoder;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -27,14 +30,19 @@ import androidx.fragment.app.Fragment;
 import com.example.tigers_lottery.DatabaseHelper;
 import com.example.tigers_lottery.R;
 import com.example.tigers_lottery.models.Event;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.Timestamp;
+import com.google.firebase.storage.StorageException;
 import com.google.firebase.storage.StorageReference;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 /**
  * Fragment used by the organizer to create a new event.
@@ -42,8 +50,9 @@ import java.util.Locale;
 
 public class OrganizerCreateEventFragment extends Fragment {
 
-    private EditText inputEventName, inputEventLocation, inputRegistrationOpens, inputRegistrationDeadline, inputEventDate, inputEventDescription, inputWaitlistLimit, inputOccupantLimit;
-    private CheckBox checkboxWaitlistLimit;
+    private EditText inputEventName, inputEventLocation, inputEventDescription, inputWaitlistLimit, inputOccupantLimit;
+    private TextView inputRegistrationOpens, inputRegistrationDeadline, inputEventDate;
+    private CheckBox checkboxWaitlistLimit, checkboxGeolocationRequired;
     private Button btnCreateEvent;
     private DatabaseHelper dbHelper;
     private ImageView imagePoster;
@@ -51,7 +60,6 @@ public class OrganizerCreateEventFragment extends Fragment {
     private ActivityResultLauncher<Intent> activityResultLauncher;
     private StorageReference storageReference;
     private TextView photoPlaceholderText;
-
 
 
     /**
@@ -93,6 +101,7 @@ public class OrganizerCreateEventFragment extends Fragment {
         inputOccupantLimit = view.findViewById(R.id.inputOccupantLimit);
         imagePoster = view.findViewById(R.id.photoPlaceholder);
         photoPlaceholderText = view.findViewById(R.id.photoPlaceholderText);
+        checkboxGeolocationRequired = view.findViewById(R.id.checkboxGeolocationRequired);
 
 
         // Initialize DatabaseHelper
@@ -127,6 +136,27 @@ public class OrganizerCreateEventFragment extends Fragment {
 
         );
 
+        inputRegistrationOpens.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                openDatePicker(inputRegistrationOpens);
+            }
+        });
+
+        inputRegistrationDeadline.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                openDatePicker(inputRegistrationDeadline);
+            }
+        });
+
+        inputEventDate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                openDatePicker(inputEventDate);
+            }
+        });
+
         return view;
     }
 
@@ -148,6 +178,7 @@ public class OrganizerCreateEventFragment extends Fragment {
         int waitlistLimit = 0;
         String occupantLimitText = inputOccupantLimit.getText().toString().trim();
         int occupantLimit = 100;
+        boolean geolocationRequired = checkboxGeolocationRequired.isChecked();
 
         boolean isValid = true;
 
@@ -163,17 +194,17 @@ public class OrganizerCreateEventFragment extends Fragment {
         }
 
         if (registrationOpens.isEmpty() || !isValidDateFormat(registrationOpens)) {
-            inputRegistrationOpens.setError("Enter a valid date (YYYY-MM-DD)");
+            Toast.makeText(getContext(), "Registration open date is empty!", Toast.LENGTH_SHORT).show();
             isValid = false;
         }
 
         if (registrationDeadline.isEmpty() || !isValidDateFormat(registrationDeadline)) {
-            inputRegistrationDeadline.setError("Enter a valid date (YYYY-MM-DD)");
+            Toast.makeText(getContext(),"Registration deadline date is empty!", Toast.LENGTH_SHORT).show();
             isValid = false;
         }
 
         if (eventDate.isEmpty() || !isValidDateFormat(eventDate)) {
-            inputEventDate.setError("Enter a valid date (YYYY-MM-DD)");
+            Toast.makeText(getContext(), "Event date is empty!", Toast.LENGTH_SHORT).show();
             isValid = false;
         }
 
@@ -210,27 +241,49 @@ public class OrganizerCreateEventFragment extends Fragment {
         Timestamp eventDateTimestamp = convertToTimestamp(eventDate);
         Timestamp currentTimestamp = Timestamp.now();
 
+        Calendar registrationOpensCalendar = Calendar.getInstance();
+        registrationOpensCalendar.setTime(registrationOpensTimestamp.toDate());
+
+        // Get current date as Calendar
+        Calendar currentCalendar = Calendar.getInstance();
+
         // Date-based validations
-        if (registrationOpensTimestamp.compareTo(currentTimestamp) <= 0) {
-            inputRegistrationOpens.setError("Registration Open Date must be in the future");
+        if (currentCalendar.get(Calendar.YEAR) >= registrationOpensCalendar.get(Calendar.YEAR) &&
+                currentCalendar.get(Calendar.MONTH) >= registrationOpensCalendar.get(Calendar.MONTH) &&
+                currentCalendar.get(Calendar.DAY_OF_MONTH) > registrationOpensCalendar.get(Calendar.DAY_OF_MONTH)) {
+            Toast.makeText(getContext(),"Registration Open Date must be now or in the future", Toast.LENGTH_SHORT).show();
             return;
         }
 
         if (registrationOpensTimestamp.compareTo(registrationDeadlineTimestamp) >= 0) {
-            inputRegistrationOpens.setError("Registration Open Date must be before Registration Deadline");
-            inputRegistrationDeadline.setError("Registration Deadline must be after Registration Open Date");
+            Toast.makeText(getContext(), "Registration Open Date must be before Registration Deadline",
+                    Toast.LENGTH_SHORT).show();
             return;
         }
 
         if (registrationDeadlineTimestamp.compareTo(eventDateTimestamp) >= 0) {
-            inputRegistrationDeadline.setError("Registration Deadline must be before Event Date");
-            inputEventDate.setError("Event Date must be after Registration Deadline");
+            Toast.makeText(getContext(), "Registration Deadline must be before Event Date",
+                    Toast.LENGTH_SHORT).show();
             return;
         }
 
         if (registrationOpensTimestamp.compareTo(eventDateTimestamp) >= 0) {
-            inputRegistrationOpens.setError("Registration Open Date must be before Event Date");
-            inputEventDate.setError("Event Date must be after Waitlist Open Date");
+            Toast.makeText(getContext(), "Registration Open Date must be before Event Date",
+                    Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Validate address
+        if (!validateAddress(eventLocation)) {
+            inputEventLocation.setError("Please enter a valid address.");
+            return;
+        }
+
+        // Convert validated address to LatLng
+        LatLng geocodedLocation = getLatLngFromAddress(eventLocation);
+
+        if (geocodedLocation == null) {
+            inputEventLocation.setError("Failed to resolve address to location.");
             return;
         }
 
@@ -246,7 +299,9 @@ public class OrganizerCreateEventFragment extends Fragment {
         event.setWaitlistLimitFlag(assignWaitlistLimit);
         event.setWaitlistLimit(assignWaitlistLimit ? waitlistLimit : 0);
         event.setOccupantLimit(occupantLimit);
-
+        event.setGeolocationRequired(geolocationRequired);
+        // Set geolocation (convert LatLng to GeoPoint)
+        event.setGeolocation(new com.google.firebase.firestore.GeoPoint(geocodedLocation.latitude, geocodedLocation.longitude));
         // Set organizer ID from Device ID (current user ID)
         String organizerId = dbHelper.getCurrentUserId(); // Retrieve Device ID
         event.setOrganizerId(organizerId); // Set as organizer ID
@@ -261,8 +316,15 @@ public class OrganizerCreateEventFragment extends Fragment {
 
                 @Override
                 public void onUploadFailure(Exception e) {
-                    Toast.makeText(getContext(), "Failed to upload poster image", Toast.LENGTH_SHORT).show();
+                    if (e instanceof StorageException) {
+                        StorageException se = (StorageException) e;
+                        Log.e("FirebaseStorage", "Error Code: " + se.getErrorCode());
+                        Log.e("FirebaseStorage", "Cause: " + se.getCause());
+                        Log.e("FirebaseStorage", "Message: " + se.getMessage());
+                    }
+                    Toast.makeText(getContext(), "Failed to upload poster image: " + e.getMessage(), Toast.LENGTH_LONG).show();
                 }
+
             });
         } else {
             // Proceed without a poster URL, still save the event
@@ -344,7 +406,56 @@ public class OrganizerCreateEventFragment extends Fragment {
         }
     }
 
+    private boolean validateAddress(String address) {
+        Geocoder geocoder = new Geocoder(requireContext(), Locale.getDefault());
+        try {
+            List<Address> addresses = geocoder.getFromLocationName(address, 1);
+            return addresses != null && !addresses.isEmpty();
+        } catch (IOException e) {
+            Log.e("GeocoderError", "Error validating address", e);
+            return false;
+        }
+    }
 
+    private LatLng getLatLngFromAddress(String address) {
+        Geocoder geocoder = new Geocoder(requireContext(), Locale.getDefault());
+        try {
+            Log.d("Geocoder", "Resolving address: " + address);
+            List<Address> addresses = geocoder.getFromLocationName(address, 1);
+            if (addresses != null && !addresses.isEmpty()) {
+                Address location = addresses.get(0);
+                Log.d("Geocoder", "Resolved LatLng: Latitude = " + location.getLatitude() + ", Longitude = " + location.getLongitude());
+                return new LatLng(location.getLatitude(), location.getLongitude());
+            } else {
+                Log.w("Geocoder", "No results for address: " + address);
+            }
+        } catch (IOException e) {
+            Log.e("GeocoderError", "Error resolving address to LatLng", e);
+        }
+        return null;
+    }
+
+    private void openDatePicker(TextView dateField) {
+        // Use the current date as the default date in the picker
+        final Calendar calendar = Calendar.getInstance();
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH);
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+
+        // Show the DatePickerDialog
+        DatePickerDialog datePickerDialog = new DatePickerDialog(requireContext(),
+                (view, selectedYear, selectedMonth, selectedDay) -> {
+                    // Save selected day, month, and year
+//                    this.selectedYear = selectedYear;
+//                    this.selectedMonth = selectedMonth + 1; // Month is 0-indexed in Calendar
+//                    this.selectedDay = selectedDay;
+                    String dateText = String.format(Locale.getDefault(), "%d-%02d-%02d", selectedYear, selectedMonth+1, selectedDay);
+                    dateField.setText(dateText);
+                }, year, month, day);
+
+        datePickerDialog.getDatePicker().setMinDate(calendar.getTimeInMillis());
+        datePickerDialog.show();
+    }
 
 }
 

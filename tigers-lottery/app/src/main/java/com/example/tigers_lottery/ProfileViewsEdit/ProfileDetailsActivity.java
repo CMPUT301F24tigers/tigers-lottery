@@ -43,8 +43,16 @@ public class ProfileDetailsActivity extends AppCompatActivity {
 
         BottomNavigationView bottomNavProfileDetails = findViewById(R.id.nav_profile_details_view);
 
+        getWindow().setStatusBarColor(0xFF2A334C);
+
         // Set up listener to handle reselection of items in the bottom navigation view
         bottomNavProfileDetails.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
+            /**
+             * sends the user to the selected fragment upon clicking it.
+             *
+             * @param item The selected item
+             * @return true
+             */
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 Fragment selectedFragment = null;
@@ -59,12 +67,9 @@ public class ProfileDetailsActivity extends AppCompatActivity {
         });
 
         // Set up listener to handle cancel button click
-        cancelButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        cancelButton.setOnClickListener(v->{
                 Intent mainActivity = new Intent(getApplicationContext(), MainActivity.class);
                 startActivity(mainActivity);
-            }
         });
     }
 

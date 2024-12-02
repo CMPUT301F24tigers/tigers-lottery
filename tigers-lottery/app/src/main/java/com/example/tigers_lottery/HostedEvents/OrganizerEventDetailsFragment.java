@@ -1,5 +1,8 @@
 package com.example.tigers_lottery.HostedEvents;
 
+import android.annotation.SuppressLint;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -13,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,10 +27,14 @@ import androidx.fragment.app.Fragment;
 import com.example.tigers_lottery.DatabaseHelper;
 import com.example.tigers_lottery.R;
 import com.example.tigers_lottery.models.Event;
+import com.example.tigers_lottery.utils.QRCodeGenerator;
 import com.google.firebase.Timestamp;
+import com.google.zxing.qrcode.encoder.QRCode;
 
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 /**
@@ -40,12 +48,13 @@ public class OrganizerEventDetailsFragment extends Fragment {
     private Event event;
     private boolean isHandlingDecline = false;
     private int lastKnownDeclinedEntrantsSize = 0;
+    private boolean isInitialDeclineSync = true;
 
     // UI Components
-    private TextView eventTitle, eventDescription, eventLocation, waitlistOpenDate, waitlistCloseDate, eventDate, waitlistLimit;
-    private ImageView eventPoster;
-    private Button viewRegisteredEntrants, viewWaitlistedEntrants, viewInvitedEntrants, viewDeclinedEntrants, runLotteryButton, clearListsButton;
-
+    private TextView eventTitle, eventDescription, eventLocation, waitlistOpenDate, waitlistCloseDate, eventDate, waitlistLimit, entrantLimit;
+    private ImageView eventPoster, viewQRCodeImage;
+    private Button viewRegisteredEntrants, viewWaitlistedEntrants, viewInvitedEntrants, viewDeclinedEntrants;
+    private LinearLayout runLotteryButton, viewQRCode, viewMapButton, clearListsButton;
     /**
      * Required empty public constructor.
      */
@@ -99,6 +108,7 @@ public class OrganizerEventDetailsFragment extends Fragment {
      * @return the view for the fragment's UI.
      */
 
+    @SuppressLint("MissingInflatedId")
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -112,6 +122,7 @@ public class OrganizerEventDetailsFragment extends Fragment {
         waitlistCloseDate = view.findViewById(R.id.waitlistCloseDate);
         eventDate = view.findViewById(R.id.eventDate);
         waitlistLimit = view.findViewById(R.id.waitlistLimit);
+        entrantLimit = view.findViewById(R.id.entrantLimit);
         viewRegisteredEntrants = view.findViewById(R.id.viewRegisteredEntrants);
         viewWaitlistedEntrants = view.findViewById(R.id.viewWaitlistedEntrants);
         viewInvitedEntrants = view.findViewById(R.id.viewInvitedEntrants);
@@ -119,6 +130,9 @@ public class OrganizerEventDetailsFragment extends Fragment {
         runLotteryButton = view.findViewById(R.id.runLotteryButton);
         eventPoster = view.findViewById(R.id.eventPoster);
         clearListsButton = view.findViewById(R.id.clearListsButton);
+        viewQRCode = view.findViewById(R.id.viewQRCodeButton);
+        viewMapButton = view.findViewById(R.id.viewMapButton);
+        viewQRCodeImage = view.findViewById(R.id.viewQRCodeButtonImage);
 
         // Fetch and display event details
         loadEventDetails();
@@ -146,6 +160,14 @@ public class OrganizerEventDetailsFragment extends Fragment {
                 if (fetchedEvent != null) {
                     event = fetchedEvent;
                     displayEventDetails(event);
+                    if(event.getQRCode() != null && !(event.getQRCode().isEmpty())){
+                        QRCodeGenerator qrCodeGenerator = new QRCodeGenerator(event);
+                        qrCodeGenerator.setHashData();
+                        Bitmap QRcode = qrCodeGenerator.generateQRCodeFromHashData();
+                        viewQRCodeImage.setImageBitmap(QRcode);
+                    }else{
+                        viewQRCodeImage.setImageResource(R.drawable.default_qr_code);
+                    }
                     setupLotteryButton();
                     setupDeclineListener();
                     setupClearListsButton();
@@ -192,10 +214,14 @@ public class OrganizerEventDetailsFragment extends Fragment {
         eventTitle.setText(event.getEventName());
         eventDescription.setText(event.getDescription());
         eventLocation.setText("Location: " + event.getLocation());
-        waitlistOpenDate.setText("Waitlist Open Date: " + event.getFormattedWaitlistOpenDate());
-        waitlistCloseDate.setText("Waitlist Close Date: " + event.getFormattedWaitlistDeadline());
-        eventDate.setText("Event Date: " + event.getFormattedEventDate());
+        String dateSplitEventDate = event.getFormattedEventDate().split(" - ")[0];
+        String dateSplitWaitlistOpen = event.getFormattedWaitlistOpenDate().split(" - ")[0];
+        String dateSplitWaitlistDeadline = event.getFormattedWaitlistDeadline().split(" - ")[0];
+        waitlistOpenDate.setText("Waitlist Open Date: " + dateSplitWaitlistOpen);
+        waitlistCloseDate.setText("Waitlist Close Date: " + dateSplitWaitlistDeadline);
+        eventDate.setText("Event Date: " + dateSplitEventDate);
         waitlistLimit.setText("Waitlist Limit: " + (event.isWaitlistLimitFlag() ? event.getWaitlistLimit() : "N/A"));
+        entrantLimit.setText("Entrant Limit: " + (event.getOccupantLimit()));
 
         // Initialize entrant lists only if they are null and avoid altering the invitedEntrants if isLotteryRan is false
         if (event.getRegisteredEntrants() == null) {
@@ -219,22 +245,33 @@ public class OrganizerEventDetailsFragment extends Fragment {
         if (event.getPosterUrl() != null && !event.getPosterUrl().isEmpty()) {
             Glide.with(this)
                     .load(event.getPosterUrl())
-                    .placeholder(R.drawable.placeholder_image_background) // find a better background later
+                    .placeholder(R.drawable.event_poster_placeholder) // find a better background later
                     .into(eventPoster);
         }
     }
+
+    /**
+     * Sets up the clear list button as clickable.
+     */
 
     private void setupClearListsButton() {
         Timestamp currentTimestamp = Timestamp.now();
 
         // Enable the button only if the event date has passed
         if (currentTimestamp.compareTo(event.getEventDate()) >= 0) {
+            clearListsButton.setBackgroundResource(R.drawable.square_button_background);
             clearListsButton.setEnabled(true);
             clearListsButton.setOnClickListener(v -> clearEntrantLists());
         } else {
+            clearListsButton.setBackgroundResource(R.drawable.square_button_background_disabled);
             clearListsButton.setEnabled(false);
         }
     }
+
+    /**
+     * Clears the waitlisted, invited and declined lists (meant for after registration
+     * for the event is closed and the event is about to start).
+     */
 
     private void clearEntrantLists() {
         event.setWaitlistedEntrants(new ArrayList<>()); // Clear the lists in the Event object
@@ -242,16 +279,30 @@ public class OrganizerEventDetailsFragment extends Fragment {
         event.setDeclinedEntrants(new ArrayList<>());
 
         dbHelper.clearEventLists(event.getEventId(), new DatabaseHelper.EventsCallback() {
+            /**
+             * On finding the event, and clearing the list, the clear list button is disabled.
+             * @param events to be cleared.
+             */
             @Override
             public void onEventsFetched(List<Event> events) {
                 Toast.makeText(getContext(), "Lists cleared successfully!", Toast.LENGTH_SHORT).show();
                 clearListsButton.setEnabled(false); // Disable after clearing
             }
 
+            /**
+             * Event fetched, required dbHelper method, unused.
+             * @param event event.
+             */
+
             @Override
             public void onEventFetched(Event event) {
                 // Not used in this context
             }
+
+            /**
+             * Handles error in clearing lists.
+             * @param e exception catcher.
+             */
 
             @Override
             public void onError(Exception e) {
@@ -269,6 +320,9 @@ public class OrganizerEventDetailsFragment extends Fragment {
         viewWaitlistedEntrants.setOnClickListener(v -> openEntrantFragment(new OrganizerWaitingListFragment()));
         viewInvitedEntrants.setOnClickListener(v -> openEntrantFragment(new OrganizerInvitedEntrantsFragment()));
         viewDeclinedEntrants.setOnClickListener(v -> openEntrantFragment(new OrganizerDeclinedEntrantsFragment()));
+        viewQRCode.setOnClickListener(v -> openEntrantFragment(new OrganizerQRCodeFragment()));
+        viewMapButton.setOnClickListener(v -> openMapFragment());
+
     }
 
     /**
@@ -287,25 +341,36 @@ public class OrganizerEventDetailsFragment extends Fragment {
         Log.d("LotterySetup", "One day before event: " + oneDayBeforeEvent);
         Log.d("LotterySetup", "Is lottery already run? " + event.isLotteryRan());
 
+        // Log the waitlist deadline comparison
+        Log.d("LotteryDebug", "Waitlist Deadline: " + event.getWaitlistDeadline());
+        Log.d("LotteryDebug", "Is current time after waitlist deadline? " + (currentTimestamp.compareTo(event.getWaitlistDeadline()) >= 0));
+
+
         // Run the lottery automatically if we're exactly 1 day before the event and lottery hasn't run
         if (currentTimestamp.compareTo(oneDayBeforeEvent) >= 0 &&
                 currentTimestamp.compareTo(event.getEventDate()) < 0 &&
                 !event.isLotteryRan()) {
 
+            Log.d("LotteryDebug", "Automatic lottery is being triggered!");
             // Run the lottery automatically
             runLottery();
 
             // Alternatively, if manual triggering is also intended, keep button enabled
             runLotteryButton.setEnabled(false);
+            runLotteryButton.setBackgroundResource(R.drawable.square_button_background_disabled);
             runLotteryButton.setOnClickListener(null);
 
         } else if (event.getWaitlistDeadline().compareTo(currentTimestamp) <= 0 && !event.isLotteryRan()) {
             // Enable the button if it's past the waitlist deadline and before the event date
+            Log.d("LotteryDebug", "Lottery button enabled.");
             runLotteryButton.setEnabled(true);
+            runLotteryButton.setBackgroundResource(R.drawable.square_button_background);
             runLotteryButton.setOnClickListener(v -> runLottery());
         } else {
             // Disable button and remove listener if conditions don't allow the lottery to be run
+            Log.d("LotteryDebug", "Lottery button disabled.");
             runLotteryButton.setEnabled(false);
+            runLotteryButton.setBackgroundResource(R.drawable.square_button_background_disabled);
             runLotteryButton.setOnClickListener(null);
         }
     }
@@ -317,7 +382,12 @@ public class OrganizerEventDetailsFragment extends Fragment {
 
 
     private void runLottery() {
+        Log.d("LotteryDebug", "runLottery called.");
+        Log.d("LotteryDebug", "Current state of isLotteryRan: " + event.isLotteryRan());
+
+
         if (event.isLotteryRan()) {
+            Log.d("LotteryDebug", "Lottery already run, exiting method.");
             Toast.makeText(getContext(), "Lottery has already been run for this event.", Toast.LENGTH_SHORT).show();
             return; // Exit if the lottery has already been run
         }
@@ -329,8 +399,18 @@ public class OrganizerEventDetailsFragment extends Fragment {
              */
             @Override
             public void onEntrantsFetched(List<String> waitlistedEntrants) {
+                Log.d("LotteryDebug", "Fetched waitlisted entrants: " + waitlistedEntrants);
                 int occupantLimit = event.getOccupantLimit();
                 List<String> invitedEntrants = dbHelper.selectRandomEntrants(waitlistedEntrants, occupantLimit);
+                Log.d("LotteryDebug", "Selected invited entrants: " + invitedEntrants);
+
+                // Identify new invitees
+                List<String> newInvitees = new ArrayList<>(invitedEntrants);
+                List<String> lotteryLosers = new ArrayList<>(waitlistedEntrants);
+                lotteryLosers.removeAll(newInvitees); // Remove those who were invited
+                if (event.getInvitedEntrants() != null) {
+                    newInvitees.removeAll(event.getInvitedEntrants());
+                }
 
                 // Update Firestore with invited entrants and mark lottery as run
                 dbHelper.updateInvitedEntrantsAndSetLotteryRan(event.getEventId(), invitedEntrants, new DatabaseHelper.EventsCallback() {
@@ -340,9 +420,72 @@ public class OrganizerEventDetailsFragment extends Fragment {
                      */
                     @Override
                     public void onEventsFetched(List<Event> events) {
+                        Log.d("LotteryDebug", "Lottery successfully updated in Firestore.");
                         Toast.makeText(getContext(), "Lottery run successfully!", Toast.LENGTH_SHORT).show();
                         runLotteryButton.setEnabled(false); // Disable button after running
+                        runLotteryButton.setBackgroundResource(R.drawable.square_button_background_disabled);
                         event.setLotteryRan(true); // Mark the event's lottery as run
+
+                        // Send notifications to new invitees
+                        for (String invitee : newInvitees) {
+                            dbHelper.sendLotteryWinNotification(
+                                    invitee,
+                                    event.getEventId(),
+                                    event.getOrganizerId(),
+                                    event.getEventName(),
+                                    new DatabaseHelper.NotificationCallback() {
+                                        /**
+                                         * Handles success on sending the notification to entrants.
+                                         * @param responseMessage logged message.
+                                         */
+                                        @Override
+                                        public void onSuccess(String responseMessage) {
+                                            Log.d("NotificationDebug", "Notification sent successfully: " + responseMessage);
+                                        }
+
+                                        /**
+                                         * Handles error on sending the notification upon running the lottery.
+                                         * @param errorMessage logged message.
+                                         */
+
+                                        @Override
+                                        public void onFailure(String errorMessage) {
+                                            Log.e("NotificationDebug", "Failed to send notification: " + errorMessage);
+                                        }
+                                    }
+                            );
+                        }
+
+                        // Send notifications to lottery losers
+                        for (String loser : lotteryLosers) {
+                            dbHelper.sendLotteryLossNotification(
+                                    loser,
+                                    event.getEventId(),
+                                    event.getOrganizerId(),
+                                    event.getEventName(),
+                                    new DatabaseHelper.NotificationCallback() {
+                                        /**
+                                         * Handles success on sending loss notification.
+                                         * @param responseMessage logged message.
+                                         */
+                                        @Override
+                                        public void onSuccess(String responseMessage) {
+                                            Log.d("NotificationDebug", "Loss notification sent successfully: " + responseMessage);
+                                        }
+
+                                        /**
+                                         * Handles error on sending loss notification.
+                                         * @param errorMessage logged message.
+                                         */
+
+                                        @Override
+                                        public void onFailure(String errorMessage) {
+                                            Log.e("NotificationDebug", "Failed to send loss notification: " + errorMessage);
+                                        }
+                                    }
+                            );
+                        }
+
                     }
 
                     /**
@@ -382,19 +525,39 @@ public class OrganizerEventDetailsFragment extends Fragment {
      */
     private void setupDeclineListener() {
         dbHelper.addDeclineListener(eventId, new DatabaseHelper.DeclineCallback() {
+            /**
+             * Handles actions on logging the decline from the entrant.
+             * @param declinedEntrants entrants that declined.
+             */
             @Override
             public void onDeclineDetected(List<String> declinedEntrants) {
-                // Only trigger decline handling if the declined entrants size has increased
-                if (!isHandlingDecline && declinedEntrants.size() > lastKnownDeclinedEntrantsSize) {
-                    isHandlingDecline = true;
-                    lastKnownDeclinedEntrantsSize = declinedEntrants.size(); // Update the known size
+                if (isInitialDeclineSync) {
+                    Log.d("DeclineDebug", "Initial sync detected. Skipping decline handling.");
+                    isInitialDeclineSync = false;
+                    lastKnownDeclinedEntrantsSize = declinedEntrants.size();
+                    return;
+                }
+
+                Log.d("DeclineDebug", "Decline detected. Declined entrants: " + declinedEntrants);
+                Log.d("DeclineDebug", "Previous size: " + lastKnownDeclinedEntrantsSize + ", Current size: " + declinedEntrants.size());
+
+                if (declinedEntrants.size() > lastKnownDeclinedEntrantsSize) {
+                    lastKnownDeclinedEntrantsSize = declinedEntrants.size();
+
+                    Log.d("DeclineDebug", "Fetching event details for decline handling...");
                     fetchEventDetails(); // Proceed to handle the actual decline
                 }
             }
 
+
+            /**
+             * Handles error on handling the decline.
+             * @param e exception catcher.
+             */
+
             @Override
             public void onError(Exception e) {
-                Log.e("DeclineListener", "Error in handling declines: ", e);
+                Log.e("DeclineDebug", "Error in decline listener: ", e);
             }
         });
     }
@@ -408,58 +571,103 @@ public class OrganizerEventDetailsFragment extends Fragment {
             @Override
             public void onEventFetched(Event event) {
                 if (event != null) {
-                    handleDeclineLogic(event);
+                    Log.d("DeclineDebug", "Event details fetched successfully: " + event.getEventName());
+                    handleDeclineLogic(event); // Proceed with decline logic
+                } else {
+                    Log.d("DeclineDebug", "Failed to fetch event details. Event is null.");
                 }
             }
 
             @Override
             public void onEventsFetched(List<Event> events) {
-                // Not needed here
+                // Not used
             }
 
             @Override
             public void onError(Exception e) {
-                Log.e("EventDetails", "Error fetching updated event details", e);
+                Log.e("DeclineDebug", "Error fetching event details: ", e);
             }
         });
     }
 
 
-    private void handleDeclineLogic(Event event) {
-        if (event.getInvitedEntrants().size() < event.getOccupantLimit()) {
-            List<String> waitlistedEntrants = event.getWaitlistedEntrants();
+    /**
+     * Handles the decline logic for entrants.
+     * @param event to be declined.
+     */
 
-            if (!waitlistedEntrants.isEmpty()) {
-                String newInvitee = selectRandomEntrant(waitlistedEntrants);
+    private void handleDeclineLogic(Event event) {
+        Log.d("DeclineDebug", "Handling decline for event: " + event.getEventName());
+
+        if (isHandlingDecline) {
+            Log.d("DeclineDebug", "Decline logic is already in process. Skipping.");
+            return;
+        }
+
+        isHandlingDecline = true; // Lock the flag for processing
+
+        try {
+            if (event.getInvitedEntrants().size() >= event.getOccupantLimit()) {
+                Log.d("DeclineDebug", "Occupant limit reached, no action needed.");
+                return;
+            }
+
+            List<String> waitlistedEntrants = event.getWaitlistedEntrants();
+            Log.d("DeclineDebug", "Waitlisted entrants: " + waitlistedEntrants);
+
+            if (waitlistedEntrants == null || waitlistedEntrants.isEmpty()) {
+                Log.d("DeclineDebug", "No waitlisted entrants to invite.");
+                return;
+            }
+
+            String newInvitee = selectRandomEntrant(waitlistedEntrants);
+            if (newInvitee != null) {
+                Log.d("DeclineDebug", "New invitee selected: " + newInvitee);
                 event.getInvitedEntrants().add(newInvitee);
                 waitlistedEntrants.remove(newInvitee);
 
-                // Update Firestore with the modified lists
                 dbHelper.updateEntrantsAfterDecline(eventId, event.getInvitedEntrants(), waitlistedEntrants, new DatabaseHelper.EventsCallback() {
                     @Override
                     public void onEventsFetched(List<Event> events) {
-                        Log.d("EventUpdate", "Entrants updated after handling decline.");
-                        isHandlingDecline = false; // Reset the flag once the update is complete
+                        Log.d("DeclineDebug", "Entrants updated successfully after decline.");
+                        dbHelper.sendLotteryWinNotification(
+                                newInvitee, eventId, event.getOrganizerId(), event.getEventName(),
+                                new DatabaseHelper.NotificationCallback() {
+                                    @Override
+                                    public void onSuccess(String responseMessage) {
+                                        Log.d("NotificationDebug", "Notification sent successfully to: " + newInvitee);
+                                    }
+
+                                    @Override
+                                    public void onFailure(String errorMessage) {
+                                        Log.e("NotificationDebug", "Failed to send notification: " + errorMessage);
+                                    }
+                                }
+                        );
                     }
 
                     @Override
                     public void onEventFetched(Event event) {
-                        // Not needed
+                        // No action needed
                     }
 
                     @Override
                     public void onError(Exception e) {
-                        Log.e("EventUpdate", "Failed to update entrants.", e);
-                        isHandlingDecline = false; // Ensure flag is reset even if an error occurs
+                        Log.e("DeclineDebug", "Failed to update entrants after decline.", e);
                     }
                 });
             } else {
-                isHandlingDecline = false; // No more waitlisted entrants to add, reset the flag
+                Log.d("DeclineDebug", "No valid invitee could be selected from the waitlist.");
             }
-        } else {
-            isHandlingDecline = false; // Occupant limit is met, reset the flag
+        } catch (Exception e) {
+            Log.e("DeclineDebug", "Error while handling decline.", e);
+        } finally {
+            isHandlingDecline = false; // Reset the flag
         }
     }
+
+
+
 
 
     /**
@@ -488,5 +696,18 @@ public class OrganizerEventDetailsFragment extends Fragment {
                 .addToBackStack(null)
                 .commit();
     }
+
+    /**
+     * Opens the map fragment for the event.
+     */
+
+    private void openMapFragment() {
+        OrganizerMapFragment mapFragment = OrganizerMapFragment.newInstance(eventId);
+        requireActivity().getSupportFragmentManager().beginTransaction()
+                .replace(R.id.main_activity_fragment_container, mapFragment)
+                .addToBackStack(null)
+                .commit();
+    }
+
 
 }

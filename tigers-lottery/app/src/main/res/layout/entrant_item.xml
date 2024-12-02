@@ -1,15 +1,38 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- This file contains the entrant items within the invited entrants, declined entrants etc. lists that come from the organizer event detail page -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="8dp">
+    android:layout_margin="8dp"
+    card_view:cardCornerRadius="12dp"
+    card_view:cardElevation="6dp"
+    android:id="@+id/entrantCardView">
 
-    <TextView
-        android:id="@+id/entrantIdTextView"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="16sp"
-        android:textColor="@android:color/black"/>
-</LinearLayout>
+        android:background="@color/secondary_background_cards"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Entrant's Full Name -->
+        <TextView
+            android:id="@+id/entrantNameTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:text="John Doe"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <!-- Entrant's Email -->
+        <TextView
+            android:id="@+id/entrantEmailTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/secondary_background_cards"
+            android:text="john.doe@example.com"
+            android:textColor="@color/white"
+            android:textSize="14sp" />
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

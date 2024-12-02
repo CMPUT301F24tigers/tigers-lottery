@@ -25,6 +25,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.bumptech.glide.Glide;
 
+import java.util.Objects;
+
 /**
  * Fragment that displays facility profile details and allows the user to edit their profile information.
  * Loads profile data from Firebase Firestore and displays it in the appropriate UI components.
@@ -47,7 +49,6 @@ public class ProfileDetailsFacilityFragment extends Fragment {
      * Default constructor for the fragment.
      */
     public ProfileDetailsFacilityFragment() {
-        // Required empty public constructor
     }
 
     /**
@@ -110,6 +111,11 @@ public class ProfileDetailsFacilityFragment extends Fragment {
         db.collection("users").document(deviceId)
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    /**
+                     * Assigns the inputted fields into the database upon completion.
+                     *
+                     * @param task task.
+                     */
                     @Override
                     public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                         if (task.isSuccessful()) {
@@ -121,7 +127,7 @@ public class ProfileDetailsFacilityFragment extends Fragment {
                                 facilityLocation.setText(document.getString("facility_location"));
 
                                 // Load facility photo if available
-                                if (document.getString("facility_photo") != null) {
+                                if (document.getString("facility_photo") != null && !Objects.equals(document.getString("facility_photo"), "NoFacilityPhoto")) {
                                     loadImageFromFirebase(document.getString("facility_photo"), facilityPhoto);
                                 }
                             } else {
@@ -134,9 +140,7 @@ public class ProfileDetailsFacilityFragment extends Fragment {
                 });
 
         // Set listener for the edit profile button to navigate to edit profile fragment
-        editProfileButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        editProfileButton.setOnClickListener(v-> {
                 Bundle bundle = new Bundle();
                 bundle.putString("deviceId", deviceId);
 
@@ -149,7 +153,6 @@ public class ProfileDetailsFacilityFragment extends Fragment {
                 fragmentTransaction.replace(R.id.profileDetailsActivityFragment, transitionedFragment);
                 fragmentTransaction.addToBackStack(null);
                 fragmentTransaction.commit();
-            }
         });
 
         return view;

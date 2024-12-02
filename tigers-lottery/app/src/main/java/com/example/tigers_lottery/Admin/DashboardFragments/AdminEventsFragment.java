@@ -4,6 +4,8 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -11,12 +13,14 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.tigers_lottery.Admin.AdminRecyclerViewAdapter;
 import com.example.tigers_lottery.Admin.DashboardFragments.ListItems.AdminListItemModel;
 import com.example.tigers_lottery.Admin.DashboardFragments.ListItems.OnActionListener;
 import com.example.tigers_lottery.DatabaseHelper;
+import com.example.tigers_lottery.HostedEvents.OrganizerEventDetailsFragment;
 import com.example.tigers_lottery.R;
 import com.example.tigers_lottery.models.Event;
 import com.example.tigers_lottery.models.User;
@@ -34,6 +38,7 @@ public class AdminEventsFragment extends Fragment implements OnActionListener {
 
     private AdminRecyclerViewAdapter eventsAdapter;
     private final List<AdminListItemModel> itemList = new ArrayList<>();
+    private String globalOrganizerName = "";
 
     /**
      * Inflates the admin events layout, initializes the RecyclerView adapter, and fetches events.
@@ -49,7 +54,9 @@ public class AdminEventsFragment extends Fragment implements OnActionListener {
         View view = inflater.inflate(R.layout.admin_list_fragment, container, false);
 
         eventsAdapter = new AdminRecyclerViewAdapter(itemList, this);
-        eventsAdapter.setHideExpandableSection2(true); // Hide section 2 for events
+
+        TextView title = view.findViewById(R.id.adminListTile);
+        title.setText("All Events");
 
         RecyclerView recyclerView = view.findViewById(R.id.adminRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -67,35 +74,57 @@ public class AdminEventsFragment extends Fragment implements OnActionListener {
     private void fetchEvents() {
         DatabaseHelper dbHelper = new DatabaseHelper(requireContext());
         dbHelper.fetchAllEvents(new DatabaseHelper.EventsCallback() {
+            /**
+             * Handles actions after finding the list of events from the database.
+             * @param events admin view of all events.
+             */
             @Override
             public void onEventsFetched(List<Event> events) {
                 itemList.clear(); // Clear the current list to refresh with new data
                 for (Event event : events) {
                     // Fetch each organizer’s name asynchronously based on the organizer ID
                     dbHelper.fetchUserById(event.getOrganizerId(), new DatabaseHelper.UsersCallback() {
+                        /**
+                         * Handles actions on finding the organizer from the database.
+                         * @param user the event's organizer.
+                         */
                         @Override
                         public void onUserFetched(User user) {
+
                             String organizerName = (user != null)
-                                    ? "by " + user.getFirstName() + " " + user.getLastName()
+                                    ? "by " + user.getFacilityName()
                                     : "Organizer Not Found";
+
+                            globalOrganizerName = organizerName;
 
                             // Add the event item to the list with organizer name
                             itemList.add(new AdminListItemModel(
                                     String.valueOf(event.getEventId()),
                                     event.getEventName(),
                                     organizerName,
+                                    event.getPosterUrl(),
                                     "View Event Details",
                                     "Delete Event",
-                                    ""
+                                    true
                             ));
                             eventsAdapter.notifyDataSetChanged();  // Notify adapter after each addition
                         }
+
+                        /**
+                         * Handles error on finding the organizer for the event
+                         * @param e exception catcher
+                         */
 
                         @Override
                         public void onError(Exception e) {
                             Log.e("DatabaseHelper", "Error retrieving organizer for event", e);
                             Toast.makeText(getContext(), "Failed to retrieve organizer", Toast.LENGTH_SHORT).show();
                         }
+
+                        /**
+                         * Handles actions on finding users
+                         * @param users the apps users
+                         */
 
                         @Override
                         public void onUsersFetched(List<User> users) {
@@ -104,6 +133,11 @@ public class AdminEventsFragment extends Fragment implements OnActionListener {
                     });
                 }
             }
+
+            /**
+             * Handles error on finding the list of events.
+             * @param e exception catcher
+             */
 
             @Override
             public void onError(Exception e) {
@@ -125,8 +159,12 @@ public class AdminEventsFragment extends Fragment implements OnActionListener {
      */
     @Override
     public void onOptionOneClick(String strEventId) {
-        int eventId = Integer.parseInt(strEventId);
-        Toast.makeText(getContext(), "Viewing Event details for event " + eventId, Toast.LENGTH_SHORT).show();
+        AdminEventDetailsFragment fragment = AdminEventDetailsFragment.newInstance(strEventId, globalOrganizerName);
+
+        requireActivity().getSupportFragmentManager().beginTransaction()
+                .replace(R.id.main_activity_fragment_container, fragment)
+                .addToBackStack(null)
+                .commit();
     }
 
     /**
@@ -137,24 +175,36 @@ public class AdminEventsFragment extends Fragment implements OnActionListener {
      */
     @Override
     public void onOptionTwoClick(String strEventId) {
+        final Event[] deletedEvent = new Event[1];
         int eventId = Integer.parseInt(strEventId);
         DatabaseHelper dbHelper = new DatabaseHelper(requireContext());
-        dbHelper.deleteEvent(eventId, new DatabaseHelper.EventsCallback() {
+        dbHelper.deleteEvent(eventId, "organizer", new DatabaseHelper.EventsCallback() {
+
+
+            /**
+             * Handles events finding actions for dbHelper. Required dbHelper method, unused.
+             * @param events list of events
+             */
+
             @Override
             public void onEventsFetched(List<Event> events) { /* Do nothing */ }
+
+            /**
+             * Handles action on finding the event, deletes the event.
+             * @param event to be deleted.
+             */
             @Override
-            public void onEventFetched(Event event) { /* Do nothing */ }
+
+            public void onEventFetched(Event event) {
+                deletedEvent[0] = event;
+                Toast.makeText(getContext(), "Removing Event: " + deletedEvent[0].getEventName(), Toast.LENGTH_SHORT).show();
+            }
+
             @Override
             public void onError(Exception e) { /* Do nothing */ }
         });
         eventsAdapter.setExpandedPosition(-1); // Collapse any expanded menus
         eventsAdapter.notifyDataSetChanged();
-        Toast.makeText(getContext(), "Removing Event " + eventId, Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void onOptionThreeClick(String userId) {
-        // Unused in this fragment for events
     }
 
     /**

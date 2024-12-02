@@ -1,46 +1,48 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
+    android:background="@color/primary_background_pages"
     android:padding="16dp">
 
-    <!-- Title for the dashboard -->
-    <TextView
-        android:id="@+id/dashboardTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Upcoming Events"
-        android:textSize="24sp"
-        android:paddingBottom="8dp" />
-
-    <!-- Search bar below the title -->
-    <androidx.appcompat.widget.SearchView
-        android:id="@+id/searchView"
+    <!-- Vertical Layout for the Dashboard -->
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:background="@drawable/search_bar_background"
-        android:queryHint="Search events" />
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-    <!-- RecyclerView to display the list of events -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/eventsRecyclerView"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:padding="8dp" />
+        <!-- Title for the dashboard -->
+        <TextView
+            android:id="@+id/dashboardTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingBottom="8dp"
+            android:textColor="@color/white"
+            android:text="Upcoming Events"
+            android:textSize="24sp"
+            android:textStyle="bold" />
 
-    <!-- Floating Action Button to create a new event -->
+        <!-- Search bar below the title -->
+
+        <!-- RecyclerView to display the list of events -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/eventsRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:padding="8dp" />
+    </LinearLayout>
+
+    <!-- Floating Action Button -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabCreateEvent"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="end|bottom"
         android:layout_margin="16dp"
+        android:contentDescription="Create Event"
         android:src="@drawable/ic_add_event"
-        android:contentDescription="Create Event" />
+        app:tint="@color/white"
+        app:backgroundTint="@color/darker_teal" />
 
-</LinearLayout>
-
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

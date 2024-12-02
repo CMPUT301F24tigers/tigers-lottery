@@ -29,17 +29,6 @@ public class OrganizerDashboardFragmentTest {
         onView(withId(R.id.eventsRecyclerView)).check(matches(isDisplayed()));
     }
 
-    @Test
-
-    public void testSearchFunctionality () {
-
-        onView(withId(R.id.navigation_organizer)).perform(click());
-
-        onView(withId(R.id.searchView)).perform(click());
-
-        onView(withId(R.id.searchView)).check(matches(isDisplayed()));
-
-    }
 }
 
 

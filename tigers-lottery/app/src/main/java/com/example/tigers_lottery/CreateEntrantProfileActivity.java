@@ -2,7 +2,13 @@ package com.example.tigers_lottery;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,6 +22,7 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
 
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -23,6 +30,9 @@ import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -91,6 +101,11 @@ public class CreateEntrantProfileActivity extends AppCompatActivity {
         editProfilePhotoButton = findViewById(R.id.sign_up_add_profile_button);
 
         saveInfoButton.setOnClickListener(new View.OnClickListener() {
+            /**
+             * Saves the information from the edit text on click.
+             *
+             * @param view view.
+             */
             @Override
             public void onClick(View view) {
                 Date date = null;
@@ -120,6 +135,11 @@ public class CreateEntrantProfileActivity extends AppCompatActivity {
                 userData.put("DOB", date);
                 userData.put("phone_number", mobileEditText.getText().toString());
 
+                if(imageUri == null) {
+                    Bitmap imageBitmap = generateProfilePicture(firstnameEditText.getText().toString(), lastnameEditText.getText().toString(), 300);
+                    imageUri = saveBitmapToUri(getApplicationContext(), imageBitmap);
+                }
+
                 dbHelper.addUser(userData, imageUri);
 
                 Intent mainActivity =new Intent(getApplicationContext(), MainActivity.class);
@@ -127,14 +147,16 @@ public class CreateEntrantProfileActivity extends AppCompatActivity {
             }
         });
 
-        dobEditText.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        dobEditText.setOnClickListener(v->{
                 openDatePicker();
             }
-        });
+        );
 
         editProfilePhotoButton.setOnClickListener(new View.OnClickListener() {
+            /**
+             * Launches a new edit profile interaction.
+             * @param view view
+             */
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(Intent.ACTION_PICK);
@@ -144,6 +166,10 @@ public class CreateEntrantProfileActivity extends AppCompatActivity {
         });
 
         cancelButton.setOnClickListener(new View.OnClickListener() {
+            /**
+             * Sends the user back to main activity on clicking the cancel button
+             * @param view view
+             */
             @Override
             public void onClick(View view) {
                 Intent mainActivityIntent = new Intent(getApplicationContext(), MainActivity.class);
@@ -179,7 +205,102 @@ public class CreateEntrantProfileActivity extends AppCompatActivity {
         datePickerDialog.show();
     }
 
+    /**
+     * Validates user profile input.
+     * @param firstName first name
+     * @param lastName last name
+     * @param email email
+     * @param date date
+     * @return true if valid, false if invalid.
+     */
+
     public boolean validatingUserProfileInput(String firstName, String lastName, String email, Date date) {
         return (Objects.equals(firstName, "") || Objects.equals(lastName, "") || Objects.equals(email, "") || date == null);
+    }
+
+    /**
+     * Generates a bitmap for the entrant's profile picture procedurally if they do not enter anything
+     * for their profile picture
+     *
+     * @param firstName first name
+     * @param lastName last name
+     * @param size size of the bitmap
+     * @return the profile picture.
+     */
+
+    public static Bitmap generateProfilePicture(String firstName, String lastName, int size) {
+        // Extract initials
+        String initials = "";
+        if (firstName != null && firstName.length() > 0) {
+            initials += firstName.substring(0, 1).toUpperCase();
+        }
+        if (lastName != null && lastName.length() > 0) {
+            initials += lastName.substring(0, 1).toUpperCase();
+        }
+
+        // Create a bitmap
+        Bitmap bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
+
+        // Create a canvas to draw on the bitmap
+        Canvas canvas = new Canvas(bitmap);
+
+        // Generate a random background color
+        int backgroundColor = generateRandomColor();
+        canvas.drawColor(backgroundColor);
+
+        // Set up paint for the text
+        Paint textPaint = new Paint();
+        textPaint.setColor(Color.WHITE); // Text color
+        textPaint.setAntiAlias(true);
+        textPaint.setTextSize(size / 2f); // Adjust text size
+
+        // Measure text size to center it
+        Rect textBounds = new Rect();
+        textPaint.getTextBounds(initials, 0, initials.length(), textBounds);
+        int x = (bitmap.getWidth() - textBounds.width()) / 2 - textBounds.left;
+        int y = (bitmap.getHeight() + textBounds.height()) / 2 - textBounds.bottom;
+
+        // Draw initials on the canvas
+        canvas.drawText(initials, x, y, textPaint);
+
+        return bitmap;
+    }
+
+    /**
+     * Generate a random pastel color.
+     *
+     * @return A random color as an integer.
+     */
+    private static int generateRandomColor() {
+        float[] hsv = new float[3];
+        hsv[0] = (float) (Math.random() * 360); // Hue
+        hsv[1] = 0.5f; // Saturation
+        hsv[2] = 0.9f; // Value
+        return Color.HSVToColor(hsv);
+    }
+
+    /**
+     * Saves the bitmap for the profile image to URI format.
+     *
+     * @param context current context.
+     * @param bitmap profile image.
+     * @return uri
+     */
+
+    private static Uri saveBitmapToUri(Context context, Bitmap bitmap) {
+        File cacheDir = context.getCacheDir();
+        File file = new File(cacheDir, "profile_image_" + System.currentTimeMillis() + ".png");
+        try {
+            FileOutputStream outputStream = new FileOutputStream(file);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+            outputStream.flush();
+            outputStream.close();
+
+            // Use FileProvider for secure access
+            return Uri.fromFile(file);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

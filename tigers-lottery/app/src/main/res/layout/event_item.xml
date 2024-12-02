@@ -1,65 +1,144 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- res/layout/event_item.xml -->
-<LinearLayout
+<androidx.cardview.widget.CardView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="8dp"
-    android:background="?android:attr/selectableItemBackground">
+    android:background="@color/secondary_background_cards"
+    android:layout_margin="8dp"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="4dp">
 
-    <!-- Event Name -->
-    <TextView
-        android:id="@+id/eventName"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/secondary_background_cards"
+        android:padding="8dp"
+        android:clipChildren="false"
+        android:clipToPadding="false">
+
+        <!-- Event ID (Hidden) -->
+        <TextView
+            android:id="@+id/eventId"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:textSize="14sp" />
+
+        <!-- Organizer ID (Hidden) -->
+        <TextView
+            android:id="@+id/organizerId"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:textSize="14sp" />
+
+        <!-- Waitlist Limit (Hidden) -->
+        <TextView
+            android:id="@+id/waitlistLimit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:textSize="14sp" />
+
+        <!-- Event Icon -->
+        <ImageView
+            android:id="@+id/eventIcon"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/rounded_image"
+            android:clipToOutline="true"
+            android:scaleType="centerCrop"
+            android:src="@drawable/circular_image"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Event Name -->
+        <TextView
+            android:id="@+id/eventName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="Test Event"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:ellipsize="none"
+            android:singleLine="false"
+            android:breakStrategy="simple"
+            app:layout_constraintBottom_toTopOf="@+id/eventGeolocationContainer"
+            app:layout_constraintStart_toEndOf="@id/eventIcon"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Location Container -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/eventGeolocationContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:layout_constraintTop_toBottomOf="@id/eventName"
+            app:layout_constraintStart_toStartOf="@id/eventName">
+
+        <!-- Location -->
+        <TextView
+            android:id="@+id/eventGeolocation"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:paddingTop="1dp"
+            android:paddingBottom="1dp"
+            android:text="Location: 6830 Speaker Vista NW, Edmonton, Alberta, Canada"
+            android:textColor="@color/white"
+            android:textSize="12sp"
+            android:ellipsize="none"
+            android:singleLine="false"
+            android:breakStrategy="simple"
+            android:background="@drawable/rounded_pill_background"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Event Date Container -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/eventDateContainer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="18sp"
-        android:textStyle="bold" />
+        android:layout_marginTop="12dp"
+        app:layout_constraintTop_toBottomOf="@id/eventGeolocationContainer"
+        app:layout_constraintStart_toStartOf="@id/eventGeolocationContainer"
+        app:layout_constraintBottom_toBottomOf="parent">
 
-    <!-- Event Date -->
-    <TextView
-        android:id="@+id/eventDate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="14sp" />
+        <!-- Event Date -->
+        <TextView
+            android:id="@+id/eventDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:paddingTop="1dp"
+            android:paddingBottom="1dp"
+            android:layout_marginEnd="8dp"
+            android:text="Date: October 19, 2024"
+            android:textColor="@color/white"
+            android:textSize="12sp"
+            android:background="@drawable/rounded_pill_background" />
 
-    <!-- Event ID (Optional, if you want to display it separately) -->
-    <TextView
-        android:id="@+id/eventId"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="14sp" />
+        <!-- Dropdown Icon -->
+        <ImageView
+            android:id="@+id/optionsMenu"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:contentDescription="Options menu"
+            android:src="@drawable/dropdown_arrow"
+            app:tint="@color/white"
+            android:layout_marginLeft="105dp"
+            app:layout_constraintStart_toEndOf="@id/eventDate"
+            app:layout_constraintTop_toTopOf="@id/eventDate"
+            app:layout_constraintBottom_toBottomOf="@id/eventDate" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- Organizer ID (Optional, only if different from eventLocation) -->
-    <TextView
-        android:id="@+id/organizerId"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="14sp" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- Waitlist Limit -->
-    <TextView
-        android:id="@+id/waitlistLimit"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="14sp" />
-
-    <!-- Geolocation -->
-    <TextView
-        android:id="@+id/eventGeolocation"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="14sp" />
-
-    <!-- Edit and Delete menu-button -->
-    <ImageView
-        android:id="@+id/optionsMenu"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@android:drawable/ic_menu_more"
-        android:contentDescription="Options menu"
-        android:layout_gravity="end" />
-
-
-
-</LinearLayout>
+</androidx.cardview.widget.CardView>

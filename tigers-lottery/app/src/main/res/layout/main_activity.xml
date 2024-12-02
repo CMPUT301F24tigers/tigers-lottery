@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -11,19 +10,39 @@
         android:id="@+id/topAppBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/app_primary_light_purple">
+        android:background="@color/primary_background_pages">
 
-        <!-- Back Button (Initially Hidden) -->
-        <ImageButton
-            android:id="@+id/globalBackButton"
+        <RelativeLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/baseline_arrow_back_24"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Back"
-            android:layout_gravity="start"
-            android:padding="10dp"
-            android:visibility="invisible" />
+            android:layout_gravity="start">
+
+            <!-- Notification Bell Icon -->
+            <ImageButton
+                android:id="@+id/notificationButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_mailbox"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Notifications"
+                android:padding="10dp" />
+
+            <!-- Badge Indicator -->
+            <TextView
+                android:id="@+id/notificationBadge"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:background="@drawable/notification_badge_background"
+                android:textColor="@android:color/white"
+                android:gravity="center"
+                android:textSize="12sp"
+                android:visibility="gone"
+                android:layout_alignEnd="@+id/notificationButton"
+                android:layout_alignTop="@+id/notificationButton"
+                android:layout_marginEnd="4dp"
+                android:layout_marginTop="4dp" />
+        </RelativeLayout>
+
 
         <!-- Title TextView -->
         <TextView
@@ -32,8 +51,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:text="Tigers Lottery"
-            android:textColor="@android:color/black"
-            android:textSize="20sp"
+            android:textColor="@color/white"
+            android:textSize="24sp"
             android:textStyle="bold" />
 
         <!-- Profile Icon Button -->
@@ -44,8 +63,8 @@
             android:src="@drawable/baseline_account_circle_24"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="Profile"
-            android:layout_gravity="end"
-            android:padding="10dp" />
+            android:padding="10dp"
+            android:layout_gravity="end" />
     </com.google.android.material.appbar.MaterialToolbar>
 
     <androidx.fragment.app.FragmentContainerView
@@ -54,16 +73,20 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:background="#FFFFFF"
+        android:background="@color/secondary_background_cards"
         tools:layout_editor_absoluteX="225dp"
         tools:layout_editor_absoluteY="238dp" />
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/nav_view"
         android:layout_width="match_parent"
-        android:layout_height="49dp"
-        android:layout_marginBottom="4dp"
-        android:background="@color/app_primary_light_purple"
+        android:layout_height="50dp"
+        android:background="@color/secondary_background_cards"
+        app:itemActiveIndicatorStyle="@style/BottomNavActiveIndicatorStyle"
+        app:itemTextColor="@color/white"
+        app:itemBackground="@color/secondary_background_cards"
+        app:itemRippleColor="@color/accent_1_teal"
+        app:itemTextAppearanceActive="@style/BottomNavActiveText"
+        app:itemTextAppearanceInactive="@style/BottomNavInactiveText"
         app:menu="@menu/menu_bottom_navigation" />
-
 </LinearLayout>

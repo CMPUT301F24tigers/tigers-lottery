@@ -43,16 +43,26 @@ public class AdminDashboardFragment extends Fragment {
 
         btnEntrantProfiles.setText("Entrant Profiles (Loading...)");
         btnAllEvents.setText("All Events (Loading...)");
+        btnFacilityProfiles.setText("All Facilities (Loading...)");
 
         DatabaseHelper dbHelper = new DatabaseHelper(requireContext());
 
         // Fetch entrant profile count and update button
         dbHelper.getUserCount(new DatabaseHelper.CountCallback() {
+            /**
+             * Handles actions on finding counts
+             * @param count number of entrants.
+             */
             @Override
             public void onCountFetched(int count) {
                 int adjustedCount = count - 1;
                 btnEntrantProfiles.setText("Entrant Profiles (" + adjustedCount + ")");
             }
+
+            /**
+             * Handles actions on count not found.
+             * @param e exception catcher.
+             */
 
             @Override
             public void onError(Exception e) {
@@ -63,15 +73,47 @@ public class AdminDashboardFragment extends Fragment {
 
         // Fetch event count and update button
         dbHelper.getEventCount(new DatabaseHelper.CountCallback() {
+            /**
+             * Handles actions on finding the event count.
+             * @param count all events.
+             */
             @Override
             public void onCountFetched(int count) {
                 btnAllEvents.setText("All Events (" + count + ")");
             }
 
+            /**
+             * Handles action on not finding event count.
+             * @param e exception catcher.
+             */
+
             @Override
             public void onError(Exception e) {
                 Toast.makeText(getContext(), "Failed to retrieve event count", Toast.LENGTH_SHORT).show();
                 btnAllEvents.setText("All Events (Error)");
+            }
+        });
+
+        // Fetch Active Facility Count and update the button
+        dbHelper.getFacilityCount(new DatabaseHelper.CountCallback() {
+            /**
+             * Handles actions on finding the facility count.
+             * @param count all facilities.
+             */
+            @Override
+            public void onCountFetched(int count) {
+                btnFacilityProfiles.setText("All Facilities (" + count + ")");
+            }
+
+            /**
+             * Handles action on not finding the facility count.
+             * @param e exception catcher.
+             */
+
+            @Override
+            public void onError(Exception e) {
+                Toast.makeText(getContext(), "Failed to retrieve facility count", Toast.LENGTH_SHORT).show();
+                btnAllEvents.setText("All Facilities (Error)");
             }
         });
 

@@ -3,12 +3,14 @@ package com.example.tigers_lottery.models;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.PropertyName;
+import com.google.zxing.qrcode.encoder.QRCode;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * Class representing an event in the Tigers Lottery application.
@@ -94,6 +96,13 @@ public class Event implements Serializable {
     @PropertyName("is_lottery_ran")
     private boolean isLotteryRan = false;
 
+    @PropertyName("QR_hash_data")
+    private String QRCode;
+
+    @PropertyName("geolocation_required")
+    private boolean geolocationRequired = false; // Default to false
+
+
     // No-argument constructor
     public Event() {}
 
@@ -164,6 +173,12 @@ public class Event implements Serializable {
     @PropertyName("location")
     public void setLocation(String location) { this.location = location; }
 
+    @PropertyName("QR_hash_data")
+    public void setQRCode(String QRCode) {this.QRCode = QRCode;}
+
+    @PropertyName("QR_hash_data")
+    public String getQRCode() {return QRCode; }
+
     @PropertyName("description")
     public String getDescription() { return description; }
 
@@ -200,12 +215,18 @@ public class Event implements Serializable {
     @PropertyName("occupant_limit")
     public void setOccupantLimit(int occupantLimit) { this.occupantLimit = occupantLimit; }
 
-    // Getter and Setter for is_lottery_ran
     @PropertyName("is_lottery_ran")
     public boolean isLotteryRan() { return isLotteryRan; }
 
     @PropertyName("is_lottery_ran")
     public void setLotteryRan(boolean lotteryRan) { isLotteryRan = lotteryRan; }
+
+    @PropertyName("geolocation_required")
+    public boolean isGeolocationRequired() { return geolocationRequired; }
+
+    @PropertyName("geolocation_required")
+    public void setGeolocationRequired(boolean geolocationRequired) { this.geolocationRequired = geolocationRequired; }
+
 
     // Helper methods to format Timestamps
     public String getFormattedEventDate() {
@@ -220,7 +241,11 @@ public class Event implements Serializable {
         return formatTimestamp(waitlistDeadline);
     }
 
-    // Utility method to format Timestamp
+    /**
+     * Utility method to format timestamp
+     * @param timestamp passed in.
+     * @return string date and time format.
+     */
     private String formatTimestamp(Timestamp timestamp) {
         if (timestamp != null) {
             SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyyy - hh:mm a", Locale.getDefault());
