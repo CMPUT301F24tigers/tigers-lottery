@@ -2,7 +2,9 @@ package com.example.tigers_lottery;
 
 import static org.junit.Assert.*;
 
-
+/*
+    TO START THE FIREBASE EMULATOR, DO "firebase emulators:start"
+ */
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.example.tigers_lottery.models.Event;
