@@ -3,8 +3,16 @@ package com.example.tigers_lottery;
 import static org.junit.Assert.*;
 
 /*
-    TO START THE FIREBASE EMULATOR, DO "firebase emulators:start"
- */
+
+    IN ORDER TO RUN THESE TESTS, YOU MUST USE THE FIREBASE EMULATOR.
+
+    1.) INSTALL THE FIREBASE CLI: npm install -g firebase-tools
+
+    2.) TO START THE FIREBASE EMULATOR: "firebase emulators:start"
+
+    3.) YOU SHOULD BE GOOD TO RUN THE TESTS NOW - A NEW WINDOW WITH THE EMULATOR SHOULD OPEN
+
+*/
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.example.tigers_lottery.models.Event;
@@ -881,6 +889,110 @@ public class DatabaseHelperTest {
                     }
                 });
     }
+
+
+    @Test
+    public void testClearEventLists() throws Exception {
+        // Setup: Create a mock event
+        Event testEvent = createMockEvent();
+        testEvent.setEventId(33445); // Unique event ID
+        testEvent.setEventName("Clear Event Lists Test Event");
+        testEvent.setWaitlistedEntrants(new ArrayList<>(List.of("user1", "user2")));
+        testEvent.setInvitedEntrants(new ArrayList<>(List.of("user3")));
+        testEvent.setDeclinedEntrants(new ArrayList<>(List.of("user4")));
+
+        // Create mock users and assign the event to their joined_events
+        User user1 = createMockUser();
+        user1.setUserId("user1");
+        user1.setJoinedEvents(new ArrayList<>(List.of((int) testEvent.getEventId())));
+
+        User user2 = createMockUser();
+        user2.setUserId("user2");
+        user2.setJoinedEvents(new ArrayList<>(List.of((int) testEvent.getEventId())));
+
+        User user3 = createMockUser();
+        user3.setUserId("user3");
+        user3.setJoinedEvents(new ArrayList<>(List.of((int) testEvent.getEventId())));
+
+        User user4 = createMockUser();
+        user4.setUserId("user4");
+        user4.setJoinedEvents(new ArrayList<>(List.of((int) testEvent.getEventId())));
+
+        // Insert the event and users into Firestore
+        Tasks.await(db.collection("events").document(String.valueOf(testEvent.getEventId())).set(testEvent));
+        Tasks.await(db.collection("users").document("user1").set(user1));
+        Tasks.await(db.collection("users").document("user2").set(user2));
+        Tasks.await(db.collection("users").document("user3").set(user3));
+        Tasks.await(db.collection("users").document("user4").set(user4));
+
+        // Wait briefly to allow Firestore to process
+        Thread.sleep(200);
+
+        // CountDownLatch to manage asynchronous operations
+        CountDownLatch latch = new CountDownLatch(1);
+
+        // Call the method to test
+        databaseHelper.clearEventLists(testEvent.getEventId(), new DatabaseHelper.EventsCallback() {
+            @Override
+            public void onEventsFetched(List<Event> events) {
+                // Verify the event's entrant lists are cleared
+                db.collection("events").document(String.valueOf(testEvent.getEventId())).get()
+                        .addOnCompleteListener(task -> {
+                            if (task.isSuccessful()) {
+                                DocumentSnapshot updatedEventDoc = task.getResult();
+                                List<String> waitlisted = (List<String>) updatedEventDoc.get("waitlisted_entrants");
+                                List<String> invited = (List<String>) updatedEventDoc.get("invited_entrants");
+                                List<String> declined = (List<String>) updatedEventDoc.get("declined_entrants");
+
+                                assertNotNull("Waitlisted entrants list should not be null", waitlisted);
+                                assertNotNull("Invited entrants list should not be null", invited);
+                                assertNotNull("Declined entrants list should not be null", declined);
+
+                                assertTrue("Waitlisted entrants list should be empty", waitlisted.isEmpty());
+                                assertTrue("Invited entrants list should be empty", invited.isEmpty());
+                                assertTrue("Declined entrants list should be empty", declined.isEmpty());
+
+                                // Verify that the event ID is removed from each user's joined_events
+                                db.collection("users").document("user1").get()
+                                        .addOnCompleteListener(userTask -> {
+                                            if (userTask.isSuccessful()) {
+                                                DocumentSnapshot userDoc = userTask.getResult();
+                                                List<Long> joinedEvents = (List<Long>) userDoc.get("joined_events");
+
+                                                assertNotNull("Joined events list should not be null", joinedEvents);
+                                                assertFalse("User1 should not have the event ID in joined_events",
+                                                        joinedEvents.contains((long) testEvent.getEventId()));
+                                                latch.countDown(); // Only call countDown once all assertions pass
+                                            } else {
+                                                fail("Error fetching user document: " + userTask.getException().getMessage());
+                                                latch.countDown();
+                                            }
+                                        });
+                            } else {
+                                fail("Error fetching updated event document: " + task.getException().getMessage());
+                                latch.countDown();
+                            }
+                        });
+            }
+
+            @Override
+            public void onEventFetched(Event event) {
+                fail("onEventFetched is not expected in this test");
+                latch.countDown();
+            }
+
+            @Override
+            public void onError(Exception e) {
+                fail("Unexpected error: " + e.getMessage());
+                latch.countDown();
+            }
+        });
+
+        // Wait for the operation to complete
+        latch.await();
+    }
+
+
 
 
 
