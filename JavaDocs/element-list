@@ -6,6 +6,7 @@ com.example.tigers_lottery.HostedEvents
 com.example.tigers_lottery.HostedEvents.Adapters
 com.example.tigers_lottery.JoinedEvents
 com.example.tigers_lottery.models
-com.example.tigers_lottery.placeholder
+com.example.tigers_lottery.Notifications
+com.example.tigers_lottery.Notifications.Adapters
 com.example.tigers_lottery.ProfileViewsEdit
 com.example.tigers_lottery.utils
