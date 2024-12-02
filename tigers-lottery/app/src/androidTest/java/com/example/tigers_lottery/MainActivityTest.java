@@ -34,19 +34,6 @@ public class MainActivityTest {
         scenario.onActivity(activity -> fragmentManager = activity.getSupportFragmentManager());
     }
 
-    /*
-    @Test
-    public void testAdminFragmentDisplayed() {
-        // Trigger navigation to AdminDashboardFragment
-        onView(withId(R.id.navigation_admin)).perform(click());
-
-        // Check if AdminDashboardFragment is displayed
-        Fragment fragment = fragmentManager.findFragmentById(R.id.main_activity_fragment_container);
-        assertTrue(fragment instanceof AdminDashboardFragment);
-    }
-
-     */
-
     @Test
     public void testOrganizerFragmentDisplayed() {
         // Trigger navigation to OrganizerDashboardFragment
@@ -61,7 +48,6 @@ public class MainActivityTest {
     public void testEntrantFragmentDisplayed() {
         // Trigger navigation to EntrantDashboardFragment
         onView(withId(R.id.navigation_entrant)).perform(click());
-
         // Check if EntrantDashboardFragment is displayed
         Fragment fragment = fragmentManager.findFragmentById(R.id.main_activity_fragment_container);
         assertTrue(fragment instanceof EntrantDashboardFragment);

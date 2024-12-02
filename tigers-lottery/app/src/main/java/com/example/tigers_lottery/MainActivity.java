@@ -93,11 +93,16 @@ public class MainActivity extends AppCompatActivity {
 
         // Check if the user profile exists; if not, navigate to CreateEntrantProfileActivity
         dbHelper.checkUserExists(new DatabaseHelper.ProfileCallback() {
+            /**
+             * On finding if the profile exists, no action needed.
+             */
             @Override
             public void onProfileExists() {
-                // Profile exists; no action needed
             }
 
+            /**
+             * On not finding the profile, navigate to the create entrant profile activity.
+             */
             @Override
             public void onProfileNotExists() {
                 Intent createEntrantProfileActivity = new Intent(getApplicationContext(), CreateEntrantProfileActivity.class);
@@ -111,8 +116,46 @@ public class MainActivity extends AppCompatActivity {
         }
 
 
+        dbHelper.fetchUserById(deviceId, new DatabaseHelper.UsersCallback() {
+            /**
+             * Required database helper method, unused.
+             * @param users users.
+             */
+            @Override
+            public void onUsersFetched(List<User> users) {
+            }
+
+            /**
+             * On finding the user, sets up the notification icon, if they have notifications
+             * turned on.
+             * @param user current user.
+             */
+
+            @Override
+            public void onUserFetched(User user) {
+                if(user.isNotificationFlag()){
+                    notificationButton.setVisibility(View.VISIBLE);
+                }
+            }
+
+            /**
+             * Error handling for finding the user.
+             * @param e exception catcher.
+             */
+
+            @Override
+            public void onError(Exception e) {
+                //Do nothing
+            }
+        });
+
+
         // Check if the device ID exists in the admins collection
         dbHelper.isAdminUser(deviceId, new DatabaseHelper.VerificationCallback() {
+            /**
+             * Handles actions on finding the user's admin status.
+             * @param exists true if the user is an admin, false if not.
+             */
             @Override
             public void onResult(boolean exists) {
                 Log.e("DatabaseHelper", "Is Admin User: " + exists);
@@ -124,6 +167,10 @@ public class MainActivity extends AppCompatActivity {
                 Log.e("DatabaseHelper", "Admin status verification complete.");
             }
 
+            /**
+             * Handles error on not finding user's admin status.
+             * @param e exception catcher.
+             */
             @Override
             public void onError(Exception e) {
                 Log.e("DatabaseHelper", "Error verifying Admin Status", e);
@@ -134,6 +181,13 @@ public class MainActivity extends AppCompatActivity {
 
         // Set up listener for bottom navigation to switch between fragments
         bottomNav.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
+            /**
+             * Handles navigation choices in the bottom navigation, taking the user to organizer,
+             * admin, or entrant dashboard on click.
+             *
+             * @param item The selected item
+             * @return fragment.
+             */
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 Fragment selectedFragment = null;
@@ -149,12 +203,9 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // Set listener for profile edit button to navigate to ProfileDetailsActivity
-        editProfile.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        editProfile.setOnClickListener(v-> {
                 Intent profileDetailsActivity = new Intent(getApplicationContext(), ProfileDetailsActivity.class);
                 startActivity(profileDetailsActivity);
-            }
         });
 
         // Handle notification button click
@@ -170,10 +221,20 @@ public class MainActivity extends AppCompatActivity {
     private void setupNotificationBadgeListener() {
         String userId = dbHelper.getCurrentUserId();
         dbHelper.listenForUnreadNotifications(userId, new DatabaseHelper.NotificationCountCallback() {
+            /**
+             * On finding the count of the notifications, updates the badge.
+             *
+             * @param count user's notification count.
+             */
             @Override
             public void onCountFetched(int count) {
                 runOnUiThread(() -> updateNotificationBadge(count));
             }
+
+            /**
+             * Handles error on finding unread notification count.
+             * @param e exception catcher.
+             */
 
             @Override
             public void onError(Exception e) {

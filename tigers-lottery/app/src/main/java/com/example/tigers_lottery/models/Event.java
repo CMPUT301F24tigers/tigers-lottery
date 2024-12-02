@@ -241,7 +241,11 @@ public class Event implements Serializable {
         return formatTimestamp(waitlistDeadline);
     }
 
-    // Utility method to format Timestamp
+    /**
+     * Utility method to format timestamp
+     * @param timestamp passed in.
+     * @return string date and time format.
+     */
     private String formatTimestamp(Timestamp timestamp) {
         if (timestamp != null) {
             SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyyy - hh:mm a", Locale.getDefault());

@@ -302,7 +302,7 @@ public class DatabaseHelper {
 
     /** Update the read status for a selected notification
      *
-     * @param notification
+     * @param notification the item whose status will be updated.
      */
     public void updateNotificationReadStatus(Notification notification) {
         notificationsRef.document(String.valueOf(notification.getNotificationId()))
@@ -314,11 +314,11 @@ public class DatabaseHelper {
 
     /** Send a batch of notifications to users in a given list
      *
-     * @param eventId
-     * @param listType
-     * @param message
-     * @param priority
-     * @param callback
+     * @param eventId event of notification to be sent.
+     * @param listType registered,waitlisted,invited,declined.
+     * @param message message to be sent.
+     * @param priority high,medium,low.
+     * @param callback callback.
      */
     public void sendNotificationsToEntrants(
             int eventId,
@@ -432,7 +432,10 @@ public class DatabaseHelper {
         });
     }
 
-
+    /**
+     * Creates a new random notification 6-digit id
+     * @return the id.
+     */
     private int generateUniqueNotificationId() {
         Random random = new Random();
         int notificationId;
@@ -444,6 +447,12 @@ public class DatabaseHelper {
 
         return notificationId;
     }
+
+    /**
+     * Checks if a document with this notification id exists
+     * @param notificationId id.
+     * @return true if it exists, false if not.
+     */
 
     private boolean notificationIdExists(int notificationId) {
         // Check if a document with this ID already exists

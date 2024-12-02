@@ -7,6 +7,10 @@ import android.widget.Toast;
 import java.util.Calendar;
 import java.util.Date;
 
+/**
+ * Utility helper class: Validator user details including facility details.
+ */
+
 public class Validator {
 
     /**

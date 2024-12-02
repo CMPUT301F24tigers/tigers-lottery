@@ -49,7 +49,6 @@ public class ProfileDetailsFacilityFragment extends Fragment {
      * Default constructor for the fragment.
      */
     public ProfileDetailsFacilityFragment() {
-        // Required empty public constructor
     }
 
     /**
@@ -112,6 +111,11 @@ public class ProfileDetailsFacilityFragment extends Fragment {
         db.collection("users").document(deviceId)
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    /**
+                     * Assigns the inputted fields into the database upon completion.
+                     *
+                     * @param task task.
+                     */
                     @Override
                     public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                         if (task.isSuccessful()) {
@@ -136,9 +140,7 @@ public class ProfileDetailsFacilityFragment extends Fragment {
                 });
 
         // Set listener for the edit profile button to navigate to edit profile fragment
-        editProfileButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        editProfileButton.setOnClickListener(v-> {
                 Bundle bundle = new Bundle();
                 bundle.putString("deviceId", deviceId);
 
@@ -151,7 +153,6 @@ public class ProfileDetailsFacilityFragment extends Fragment {
                 fragmentTransaction.replace(R.id.profileDetailsActivityFragment, transitionedFragment);
                 fragmentTransaction.addToBackStack(null);
                 fragmentTransaction.commit();
-            }
         });
 
         return view;

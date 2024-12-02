@@ -143,10 +143,19 @@ public class AdminFacilityDetailsFragment extends Fragment {
      */
     private void loadFacilityDetails() {
         dbHelper.fetchUserById(userId, new DatabaseHelper.UsersCallback() {
+            /**
+             * Handles actions of finding users, required db helper method, unused.
+             * @param users all users.
+             */
             @Override
             public void onUsersFetched(List<User> users) {
                 // Not used in this context.
             }
+
+            /**
+             * Handles actions on finding user.
+             * @param fetchedUser the user whose facility is to be found.
+             */
 
             @Override
             public void onUserFetched(User fetchedUser) {
@@ -158,6 +167,11 @@ public class AdminFacilityDetailsFragment extends Fragment {
                     requireActivity().getSupportFragmentManager().popBackStack();
                 }
             }
+
+            /**
+             * Handles error on finding the user.
+             * @param e exception catcher.
+             */
 
             @Override
             public void onError(Exception e) {
@@ -208,6 +222,10 @@ public class AdminFacilityDetailsFragment extends Fragment {
     private void setupButtonListeners() {
         removeFacilityPhoto.setOnClickListener(v -> {
             dbHelper.removeImage("facility", userId, new DatabaseHelper.Callback() {
+                /**
+                 * Handles success of the remove facility photo action
+                 * @param message to be toasted.
+                 */
                 @Override
                 public void onSuccess(String message) {
                     // Dispatch a notification to the admin if necessary
@@ -235,6 +253,11 @@ public class AdminFacilityDetailsFragment extends Fragment {
                     facilityPhoto.setOnClickListener(null);
                     loadFacilityDetails();
                 }
+
+                /**
+                 * Handles failure of the remove facility action.
+                 * @param e exception catcher.
+                 */
 
                 @Override
                 public void onFailure(Exception e) {

@@ -250,6 +250,10 @@ public class OrganizerEventDetailsFragment extends Fragment {
         }
     }
 
+    /**
+     * Sets up the clear list button as clickable.
+     */
+
     private void setupClearListsButton() {
         Timestamp currentTimestamp = Timestamp.now();
 
@@ -264,22 +268,41 @@ public class OrganizerEventDetailsFragment extends Fragment {
         }
     }
 
+    /**
+     * Clears the waitlisted, invited and declined lists (meant for after registration
+     * for the event is closed and the event is about to start).
+     */
+
     private void clearEntrantLists() {
         event.setWaitlistedEntrants(new ArrayList<>()); // Clear the lists in the Event object
         event.setInvitedEntrants(new ArrayList<>());
         event.setDeclinedEntrants(new ArrayList<>());
 
         dbHelper.clearEventLists(event.getEventId(), new DatabaseHelper.EventsCallback() {
+            /**
+             * On finding the event, and clearing the list, the clear list button is disabled.
+             * @param events to be cleared.
+             */
             @Override
             public void onEventsFetched(List<Event> events) {
                 Toast.makeText(getContext(), "Lists cleared successfully!", Toast.LENGTH_SHORT).show();
                 clearListsButton.setEnabled(false); // Disable after clearing
             }
 
+            /**
+             * Event fetched, required dbHelper method, unused.
+             * @param event event.
+             */
+
             @Override
             public void onEventFetched(Event event) {
                 // Not used in this context
             }
+
+            /**
+             * Handles error in clearing lists.
+             * @param e exception catcher.
+             */
 
             @Override
             public void onError(Exception e) {
@@ -411,10 +434,19 @@ public class OrganizerEventDetailsFragment extends Fragment {
                                     event.getOrganizerId(),
                                     event.getEventName(),
                                     new DatabaseHelper.NotificationCallback() {
+                                        /**
+                                         * Handles success on sending the notification to entrants.
+                                         * @param responseMessage logged message.
+                                         */
                                         @Override
                                         public void onSuccess(String responseMessage) {
                                             Log.d("NotificationDebug", "Notification sent successfully: " + responseMessage);
                                         }
+
+                                        /**
+                                         * Handles error on sending the notification upon running the lottery.
+                                         * @param errorMessage logged message.
+                                         */
 
                                         @Override
                                         public void onFailure(String errorMessage) {
@@ -432,10 +464,19 @@ public class OrganizerEventDetailsFragment extends Fragment {
                                     event.getOrganizerId(),
                                     event.getEventName(),
                                     new DatabaseHelper.NotificationCallback() {
+                                        /**
+                                         * Handles success on sending loss notification.
+                                         * @param responseMessage logged message.
+                                         */
                                         @Override
                                         public void onSuccess(String responseMessage) {
                                             Log.d("NotificationDebug", "Loss notification sent successfully: " + responseMessage);
                                         }
+
+                                        /**
+                                         * Handles error on sending loss notification.
+                                         * @param errorMessage logged message.
+                                         */
 
                                         @Override
                                         public void onFailure(String errorMessage) {
@@ -484,6 +525,10 @@ public class OrganizerEventDetailsFragment extends Fragment {
      */
     private void setupDeclineListener() {
         dbHelper.addDeclineListener(eventId, new DatabaseHelper.DeclineCallback() {
+            /**
+             * Handles actions on logging the decline from the entrant.
+             * @param declinedEntrants entrants that declined.
+             */
             @Override
             public void onDeclineDetected(List<String> declinedEntrants) {
                 // Skip handling during the initial listener sync
@@ -505,6 +550,11 @@ public class OrganizerEventDetailsFragment extends Fragment {
                 }
             }
 
+            /**
+             * Handles error on handling the decline.
+             * @param e exception catcher.
+             */
+
             @Override
             public void onError(Exception e) {
                 Log.e("DeclineDebug", "Error in decline listener: ", e);
@@ -518,6 +568,10 @@ public class OrganizerEventDetailsFragment extends Fragment {
      */
     private void fetchEventDetails() {
         dbHelper.fetchEventById(eventId, new DatabaseHelper.EventsCallback() {
+            /**
+             * Handles actions on finding the event's details.
+             * @param event found
+             */
             @Override
             public void onEventFetched(Event event) {
                 if (event != null) {
@@ -525,10 +579,20 @@ public class OrganizerEventDetailsFragment extends Fragment {
                 }
             }
 
+            /**
+             * Handles actions on finding the events, required dbHelper method, unused.
+             * @param events to be fetched.
+             */
+
             @Override
             public void onEventsFetched(List<Event> events) {
                 // Not needed here
             }
+
+            /**
+             * Handles error on finding event details.
+             * @param e exception catcher.
+             */
 
             @Override
             public void onError(Exception e) {
@@ -536,6 +600,11 @@ public class OrganizerEventDetailsFragment extends Fragment {
             }
         });
     }
+
+    /**
+     * Handles the decline logic for entrants.
+     * @param event to be declined.
+     */
 
 
     private void handleDeclineLogic(Event event) {
@@ -554,6 +623,10 @@ public class OrganizerEventDetailsFragment extends Fragment {
 
                 // Update Firestore with the modified lists
                 dbHelper.updateEntrantsAfterDecline(eventId, event.getInvitedEntrants(), waitlistedEntrants, new DatabaseHelper.EventsCallback() {
+                    /**
+                     * Handles the events to be updated
+                     * @param events
+                     */
                     @Override
                     public void onEventsFetched(List<Event> events) {
                         Log.d("DeclineDebug", "Entrants updated after handling decline.");
@@ -566,10 +639,19 @@ public class OrganizerEventDetailsFragment extends Fragment {
                                 event.getOrganizerId(),
                                 event.getEventName(),
                                 new DatabaseHelper.NotificationCallback() {
+                                    /**
+                                     * Handles success on sending notifications to new entrants.
+                                     * @param responseMessage to be logged.
+                                     */
                                     @Override
                                     public void onSuccess(String responseMessage) {
                                         Log.d("NotificationDebug", "Notification sent successfully: " + responseMessage);
                                     }
+
+                                    /**
+                                     * Handles error on sending notifications to new entrants.
+                                     * @param errorMessage to be logged.
+                                     */
 
                                     @Override
                                     public void onFailure(String errorMessage) {
@@ -580,10 +662,20 @@ public class OrganizerEventDetailsFragment extends Fragment {
 
                     }
 
+                    /**
+                     * Required dbHelper method, unused.
+                     * @param event event
+                     */
+
                     @Override
                     public void onEventFetched(Event event) {
                         // Not needed
                     }
+
+                    /**
+                     * Handles error on updating events.
+                     * @param e exception catcher.
+                     */
 
                     @Override
                     public void onError(Exception e) {
@@ -628,6 +720,10 @@ public class OrganizerEventDetailsFragment extends Fragment {
                 .addToBackStack(null)
                 .commit();
     }
+
+    /**
+     * Opens the map fragment for the event.
+     */
 
     private void openMapFragment() {
         OrganizerMapFragment mapFragment = OrganizerMapFragment.newInstance(eventId);

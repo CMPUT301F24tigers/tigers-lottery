@@ -139,11 +139,19 @@ public class AdminUserDetailsFragment extends Fragment {
      */
     private void loadUserDetails() {
         dbHelper.fetchUserById(userId, new DatabaseHelper.UsersCallback() {
+            /**
+             * Handles actions of finding users, required db helper method, unused.
+             * @param users aall users.
+             */
             @Override
             public void onUsersFetched(List<User> users) {
                 // Not used
             }
 
+            /**
+             * Handles actions on finding user.
+             * @param fetchedUser the user whose detail is to be loaded.
+             */
             @Override
             public void onUserFetched(User fetchedUser) {
                 if (fetchedUser != null) {
@@ -154,6 +162,11 @@ public class AdminUserDetailsFragment extends Fragment {
                     requireActivity().getSupportFragmentManager().popBackStack();
                 }
             }
+
+            /**
+             * Handles error on finding user.
+             * @param e exception catcher.
+             */
 
             @Override
             public void onError(Exception e) {
@@ -206,6 +219,10 @@ public class AdminUserDetailsFragment extends Fragment {
     private void setupButtonListeners() {
         removeUserProfilePhoto.setOnClickListener(v -> {
             dbHelper.removeImage("user", userId, new DatabaseHelper.Callback() {
+                /**
+                 * Handles success on removing a user's image.
+                 * @param message pushed
+                 */
                 @Override
                 public void onSuccess(String message) {
                     //TODO: Dispatch notification to the user
@@ -232,6 +249,11 @@ public class AdminUserDetailsFragment extends Fragment {
                     userPhoto.setOnClickListener(null);
                     loadUserDetails();
                 }
+
+                /**
+                 * Handles failure of the removing user method.
+                 * @param e exception catcher.
+                 */
 
                 @Override
                 public void onFailure(Exception e) {

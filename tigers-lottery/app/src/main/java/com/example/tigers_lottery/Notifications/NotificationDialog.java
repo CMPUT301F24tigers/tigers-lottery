@@ -11,20 +11,33 @@ import com.example.tigers_lottery.models.Notification;
 
 import java.util.Objects;
 
+
+/**
+ * Dialog shown on clicking a notification to get an enlarged view of the notification.
+ */
 public class NotificationDialog {
 
     private final Context context;
     private final Notification notification;
     private final OnNotificationReadCallback callback;
 
-    // Constructor
+
+    /**
+     * Notification dialog constructor.
+     *
+     * @param context current context.
+     * @param notification to be shown.
+     * @param callback callback.
+     */
     public NotificationDialog(Context context, Notification notification, OnNotificationReadCallback callback) {
         this.context = context;
         this.notification = notification;
         this.callback = callback;
     }
 
-    // Show the dialog
+    /**
+     * Shows the dialog for the notification and populates it with the notifications details.
+     */
     public void showDialog() {
         // Inflate the custom dialog layout
         View dialogView = LayoutInflater.from(context).inflate(R.layout.notification_dialog, null);
@@ -79,7 +92,9 @@ public class NotificationDialog {
         dialog.show();
     }
 
-    // Callback interface for marking notification as read
+    /**
+     * Callback interface for marking notification as read.
+     */
     public interface OnNotificationReadCallback {
         void onNotificationRead(Notification notification);
     }
