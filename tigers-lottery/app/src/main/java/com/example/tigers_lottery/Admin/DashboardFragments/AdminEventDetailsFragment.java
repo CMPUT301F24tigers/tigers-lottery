@@ -2,6 +2,7 @@ package com.example.tigers_lottery.Admin.DashboardFragments;
 
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,6 +20,7 @@ import com.bumptech.glide.Glide;
 import com.example.tigers_lottery.DatabaseHelper;
 import com.example.tigers_lottery.R;
 import com.example.tigers_lottery.models.Event;
+import com.example.tigers_lottery.models.Notification;
 import com.example.tigers_lottery.models.User;
 import com.example.tigers_lottery.utils.QRCodeGenerator;
 import com.google.firebase.Timestamp;
@@ -26,6 +28,7 @@ import com.google.zxing.qrcode.encoder.QRCode;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
@@ -40,6 +43,7 @@ public class AdminEventDetailsFragment extends Fragment {
     private String eventId;
     private DatabaseHelper dbHelper;
     private Event event;
+    private String organizerID;
 
     // UI Components
     private TextView eventTitle;
@@ -204,6 +208,8 @@ public class AdminEventDetailsFragment extends Fragment {
             }
         });
 
+        organizerID = event.getOrganizerId();
+
         eventTitle.setText(event.getEventName());
         eventDescription.setText(event.getDescription());
         eventLocation.setText("Location: " + event.getLocation());
@@ -241,22 +247,47 @@ public class AdminEventDetailsFragment extends Fragment {
      * Sets up button listeners for admin actions.
      */
     private void setupButtonListeners() {
-        //TODO: Dispatch notification for the organizer
         removeEventPoster.setOnClickListener(v -> {
-            dbHelper.removeImage("event", eventId, new DatabaseHelper.Callback() {
-                @Override
-                public void onSuccess(String message) {
-                    Toast.makeText(getContext(), event.getEventName() + "'s event poster has been removed", Toast.LENGTH_SHORT).show();
-                    removeEventPoster.setVisibility(View.GONE);
-                    eventPoster.setOnClickListener(null);
-                    loadEventDetails();
-                }
+            if (organizerID != null) { // Ensure organizerId is available
+                dbHelper.removeImage("event", eventId, new DatabaseHelper.Callback() {
+                    @Override
+                    public void onSuccess(String message) {
+                        Toast.makeText(getContext(), event.getEventName() + "'s event poster has been removed", Toast.LENGTH_SHORT).show();
+                        removeEventPoster.setVisibility(View.GONE);
 
-                @Override
-                public void onFailure(Exception e) {
-                    Toast.makeText(getContext(), "Failed to remove event poster: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                }
-            });
+                        Notification notification = new Notification();
+                        notification.setMessage("Your event poster has been removed by the admin due to a violation of our app’s policies. Please upload a new poster that complies with the guidelines of Tigers Lottery.");
+                        notification.setType("Event Poster Removal");
+                        notification.setUserId(organizerID); // Use the stored organizer ID
+                        notification.setMetadata(new HashMap<>() {{
+                            put("event_name", "admin");
+                        }});
+
+                        dbHelper.sendAdminUserNotification(notification, new DatabaseHelper.NotificationCallback() {
+                            @Override
+                            public void onSuccess(String message) {
+                                Log.d("AdminUserDetailsFragment", "User has been notified of the event poster removal");
+                            }
+
+                            @Override
+                            public void onFailure(String errorMessage) {
+                                Log.d("AdminUserDetailsFragment", "Failed to notify user of the event poster removal: " + errorMessage);
+                            }
+                        });
+
+                        eventPoster.setOnClickListener(null);
+                        loadEventDetails();
+                    }
+
+                    @Override
+                    public void onFailure(Exception e) {
+                        Toast.makeText(getContext(), "Failed to remove event poster: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+            } else {
+                Toast.makeText(getContext(), "Organizer ID is not available to remove poster. Please try again", Toast.LENGTH_SHORT).show();
+            }
+
         });
         viewQRCode.setOnClickListener(v ->{
             event.setQRCode(null);
@@ -269,6 +300,26 @@ public class AdminEventDetailsFragment extends Fragment {
                 public void onEventsFetched(List<Event> events) {
                     Toast.makeText(getContext(), "You have deleted this event's QR Code", Toast.LENGTH_SHORT).show();
                     viewQRCode.setVisibility(View.GONE);
+
+                    Notification notification = new Notification();
+                    notification.setMessage("The QR code for your event has been removed by the admin due to a violation of our app’s policies. You can regenerate a new QR code on the event details page in accordance with the guidelines of Tigers Lottery");
+                    notification.setType("Event QR code Removal");
+                    notification.setUserId(organizerID); // Use the stored organizer ID
+                    notification.setMetadata(new HashMap<>() {{
+                        put("event_name", "admin");
+                    }});
+
+                    dbHelper.sendAdminUserNotification(notification, new DatabaseHelper.NotificationCallback() {
+                        @Override
+                        public void onSuccess(String message) {
+                            Log.d("AdminUserDetailsFragment", "User has been notified of the QR code removal");
+                        }
+
+                        @Override
+                        public void onFailure(String errorMessage) {
+                            Log.d("AdminUserDetailsFragment", "Failed to notify user of the QR code removal: " + errorMessage);
+                        }
+                    });
                 }
 
                 /**

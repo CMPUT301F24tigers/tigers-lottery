@@ -523,6 +523,31 @@ public class DatabaseHelper {
     }
 
     /**
+     * Sends an admin-generated notification to a user by storing it in the Firestore database.
+     *
+     * @param notification The Notification object containing the details of the notification to be sent.
+     * @param callback     The callback to handle the success or failure of the operation.
+     *                     On success, the callback provides a message confirming the notification was sent.
+     *                     On failure, the callback provides an error message describing the issue.
+     */
+    public void sendAdminUserNotification(Notification notification, final NotificationCallback callback) {
+        // Generate a unique 6-digit notification ID
+        int notificationId = generateUniqueNotificationId();
+
+        notification.setNotificationId(notificationId);
+        notification.setSenderId(getCurrentUserId());
+        notification.setCategory("Admin");
+        notification.setPriority("High");
+        notification.setTimestamp(Timestamp.now());
+
+        // Write the notification to Firestore
+        notificationsRef.document(String.valueOf(notificationId))
+                .set(notification)
+                .addOnSuccessListener(aVoid -> callback.onSuccess("Notification sent to user: " + notification.getUserId()))
+                .addOnFailureListener(e -> callback.onFailure("Failed to send notification: " + e.getMessage()));
+    }
+
+    /**
      * Deletes a notification from the Firestore database.
      *
      * @param notificationId The ID of the notification to delete.
@@ -1010,10 +1035,11 @@ public class DatabaseHelper {
     /**
      * Deletes a particular event from the database.
      *
-     * @param eventId to be deleted.
-     * @param callback handles success/failure of deletion.
+     * @param eventId       The ID of the event to be deleted.
+     * @param removalSource The source of the event removal ("admin", "facility", "organizer").
+     * @param callback      Handles success/failure of deletion.
      */
-    public void deleteEvent(int eventId, final EventsCallback callback) {
+    public void deleteEvent(int eventId, String removalSource, final EventsCallback callback) {
         eventsRef.whereEqualTo("event_id", eventId)
                 .get()
                 .addOnCompleteListener(task -> {
@@ -1024,6 +1050,79 @@ public class DatabaseHelper {
 
                         if (event != null) {
                             String organizerId = event.getOrganizerId(); // Get the organizer ID
+                            String eventName = event.getEventName();
+
+                            List<String> invitedEntrants = event.getInvitedEntrants(); // Get invited entrants
+                            List<String> registeredEntrants = event.getRegisteredEntrants(); // Get registered entrants
+                            List<String> waitlistedEntrants = event.getWaitlistedEntrants(); // Get waitlisted entrants
+
+                            // Handle notifications based on removal source
+                            switch (removalSource.toLowerCase()) {
+                                case "admin":
+                                    sendAdminEventNotification(organizerId,
+                                            "Your event '" + eventName + "' has been removed by the admin due to a violation of Tigers Lottery policies.",
+                                            "Event Removal",
+                                            eventName);
+
+                                    notifyEntrants(invitedEntrants,
+                                            "The event '" + eventName + "' you were invited to has been removed by the admin due to a violation of Tigers Lottery policies.",
+                                            "Event Removal",
+                                            eventName);
+
+                                    notifyEntrants(registeredEntrants,
+                                            "The event '" + eventName + "' you registered for has been removed by the admin due to a violation of Tigers Lottery policies.",
+                                            "Event Removal",
+                                            eventName);
+
+                                    notifyEntrants(waitlistedEntrants,
+                                            "The event '" + eventName + "' you were waitlisted for has been removed by the admin due to a violation of Tigers Lottery policies.",
+                                            "Event Removal",
+                                            eventName);
+                                    break;
+
+                                case "organizer":
+                                    sendAdminEventNotification(organizerId,
+                                            "You have successfully deleted your event '" + eventName + "'.",
+                                            "Event Deletion",
+                                            eventName);
+
+                                    notifyEntrants(invitedEntrants,
+                                            "The event '" + eventName + "' you were invited to has been canceled by the organizer.",
+                                            "Event Cancellation",
+                                            eventName);
+
+                                    notifyEntrants(registeredEntrants,
+                                            "The event '" + eventName + "' you registered for has been canceled by the organizer.",
+                                            "Event Cancellation",
+                                            eventName);
+
+                                    notifyEntrants(waitlistedEntrants,
+                                            "The event '" + eventName + "' you were waitlisted for has been canceled by the organizer.",
+                                            "Event Cancellation",
+                                            eventName);
+                                    break;
+
+                                case "facility":
+                                    notifyEntrants(invitedEntrants,
+                                            "The event '" + eventName + "' you were invited to has been removed because the associated facility has been deleted.",
+                                            "Event Removal",
+                                            eventName);
+
+                                    notifyEntrants(registeredEntrants,
+                                            "The event '" + eventName + "' you registered for has been removed because the associated facility has been deleted.",
+                                            "Event Removal",
+                                            eventName);
+
+                                    notifyEntrants(waitlistedEntrants,
+                                            "The event '" + eventName + "' you were waitlisted for has been removed because the associated facility has been deleted.",
+                                            "Event Removal",
+                                            eventName);
+                                    break;
+
+                                default:
+                                    callback.onError(new Exception("Invalid removal source specified."));
+                                    return;
+                            }
 
                             // Proceed to delete the event document
                             eventsRef.document(eventDoc.getId()).delete()
@@ -1045,6 +1144,58 @@ public class DatabaseHelper {
                     }
                 })
                 .addOnFailureListener(callback::onError);
+    }
+
+    /**
+     * Sends a notification to a specific user with the given message, type, and metadata.
+     *
+     * @param userId    The ID of the user to send the notification to.
+     * @param message   The message content of the notification.
+     * @param type      The type/category of the notification.
+     * @param eventName The name of the event associated with the notification.
+     */
+    private void sendAdminEventNotification(String userId, String message, String type, String eventName) {
+        if (userId == null || userId.isEmpty()) return;
+
+        Notification notification = new Notification();
+        notification.setUserId(userId);
+        notification.setMessage(message);
+        notification.setType(type);
+
+        // Add event-related metadata to the notification
+        notification.setMetadata(new HashMap<>() {{
+            put("event_name", eventName);
+        }});
+
+        // Dispatch the notification using the database helper
+        sendAdminUserNotification(notification, new DatabaseHelper.NotificationCallback() {
+            @Override
+            public void onSuccess(String message) {
+                Log.d(TAG, "Notification sent to user: " + userId);
+            }
+
+            @Override
+            public void onFailure(String errorMessage) {
+                Log.e(TAG, "Failed to send notification to user: " + userId + " - " + errorMessage);
+            }
+        });
+    }
+
+    /**
+     * Sends notifications to a list of users with the specified message, type, and event metadata.
+     *
+     * @param userIds   A list of user IDs to send notifications to.
+     * @param message   The message content of the notification.
+     * @param type      The type/category of the notification.
+     * @param eventName The name of the event associated with the notification.
+     */
+    private void notifyEntrants(List<String> userIds, String message, String type, String eventName) {
+        if (userIds == null || userIds.isEmpty()) return;
+
+        // Send a notification to each user in the list
+        for (String userId : userIds) {
+            sendAdminEventNotification(userId, message, type, eventName);
+        }
     }
 
     /**
@@ -1529,7 +1680,7 @@ public class DatabaseHelper {
         hostedEventIds = user.getHostedEvents();
 
         for (Integer eventId: hostedEventIds) {
-            deleteEvent(eventId, new EventsCallback() {
+            deleteEvent(eventId, "facility",  new EventsCallback() {
                 @Override
                 public void onEventsFetched(List<Event> events) {}
 
@@ -1567,8 +1718,31 @@ public class DatabaseHelper {
                         // User does not exist
                         callback.onFailure(new Exception("User with ID " + userId + " does not exist."));
                     }
+
+                    Notification notification = new Notification();
+                    notification.setUserId(userId);
+                    notification.setMessage("Your facility has been removed due to a violation of Tigers Lottery policies. As a result, all associated events and your facility profile have been permanently deleted. Please contact support if you believe this action was taken in error");
+                    notification.setType("Facility Removal");
+
+                    notification.setMetadata(new HashMap<>() {{
+                        put("event_name", "admin");
+                    }});
+
+                    sendAdminUserNotification(notification, new NotificationCallback() {
+                        @Override
+                        public void onSuccess(String message) {
+                            Log.d("DatabaseHelper", "Notification dispatched - facility profile for user " + userId + " has been deleted");
+                        }
+
+                        @Override
+                        public void onFailure(String errorMessage) {
+                            Log.d("DatabaseHelper", "Facility deletion notification is not dispatched  " + errorMessage);
+
+                        }
+                    });
                 })
                 .addOnFailureListener(e -> callback.onFailure(new Exception("Failed to verify user existence: " + e.getMessage(), e)));
+
     }
 
 
@@ -1820,6 +1994,58 @@ public class DatabaseHelper {
     }
 
     /**
+     * Deletes all notifications for a specific user.
+     *
+     * @param userId The user_id for which notifications need to be deleted.
+     */
+    public void deleteAllNotificationsForUser(String userId) {
+        notificationsRef
+                .whereEqualTo("user_id", userId)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    if (!querySnapshot.isEmpty()) {
+                        // Iterate over documents and delete each one
+                        for (QueryDocumentSnapshot document : querySnapshot) {
+                            document.getReference().delete()
+                                    .addOnSuccessListener(aVoid -> {
+                                        System.out.println("Notification deleted: " + document.getId());
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        System.err.println("Error deleting notification: " + e.getMessage());
+                                    });
+                        }
+                    } else {
+                        System.out.println("No notifications found for user_id: " + userId);
+                    }
+
+                    Notification notification = new Notification();
+                    notification.setUserId(userId);
+                    notification.setMessage("Your user profile, along with all associated events, has been removed by the admin due to a violation of Tigers Lottery policies. Please contact your Admin if you believe this action was taken in error.");
+                    notification.setType("User Profile Removal");
+
+                    // Add event-related metadata to the notification
+                    notification.setMetadata(new HashMap<>() {{
+                        put("event_name", "admin");
+                    }});
+
+                    sendAdminUserNotification(notification, new NotificationCallback() {
+                        @Override
+                        public void onSuccess(String message) {
+                            Log.d("DatabaseHelper", "Notification dispatched - user " + userId + " has been deleted");
+                        }
+
+                        @Override
+                        public void onFailure(String errorMessage) {
+                            Log.d("DatabaseHelper", "User deletion notification is not dispatched  " + errorMessage);
+                        }
+                    });
+                })
+                .addOnFailureListener(e -> {
+                    System.err.println("Error fetching notifications: " + e.getMessage());
+                });
+    }
+
+    /**
      * This method removed a user from the DB
      *
      * @param userId - The user ID (device ID) of the person to be removed
@@ -1899,7 +2125,7 @@ public class DatabaseHelper {
                 // Removing hosted events
                 if (hostedEvents != null) {
                     for (Integer eventId : hostedEvents) {
-                        deleteEvent(eventId, new EventsCallback() {
+                        deleteEvent(eventId,"admin", new EventsCallback() {
                             @Override
                             public void onEventsFetched(List<Event> events) {
                                 Log.d("DatabaseHelper", "Event " + eventId + " deleted as part of user removal.");
@@ -1918,10 +2144,14 @@ public class DatabaseHelper {
                     }
                 }
 
+                //deletes all notifications to a user
+                deleteAllNotificationsForUser(userId);
+
                 // Finally, delete user from users collection
                 usersRef.document(userId).delete()
                         .addOnSuccessListener(aVoid -> Log.d("DatabaseHelper", "User " + userId + " removed from users collection"))
                         .addOnFailureListener(e -> Log.e("DatabaseHelper", "Failed to remove user from users collection", e));
+
             }
         });
     }

@@ -178,11 +178,14 @@ public class AdminEventsFragment extends Fragment implements OnActionListener {
         final Event[] deletedEvent = new Event[1];
         int eventId = Integer.parseInt(strEventId);
         DatabaseHelper dbHelper = new DatabaseHelper(requireContext());
-        dbHelper.deleteEvent(eventId, new DatabaseHelper.EventsCallback() {
+        dbHelper.deleteEvent(eventId, "organizer", new DatabaseHelper.EventsCallback() {
+
+
             /**
              * Handles events finding actions for dbHelper. Required dbHelper method, unused.
              * @param events list of events
              */
+
             @Override
             public void onEventsFetched(List<Event> events) { /* Do nothing */ }
 
@@ -191,18 +194,17 @@ public class AdminEventsFragment extends Fragment implements OnActionListener {
              * @param event to be deleted.
              */
             @Override
-            public void onEventFetched(Event event) { deletedEvent[0] = event; }
 
-            /**
-             * Handles errors on deleting the event.
-             * @param e exception catcher.
-             */
+            public void onEventFetched(Event event) {
+                deletedEvent[0] = event;
+                Toast.makeText(getContext(), "Removing Event: " + deletedEvent[0].getEventName(), Toast.LENGTH_SHORT).show();
+            }
+
             @Override
             public void onError(Exception e) { /* Do nothing */ }
         });
         eventsAdapter.setExpandedPosition(-1); // Collapse any expanded menus
         eventsAdapter.notifyDataSetChanged();
-        Toast.makeText(getContext(), "Removing Event: " + deletedEvent[0].getEventName(), Toast.LENGTH_SHORT).show();
     }
 
     /**

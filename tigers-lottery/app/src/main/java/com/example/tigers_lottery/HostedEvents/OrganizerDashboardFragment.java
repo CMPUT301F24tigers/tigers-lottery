@@ -188,7 +188,7 @@ public class OrganizerDashboardFragment extends Fragment implements EventAdapter
 
     @Override
     public void onDeleteSelected(Event event) {
-        dbHelper.deleteEvent(event.getEventId(), new DatabaseHelper.EventsCallback() {
+        dbHelper.deleteEvent(event.getEventId(), "organizer", new DatabaseHelper.EventsCallback() {
             /**
              * Clears the current list displayed and reloads the list.
              * @param events organizer's list of events.
