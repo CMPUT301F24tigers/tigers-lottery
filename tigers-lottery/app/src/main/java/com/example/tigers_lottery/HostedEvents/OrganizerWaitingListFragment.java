@@ -1,6 +1,7 @@
 package com.example.tigers_lottery.HostedEvents;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +17,7 @@ import com.example.tigers_lottery.DatabaseHelper;
 import com.example.tigers_lottery.HostedEvents.Adapters.EntrantAdapter;
 import com.example.tigers_lottery.Notifications.SendNotificationDialog;
 import com.example.tigers_lottery.R;
+import com.example.tigers_lottery.models.Event;
 import com.example.tigers_lottery.models.User;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -57,7 +59,6 @@ public class OrganizerWaitingListFragment extends Fragment {
 
         eventId = getArguments() != null ? getArguments().getInt("event_id") : -1;
         dbHelper = new DatabaseHelper(requireContext());
-
         fetchWaitlistedEntrants();
 
         // Set up FAB to open the notification dialog
