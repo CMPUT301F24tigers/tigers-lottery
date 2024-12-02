@@ -9,6 +9,9 @@ import android.widget.TextView;
 import com.example.tigers_lottery.R;
 import com.example.tigers_lottery.models.Notification;
 
+import java.util.Objects;
+
+
 /**
  * Dialog shown on clicking a notification to get an enlarged view of the notification.
  */
@@ -72,6 +75,10 @@ public class NotificationDialog {
         // Get event name from metadata
         String eventName = (String) notification.getMetadata().get("event_name");
         eventNameView.setText("Event Name: " + (eventName != null ? eventName : "N/A"));
+
+        if (Objects.equals(eventName, "admin")) {
+            eventNameView.setText("");
+        }
 
         // Build and show dialog
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
