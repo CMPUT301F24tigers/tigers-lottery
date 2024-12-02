@@ -610,27 +610,38 @@ public class OrganizerEventDetailsFragment extends Fragment {
     private void handleDeclineLogic(Event event) {
         Log.d("DeclineDebug", "Handling decline for event: " + event.getEventName());
 
+        // Prevent further action if the invited list already meets the occupant limit
         if (event.getInvitedEntrants().size() >= event.getOccupantLimit()) {
             Log.d("DeclineDebug", "Occupant limit reached, no action needed.");
             isHandlingDecline = false;
             return;
         }
 
+        // Get the current waitlisted entrants
         List<String> waitlistedEntrants = event.getWaitlistedEntrants();
-        if (waitlistedEntrants.isEmpty()) {
+
+        // Check if there are any waitlisted entrants to invite
+        if (waitlistedEntrants == null || waitlistedEntrants.isEmpty()) {
             Log.d("DeclineDebug", "No waitlisted entrants to invite.");
             isHandlingDecline = false;
             return;
         }
 
+        // Select a new invitee from the waitlist
         String newInvitee = selectRandomEntrant(waitlistedEntrants);
+
         if (newInvitee != null) {
+            // Update the event's lists
             event.getInvitedEntrants().add(newInvitee);
             waitlistedEntrants.remove(newInvitee);
 
+            // Update the database with the modified lists
             dbHelper.updateEntrantsAfterDecline(eventId, event.getInvitedEntrants(), waitlistedEntrants, new DatabaseHelper.EventsCallback() {
                 @Override
                 public void onEventsFetched(List<Event> events) {
+                    Log.d("DeclineDebug", "Entrants updated successfully after decline.");
+
+                    // Send a notification to the new invitee
                     dbHelper.sendLotteryWinNotification(
                             newInvitee, eventId, event.getOrganizerId(), event.getEventName(),
                             new DatabaseHelper.NotificationCallback() {
@@ -638,29 +649,35 @@ public class OrganizerEventDetailsFragment extends Fragment {
                                 public void onSuccess(String responseMessage) {
                                     Log.d("NotificationDebug", "Notification sent successfully to: " + newInvitee);
                                 }
+
                                 @Override
                                 public void onFailure(String errorMessage) {
                                     Log.e("NotificationDebug", "Failed to send notification: " + errorMessage);
                                 }
                             }
                     );
-                    isHandlingDecline = false; // Reset flag
+
+                    // Mark the decline handling process as complete
+                    isHandlingDecline = false;
                 }
 
                 @Override
                 public void onEventFetched(Event event) {
-                    // Do nothing
+                    // No action needed for this callback
                 }
 
                 @Override
                 public void onError(Exception e) {
-                    Log.e("DeclineDebug", "Failed to update entrants.", e);
-                    isHandlingDecline = false;
+                    Log.e("DeclineDebug", "Failed to update entrants after decline.", e);
+                    isHandlingDecline = false; // Ensure the flag is reset even if an error occurs
                 }
             });
-
+        } else {
+            Log.d("DeclineDebug", "No valid invitee could be selected from the waitlist.");
+            isHandlingDecline = false;
         }
     }
+
 
 
 
