@@ -39,8 +39,16 @@ public class OrganizerQRCodeFragment extends Fragment {
     private TextView title, description;
     private Button regenerateButton;
 
+    /**
+     * Required empty constructor
+     */
     public OrganizerQRCodeFragment(){}
 
+    /**
+     * Creates a new instance of the organizerQRCodeFragment page and populates it with the event's id.
+     * @param eventId event's qrCode to be seen.
+     * @return a new instance of the QRCode fragment.
+     */
     public static OrganizerQRCodeFragment newInstance(int eventId){
         OrganizerQRCodeFragment fragment = new OrganizerQRCodeFragment();
         Bundle args = new Bundle();
@@ -49,6 +57,13 @@ public class OrganizerQRCodeFragment extends Fragment {
         return fragment;
 
     }
+
+    /**
+     * Initializes the database helper and gets the event id of the event.
+     *
+     * @param savedInstanceState If the fragment is being re-created from
+     * a previous saved state, this is the state.
+     */
 
     @Override
     public void onCreate(Bundle savedInstanceState){
@@ -91,12 +106,25 @@ public class OrganizerQRCodeFragment extends Fragment {
         });
         return view;
     }
+
+    /**
+     * Helper method to load the event's details specifically the qrCode, using the database helper.
+     */
     private void loadEventDetails(){
         dbHelper.fetchEventById(eventId, new DatabaseHelper.EventsCallback() {
+            /**
+             * Required database helper method, unused.
+             * @param events events.
+             */
             @Override
             public void onEventsFetched(List<Event> events) {
 
             }
+
+            /**
+             * On finding the required event, populates the event name, if not find fragment is closed.
+             * @param fetchedEvent whose details are to be displayed.
+             */
 
             @Override
             public void onEventFetched(Event fetchedEvent) {
@@ -111,12 +139,22 @@ public class OrganizerQRCodeFragment extends Fragment {
                 }
             }
 
+            /**
+             * Handles error on event finding.
+             * @param e exception catcher.
+             */
+
             @Override
             public void onError(Exception e) {
 
             }
         });
     }
+
+    /**
+     * Creates the QRCode for the event using the QRCodeGenerator and displays different texts
+     * depending on if the event has a QRCode or not.
+     */
     private void setUpQRCode(){
         if(event.getQRCode() != null && !(event.getQRCode().isEmpty())) {
             QRCodeGenerator qrCodeGenerator = new QRCodeGenerator(event);

@@ -35,7 +35,7 @@ public class OrganizerDeclinedEntrantsFragment extends Fragment {
 
     /**
      * Inflates the layout for the list displaying the entrants that have been
-     * cancelled for a specific event. Initializes the databseHelper.
+     * cancelled for a specific event. Initializes the database Helper.
      *
      * @param inflater The LayoutInflater object that can be used to inflate
      * any views in the fragment,
@@ -77,6 +77,10 @@ public class OrganizerDeclinedEntrantsFragment extends Fragment {
 
     private void fetchDeclinedEntrants() {
         dbHelper.fetchDeclinedEntrants(eventId, new DatabaseHelper.EntrantsCallback() {
+            /**
+             * Handles actions on finding the entrants corresponding to the list.
+             * @param entrantIds ids of the entrants.
+             */
             @Override
             public void onEntrantsFetched(List<String> entrantIds) {
                 if (entrantIds.isEmpty()) {
@@ -85,16 +89,28 @@ public class OrganizerDeclinedEntrantsFragment extends Fragment {
                 } else {
                     // Fetch user details for all entrant IDs
                     dbHelper.fetchUsersByIds(entrantIds, new DatabaseHelper.UsersCallback() {
+                        /**
+                         * Handles actions on finding details of all entrants.
+                         * @param users in the list
+                         */
                         @Override
                         public void onUsersFetched(List<User> users) {
                             noEntrantsMessage.setVisibility(View.GONE);
                             recyclerView.setVisibility(View.VISIBLE);
                             setupRecyclerView(users);
                         }
-
+                        /**
+                         * Handles actions on finding user, required dbHelper method, unused.
+                         * @param user user.
+                         */
                         @Override
                         public void onUserFetched(User user) {
                         }
+
+                        /**
+                         * Handles error on list finding.
+                         * @param e exception catcher.
+                         */
 
                         @Override
                         public void onError(Exception e) {
@@ -106,6 +122,10 @@ public class OrganizerDeclinedEntrantsFragment extends Fragment {
                 }
             }
 
+            /**
+             * Handles error on finding the entrants corresponding to the list.
+             * @param e exception catcher.
+             */
             @Override
             public void onError(Exception e) {
                 noEntrantsMessage.setVisibility(View.VISIBLE);

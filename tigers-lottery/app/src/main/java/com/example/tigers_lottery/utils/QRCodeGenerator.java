@@ -11,6 +11,12 @@ import com.google.zxing.qrcode.QRCodeWriter;
 
 import java.time.Instant;
 
+/**
+ * Utility class to generate a qrCode for an event, an event's qrCode is generated uniquely
+ * using the event's id and their timestamp as the hash data. This ensures that every qrCode remains
+ * unique, and new qrCodes for the same event also maintain uniqueness.
+ */
+
 public class QRCodeGenerator {
     private String currentHashData;
     private Event event;

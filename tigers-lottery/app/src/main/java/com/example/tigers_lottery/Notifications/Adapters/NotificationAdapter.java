@@ -28,10 +28,26 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
     private final List<Notification> notifications;
     private final Context context;
 
+    /**
+     * Initializes the notification adapter.
+     *
+     * @param context context of the current state of the activity.
+     * @param notifications list of notifications.
+     */
     public NotificationAdapter(Context context, List<Notification> notifications) {
         this.context = context;
         this.notifications = notifications;
     }
+
+    /**
+     * Creates a view holder for the notification items.
+     *
+     * @param parent The ViewGroup into which the new View will be added after it is bound to
+     *               an adapter position.
+     * @param viewType The view type of the new View.
+     *
+     * @return the view holder.
+     */
 
     @NonNull
     @Override
@@ -39,6 +55,14 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.notification_item, parent, false);
         return new NotificationViewHolder(view);
     }
+
+    /**
+     *  Binds the notification items' details to the view and the holder.
+     *
+     * @param holder The ViewHolder which should be updated to represent the contents of the
+     *        item at the given position in the data set.
+     * @param position The position of the item within the adapter's data set.
+     */
 
     @Override
     public void onBindViewHolder(@NonNull NotificationViewHolder holder, int position) {
@@ -94,16 +118,30 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         }
     }
 
+    /**
+     * Gets the amount of items in the notification list.
+     *
+     * @return number of notification.
+     */
 
     @Override
     public int getItemCount() {
         return notifications.size();
     }
 
+    /**
+     * Initializes the view for the notification holder screen.
+     */
+
     static class NotificationViewHolder extends RecyclerView.ViewHolder {
         TextView notificationType, notificationMessage, notificationPriority;
         CardView cardView;
         FrameLayout frameLayout;
+
+        /**
+         * Assigns the notification fields to their required layouts.
+         * @param itemView view
+         */
 
         public NotificationViewHolder(@NonNull View itemView) {
             super(itemView);

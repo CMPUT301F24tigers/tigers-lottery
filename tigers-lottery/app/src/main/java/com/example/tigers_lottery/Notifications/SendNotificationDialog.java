@@ -13,17 +13,34 @@ import android.widget.Toast;
 import com.example.tigers_lottery.DatabaseHelper;
 import com.example.tigers_lottery.R;
 
+/**
+ * Dialog class for sending a notification as an organizer.
+ */
+
 public class SendNotificationDialog {
 
     private final Context context;
     private final int eventId;
     private final String listType;
 
+    /**
+     * Constructor for sending a notification.
+     *
+     * @param context current context.
+     * @param eventId from which notification is sent.
+     * @param listType invited, registered, declined, waitlisted.
+     */
+
     public SendNotificationDialog(Context context, int eventId, String listType) {
         this.context = context;
         this.eventId = eventId;
         this.listType = listType;
     }
+
+    /**
+     * Shows the dialog screen for the organizer to send a message allowing them their own input
+     * and letting them choose the priority of their message.
+     */
 
     public void showDialog() {
         // Inflate the dialog layout
@@ -69,11 +86,20 @@ public class SendNotificationDialog {
             // Call backend method to send notifications
             DatabaseHelper dbHelper = new DatabaseHelper(context);
             dbHelper.sendNotificationsToEntrants(eventId, listType, message, priority, new DatabaseHelper.NotificationCallback() {
+                /**
+                 * Handles success on sending a notification.
+                 * @param responseMessage to be logged.
+                 */
                 @Override
                 public void onSuccess(String responseMessage) {
                     Toast.makeText(context, "Notification sent successfully!", Toast.LENGTH_SHORT).show();
                     dialog.dismiss();
                 }
+
+                /**
+                 * Handles error on sending a notification.
+                 * @param errorMessage to be logged.
+                 */
 
                 @Override
                 public void onFailure(String errorMessage) {

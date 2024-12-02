@@ -44,6 +44,11 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * Fragment for displaying the view when clicking joined events
+ * Entrants will be able to see any events they are in a list for and interact with them.
+ */
+
 public class EntrantDashboardFragment extends Fragment {
 
     private DatabaseHelper dbHelper;
@@ -52,15 +57,24 @@ public class EntrantDashboardFragment extends Fragment {
 
     private ActivityResultLauncher<Intent> qrCodeLauncher;
 
+    /**
+     * Required empty constructor.
+     */
+
     public EntrantDashboardFragment() {
-        // Required empty public constructor
     }
+
+    /**
+     * Initializes the QRCode launcher and saves the instance state for the user's actions.
+     *
+     * @param savedInstanceState If the fragment is being re-created from
+     * a previous saved state, this is the state.
+     */
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Initialize ActivityResultLauncher for QR code scanning
         qrCodeLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
             if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
                 IntentResult intentResult = IntentIntegrator.parseActivityResult(
@@ -81,7 +95,20 @@ public class EntrantDashboardFragment extends Fragment {
     }
 
 
-
+    /**
+     * Inflates the layout for the entrant dashboard screen, initializes the database helper,
+     * floating action button to join an event, and loads the events joined by the entrant.
+     *
+     * @param inflater The LayoutInflater object that can be used to inflate
+     * any views in the fragment,
+     * @param container If non-null, this is the parent view that the fragment's
+     * UI should be attached to.  The fragment should not add the view itself,
+     * but this can be used to generate the LayoutParams of the view.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed
+     * from a previous saved state as given here.
+     *
+     * @return the view for the fragment's ui.
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.entrant_dashboard_fragment, container, false);
@@ -92,11 +119,12 @@ public class EntrantDashboardFragment extends Fragment {
 
         List<Event> entrantsEvents = new ArrayList<>();
 
-        // Set up the Join Event button to launch the camera for QR code scanning
-        joinEventButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        joinEventButton.setOnClickListener(v-> {
                 checkUserProfileComplete(dbHelper.getCurrentUserId(), new DatabaseHelper.isValidProfileCallback() {
+                    /**
+                     * On checking if the profile is complete, grants user permission
+                     * @param isComplete true if the profile is complete false if not.
+                     */
                     @Override
                     public void onProfileCheckComplete(boolean isComplete) {
                         if(isComplete){
@@ -114,11 +142,14 @@ public class EntrantDashboardFragment extends Fragment {
                         }
                     }
                 });
-
-            }
         });
 
+
         dbHelper.entrantFetchEvents(new DatabaseHelper.EventsCallback() {
+            /**
+             * On finding the entrant's events; populates the required fields.
+             * @param events all events in the database.
+             */
             @Override
             public void onEventsFetched(List<Event> events) {
                 entrantsEvents.clear();
@@ -180,10 +211,20 @@ public class EntrantDashboardFragment extends Fragment {
                 }
             }
 
+            /**
+             * Required dbHelper method, unused.
+             * @param event event.
+             */
+
             @Override
             public void onEventFetched(Event event) {
                 // Not used here
             }
+
+            /**
+             * Handles error on finding events.
+             * @param e exception catcher.
+             */
 
             @Override
             public void onError(Exception e) {
@@ -194,6 +235,12 @@ public class EntrantDashboardFragment extends Fragment {
 
         return view;
     }
+
+    /**
+     * validates the entrant's date of birth.
+     * @param dob entrant's date of birth.
+     * @return true if valid, false if not.
+     */
 
     private static boolean isValidDateOfBirth(Timestamp dob) {
         if (dob == null) {
@@ -209,12 +256,24 @@ public class EntrantDashboardFragment extends Fragment {
         return dateOfBirth.before(minAdultDob);
     }
 
+    /**
+     * Validates the entrant's email address.
+     * @param email email.
+     * @return true if valid, false if not.
+     */
+
     public static boolean isValidEmailAddress(String email) {
         if (email == null || email.trim().isEmpty()) {
             return false;
         }
         return Patterns.EMAIL_ADDRESS.matcher(email).matches();
     }
+
+    /**
+     * Validates the entrant's name.
+     * @param name name
+     * @return true if valid, false if not.
+     */
 
     public static boolean isValidName(String name) {
         return name != null && !name.trim().isEmpty() && !"Unknown User".equals(name);
@@ -227,9 +286,18 @@ public class EntrantDashboardFragment extends Fragment {
      */
     public void checkUserProfileComplete(String userId, DatabaseHelper.isValidProfileCallback callback) {
         dbHelper.fetchUserById(userId, new DatabaseHelper.UsersCallback() {
+            /**
+             * Required dbHelper method, unused.
+             * @param users users.
+             */
             @Override
             public void onUsersFetched(List<User> users) {
             }
+
+            /**
+             * Finds the specific user in the database and checks their details' validity.
+             * @param user current user.
+             */
 
             @Override
             public void onUserFetched(User user) {
@@ -239,6 +307,11 @@ public class EntrantDashboardFragment extends Fragment {
                         && isValidDateOfBirth(user.getDateOfBirth());
                 callback.onProfileCheckComplete(isValid);
             }
+
+            /**
+             * Handles error on finding user's details.
+             * @param e exception catcher.
+             */
 
             @Override
             public void onError(Exception e) {
@@ -262,6 +335,11 @@ public class EntrantDashboardFragment extends Fragment {
         Intent intent = integrator.createScanIntent();
         qrCodeLauncher.launch(intent); // Launch the scanner
     }
+
+    /**
+     * Navigates to the event details of the scanned QRCode's event.
+     * @param result eventId.
+     */
 
     private void navigateToEventDetails(String result) {
 
