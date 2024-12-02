@@ -81,6 +81,10 @@ public class OrganizerDashboardFragment extends Fragment implements EventAdapter
 
         fabCreateEvent.setOnClickListener(v -> {
            checkFacilityProfileComplete(dbHelper.getCurrentUserId(), new DatabaseHelper.isValidProfileCallback() {
+               /**
+                * Handles actions after checking if the entrant profile is complete.
+                * @param isComplete checks if the profile is complete
+                */
                @Override
                public void onProfileCheckComplete(boolean isComplete) {
                    if(isComplete){
@@ -240,9 +244,18 @@ public class OrganizerDashboardFragment extends Fragment implements EventAdapter
      */
     public void checkFacilityProfileComplete(String userId, DatabaseHelper.isValidProfileCallback callback) {
         dbHelper.fetchUserById(userId, new DatabaseHelper.UsersCallback() {
+            /**
+             * Handles actions on finding users, required but unused.
+             * @param users all users.
+             */
             @Override
             public void onUsersFetched(List<User> users) {
             }
+
+            /**
+             * Handles actions on finding specific user.
+             * @param user user whose id is to be validated.
+             */
 
             @Override
             public void onUserFetched(User user) {
@@ -252,6 +265,11 @@ public class OrganizerDashboardFragment extends Fragment implements EventAdapter
                 callback.onProfileCheckComplete(isValid);
             }
 
+            /**
+             * Handles error on finding user.
+             * @param e exception catcher.
+             */
+
             @Override
             public void onError(Exception e) {
                 Log.d("OrganizerDashboardFragment", "Failed to Fetch user to validate profile completion");
@@ -260,12 +278,26 @@ public class OrganizerDashboardFragment extends Fragment implements EventAdapter
         });
     }
 
+    /**
+     * Validates the entered email address.
+     *
+     * @param email to be validated.
+     * @return true if the email is valid, false if not.
+     */
+
     public static boolean isValidEmailAddress(String email) {
         if (email == null || email.trim().isEmpty()) {
             return false;
         }
         return Patterns.EMAIL_ADDRESS.matcher(email).matches();
     }
+
+    /**
+     * Validates the entered name.
+     *
+     * @param name to be validated.
+     * @return true if the name is valid, false if not.
+     */
 
     public static boolean isValidName(String name) {
         return name != null && !name.trim().isEmpty();

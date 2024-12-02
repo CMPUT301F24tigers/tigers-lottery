@@ -74,12 +74,20 @@ public class AdminEventsFragment extends Fragment implements OnActionListener {
     private void fetchEvents() {
         DatabaseHelper dbHelper = new DatabaseHelper(requireContext());
         dbHelper.fetchAllEvents(new DatabaseHelper.EventsCallback() {
+            /**
+             * Handles actions after finding the list of events from the database.
+             * @param events admin view of all events.
+             */
             @Override
             public void onEventsFetched(List<Event> events) {
                 itemList.clear(); // Clear the current list to refresh with new data
                 for (Event event : events) {
                     // Fetch each organizer’s name asynchronously based on the organizer ID
                     dbHelper.fetchUserById(event.getOrganizerId(), new DatabaseHelper.UsersCallback() {
+                        /**
+                         * Handles actions on finding the organizer from the database.
+                         * @param user the event's organizer.
+                         */
                         @Override
                         public void onUserFetched(User user) {
 
@@ -102,11 +110,21 @@ public class AdminEventsFragment extends Fragment implements OnActionListener {
                             eventsAdapter.notifyDataSetChanged();  // Notify adapter after each addition
                         }
 
+                        /**
+                         * Handles error on finding the organizer for the event
+                         * @param e exception catcher
+                         */
+
                         @Override
                         public void onError(Exception e) {
                             Log.e("DatabaseHelper", "Error retrieving organizer for event", e);
                             Toast.makeText(getContext(), "Failed to retrieve organizer", Toast.LENGTH_SHORT).show();
                         }
+
+                        /**
+                         * Handles actions on finding users
+                         * @param users the apps users
+                         */
 
                         @Override
                         public void onUsersFetched(List<User> users) {
@@ -115,6 +133,11 @@ public class AdminEventsFragment extends Fragment implements OnActionListener {
                     });
                 }
             }
+
+            /**
+             * Handles error on finding the list of events.
+             * @param e exception catcher
+             */
 
             @Override
             public void onError(Exception e) {
@@ -156,10 +179,24 @@ public class AdminEventsFragment extends Fragment implements OnActionListener {
         int eventId = Integer.parseInt(strEventId);
         DatabaseHelper dbHelper = new DatabaseHelper(requireContext());
         dbHelper.deleteEvent(eventId, new DatabaseHelper.EventsCallback() {
+            /**
+             * Handles events finding actions for dbHelper. Required dbHelper method, unused.
+             * @param events list of events
+             */
             @Override
             public void onEventsFetched(List<Event> events) { /* Do nothing */ }
+
+            /**
+             * Handles action on finding the event, deletes the event.
+             * @param event to be deleted.
+             */
             @Override
             public void onEventFetched(Event event) { deletedEvent[0] = event; }
+
+            /**
+             * Handles errors on deleting the event.
+             * @param e exception catcher.
+             */
             @Override
             public void onError(Exception e) { /* Do nothing */ }
         });

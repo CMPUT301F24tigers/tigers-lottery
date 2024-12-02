@@ -101,6 +101,11 @@ public class CreateEntrantProfileActivity extends AppCompatActivity {
         editProfilePhotoButton = findViewById(R.id.sign_up_add_profile_button);
 
         saveInfoButton.setOnClickListener(new View.OnClickListener() {
+            /**
+             * Saves the information from the edit text on click.
+             *
+             * @param view view.
+             */
             @Override
             public void onClick(View view) {
                 Date date = null;
@@ -142,14 +147,16 @@ public class CreateEntrantProfileActivity extends AppCompatActivity {
             }
         });
 
-        dobEditText.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        dobEditText.setOnClickListener(v->{
                 openDatePicker();
             }
-        });
+        );
 
         editProfilePhotoButton.setOnClickListener(new View.OnClickListener() {
+            /**
+             * Launches a new edit profile interaction.
+             * @param view view
+             */
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(Intent.ACTION_PICK);
@@ -159,6 +166,10 @@ public class CreateEntrantProfileActivity extends AppCompatActivity {
         });
 
         cancelButton.setOnClickListener(new View.OnClickListener() {
+            /**
+             * Sends the user back to main activity on clicking the cancel button
+             * @param view view
+             */
             @Override
             public void onClick(View view) {
                 Intent mainActivityIntent = new Intent(getApplicationContext(), MainActivity.class);
@@ -194,9 +205,28 @@ public class CreateEntrantProfileActivity extends AppCompatActivity {
         datePickerDialog.show();
     }
 
+    /**
+     * Validates user profile input.
+     * @param firstName first name
+     * @param lastName last name
+     * @param email email
+     * @param date date
+     * @return true if valid, false if invalid.
+     */
+
     public boolean validatingUserProfileInput(String firstName, String lastName, String email, Date date) {
         return (Objects.equals(firstName, "") || Objects.equals(lastName, "") || Objects.equals(email, "") || date == null);
     }
+
+    /**
+     * Generates a bitmap for the entrant's profile picture procedurally if they do not enter anything
+     * for their profile picture
+     *
+     * @param firstName first name
+     * @param lastName last name
+     * @param size size of the bitmap
+     * @return the profile picture.
+     */
 
     public static Bitmap generateProfilePicture(String firstName, String lastName, int size) {
         // Extract initials
@@ -248,6 +278,14 @@ public class CreateEntrantProfileActivity extends AppCompatActivity {
         hsv[2] = 0.9f; // Value
         return Color.HSVToColor(hsv);
     }
+
+    /**
+     * Saves the bitmap for the profile image to URI format.
+     *
+     * @param context current context.
+     * @param bitmap profile image.
+     * @return uri
+     */
 
     private static Uri saveBitmapToUri(Context context, Bitmap bitmap) {
         File cacheDir = context.getCacheDir();

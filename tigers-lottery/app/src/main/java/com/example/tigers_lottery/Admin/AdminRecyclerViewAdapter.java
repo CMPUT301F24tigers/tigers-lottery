@@ -38,6 +38,16 @@ public class AdminRecyclerViewAdapter extends RecyclerView.Adapter<AdminRecycler
         this.actionListener = actionListener;
     }
 
+    /**
+     * Creates the view holder for admin admin list items.
+     *
+     * @param parent The ViewGroup into which the new View will be added after it is bound to
+     *               an adapter position.
+     * @param viewType The view type of the new View.
+     *
+     * @return the view holder for the view.
+     */
+
     @NonNull
     @Override
     public ItemViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -45,6 +55,14 @@ public class AdminRecyclerViewAdapter extends RecyclerView.Adapter<AdminRecycler
                 .inflate(R.layout.admin_list_item, parent, false);
         return new ItemViewHolder(view);
     }
+
+    /**
+     *  Binds the admin event/user item to the view, and populates the required fields.
+     *
+     * @param holder The ViewHolder which should be updated to represent the contents of the
+     *        item at the given position in the data set.
+     * @param position The position of the item within the adapter's data set.
+     */
 
     @Override
     public void onBindViewHolder(@NonNull ItemViewHolder holder, int position) {
@@ -103,6 +121,11 @@ public class AdminRecyclerViewAdapter extends RecyclerView.Adapter<AdminRecycler
     public void setExpandedPosition(int position) {
         this.expandedPosition = position;
     }
+
+    /**
+     *
+     * @return the count of items in the list.
+     */
 
     @Override
     public int getItemCount() {
