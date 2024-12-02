@@ -313,7 +313,7 @@ public class OrganizerEditEventFragment extends Fragment {
         Timestamp registrationDeadlineTimestamp = convertToTimestamp(registrationDeadline);
         Timestamp eventDateTimestamp = convertToTimestamp(eventDate);
         Timestamp currentTimestamp = Timestamp.now();
-
+        /*
         // Date-based validations
         if (registrationOpensTimestamp.compareTo(currentTimestamp) <= 0) {
             inputRegistrationOpens.setError("Registration Open Date must be in the future");
@@ -331,6 +331,8 @@ public class OrganizerEditEventFragment extends Fragment {
             inputEventDate.setError("Event Date must be after Registration Deadline");
             return;
         }
+
+         */
 
         if (registrationOpensTimestamp.compareTo(eventDateTimestamp) >= 0) {
             inputRegistrationOpens.setError("Registration Open Date must be before Event Date");
