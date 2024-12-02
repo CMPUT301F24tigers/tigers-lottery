@@ -243,16 +243,16 @@ public class DatabaseHelper {
      * @param callback Callback to handle success or failure of the update operation.
      */
     public void updateUserGeolocation(GeoPoint geoPoint, StatusCallback callback) {
-        String userId = getCurrentUserId(); // Use the helper method to fetch currentUserId
+       // String userId = getCurrentUserId(); // Use the helper method to fetch currentUserId
 
         // Check if userId is valid
-        if (userId == null || userId.isEmpty()) {
+        if (currentUserId == null || currentUserId.isEmpty()) {
             callback.onError(new Exception("User ID is not available."));
             return;
         }
 
         // Update the user_geolocation field in Firestore
-        usersRef.document(userId)
+        usersRef.document(currentUserId)
                 .update("user_geolocation", geoPoint)
                 .addOnSuccessListener(unused -> {
                     Log.d(TAG, "User geolocation updated successfully.");

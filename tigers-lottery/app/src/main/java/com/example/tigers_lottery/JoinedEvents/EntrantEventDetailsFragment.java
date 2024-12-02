@@ -116,8 +116,9 @@ public class EntrantEventDetailsFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.entrant_event_details_fragment, container, false);
-        DatabaseHelper dbHelper = new DatabaseHelper(getContext());
+        //DatabaseHelper dbHelper = new DatabaseHelper(getContext());
         Bundle args = getArguments();
+        dbHelper = new DatabaseHelper(requireContext());
         String deviceId = dbHelper.getCurrentUserId();
         ImageButton backButton = view.findViewById(R.id.eventDetailsBackButton);
         Button eventDetailsButton = view.findViewById(R.id.eventDetailsButton);
@@ -131,6 +132,8 @@ public class EntrantEventDetailsFragment extends Fragment {
         TextView eventTextViewStatus = view.findViewById(R.id.eventDetailsTextViewStatus);
         ImageView eventDetailsImageView = view.findViewById(R.id.eventDetailsImageView);
         eventDetailsButton.setVisibility(View.INVISIBLE);
+
+
 
         assert args != null;
         dbHelper.fetchEventById(args.getInt("eventId"), new DatabaseHelper.EventsCallback() {
